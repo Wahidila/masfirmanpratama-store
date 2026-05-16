@@ -1,0 +1,213 @@
+<?php
+
+namespace Tests\Feature;
+
+use Tests\TestCase;
+
+class TrackOrderPageTest extends TestCase
+{
+    // ─── Smoke ─────────────────────────────────────────────────────────────
+
+    public function test_track_page_returns_200(): void
+    {
+        $this->get('/track/MFP-20260516-ABC123')->assertStatus(200);
+    }
+
+    public function test_track_page_uses_store_layout_assets(): void
+    {
+        $response = $this->get('/track/MFP-20260516-ABC123');
+
+        $response->assertStatus(200);
+        // Vite-injected CSS + JS markers
+        $response->assertSeeInOrder(['/build/assets/app-', '.css'], false);
+        $response->assertSeeInOrder(['/build/assets/app-', '.js'], false);
+        $response->assertSee('csrf-token', false);
+        $response->assertSee('unpkg.com/lucide', false);
+        // Page chrome (judul tab)
+        $response->assertSee('Lacak Pesanan — MFP-20260516-ABC123', false);
+    }
+
+    // ─── Header (order number + status badge) ──────────────────────────────
+
+    public function test_track_page_renders_order_number_in_header(): void
+    {
+        $response = $this->get('/track/MFP-20260516-ABC123');
+
+        $response->assertStatus(200);
+        $response->assertSee('data-testid="order-number"', false);
+        $response->assertSee('MFP-20260516-ABC123', false);
+        $response->assertSee('Salin nomor pesanan', false);
+    }
+
+    public function test_track_page_renders_status_badge(): void
+    {
+        // 'A' suffix → unpaid
+        $response = $this->get('/track/MFP-20260516-NEWXA');
+        $response->assertStatus(200);
+        $response->assertSee('data-testid="status-badge"', false);
+        $response->assertSee('data-status="unpaid"', false);
+        $response->assertSee('Menunggu Pembayaran', false);
+    }
+
+    public function test_status_badge_changes_per_order_suffix(): void
+    {
+        $cases = [
+            ['/track/MFP-DUMMYA', 'unpaid', 'Menunggu Pembayaran'],
+            ['/track/MFP-DUMMYC', 'waiting_confirmation', 'Menunggu Verifikasi'],
+            ['/track/MFP-DUMMYE', 'paid', 'Lunas'],
+            ['/track/MFP-DUMMYG', 'partial_paid', 'Cicilan Berjalan'],
+            ['/track/MFP-DUMMYJ', 'processing', 'Sedang Diproses'],
+            ['/track/MFP-DUMMYZ', 'completed', 'Pesanan Selesai'],
+        ];
+
+        foreach ($cases as [$url, $status, $needle]) {
+            $response = $this->get($url);
+            $response->assertStatus(200);
+            $response->assertSee('data-status="'.$status.'"', false);
+            $response->assertSee($needle, false);
+        }
+    }
+
+    // ─── Timeline 6 step ───────────────────────────────────────────────────
+
+    public function test_track_page_renders_six_step_timeline(): void
+    {
+        $response = $this->get('/track/MFP-20260516-ABC123');
+
+        $response->assertStatus(200);
+        $response->assertSee('data-testid="status-timeline"', false);
+        // 6 step keys ada di markup (desktop ol + mobile ol = 12 occurrences,
+        // tapi assertSee cuma butuh ada).
+        $response->assertSee('data-step="created"', false);
+        $response->assertSee('data-step="uploaded"', false);
+        $response->assertSee('data-step="verified"', false);
+        $response->assertSee('data-step="processing"', false);
+        $response->assertSee('data-step="shipped"', false);
+        $response->assertSee('data-step="completed"', false);
+        // Label step
+        $response->assertSee('Pesanan Dibuat', false);
+        $response->assertSee('Bukti Diupload', false);
+        $response->assertSee('Pembayaran Diverifikasi', false);
+        $response->assertSee('Pesanan Diproses', false);
+        $response->assertSee('Dikirim', false);
+        $response->assertSee('Selesai', false);
+    }
+
+    // ─── Order items ───────────────────────────────────────────────────────
+
+    public function test_track_page_renders_order_items_block(): void
+    {
+        $response = $this->get('/track/MFP-20260516-ABC123');
+
+        $response->assertStatus(200);
+        $response->assertSee('data-testid="order-items"', false);
+        $response->assertSee('Kelas Reguler AMC', false);
+        $response->assertSee('Buku — Mind Power &amp; Life Mastery', false);
+        // Total ditampilkan dalam locale Indonesia
+        $response->assertSee('Total Pesanan', false);
+        $response->assertSee('Rp 4.710.000', false); // 4500000 + 185000 + 25000 ongkir
+    }
+
+    // ─── Payment history ───────────────────────────────────────────────────
+
+    public function test_track_page_renders_payment_history_table_for_paid_order(): void
+    {
+        // 'E' suffix → paid → ada 1 row payment history confirmed
+        $response = $this->get('/track/MFP-20260516-PAIDE');
+
+        $response->assertStatus(200);
+        $response->assertSee('data-testid="payment-history"', false);
+        $response->assertSee('data-testid="payment-history-table"', false);
+        $response->assertSee('Pembayaran Lunas', false);
+        $response->assertSee('Diverifikasi', false);
+        $response->assertSee('Lihat bukti', false);
+    }
+
+    public function test_track_page_renders_installment_rows_for_partial_paid_order(): void
+    {
+        // 'G' suffix → partial_paid → DP confirmed + 2 cicilan pending
+        $response = $this->get('/track/MFP-20260516-PARTG');
+
+        $response->assertStatus(200);
+        $response->assertSee('Down Payment (30%)', false);
+        $response->assertSee('Cicilan ke-1 dari 2', false);
+        $response->assertSee('Cicilan ke-2 dari 2', false);
+        // Tone untuk pending row
+        $response->assertSee('data-status="pending"', false);
+        $response->assertSee('data-status="confirmed"', false);
+    }
+
+    public function test_track_page_renders_empty_state_when_no_payment(): void
+    {
+        // 'A' suffix → unpaid → belum ada payment history
+        $response = $this->get('/track/MFP-20260516-NEWXA');
+
+        $response->assertStatus(200);
+        $response->assertSee('Belum ada bukti bayar yang diupload.', false);
+        // CTA upload muncul
+        $response->assertSee('href="'.url('/upload/MFP-20260516-NEWXA').'"', false);
+        $response->assertSee('Upload bukti bayar', false);
+    }
+
+    // ─── Pengiriman (shipment) ─────────────────────────────────────────────
+
+    public function test_track_page_renders_shipment_card_for_processing_order(): void
+    {
+        // 'J' suffix → processing → shipment card muncul (item fisik = buku)
+        $response = $this->get('/track/MFP-20260516-PROCJ');
+
+        $response->assertStatus(200);
+        $response->assertSee('data-testid="shipment-card"', false);
+        $response->assertSee('JNE Reguler', false);
+        $response->assertSee('data-testid="resi-number"', false);
+        $response->assertSee('data-testid="tracking-link"', false);
+        // Tracking URL ke situs kurir
+        $response->assertSee('jne.co.id/id/tracking/trace/awb/JNE', false);
+    }
+
+    public function test_track_page_omits_shipment_card_for_unpaid_order(): void
+    {
+        $response = $this->get('/track/MFP-20260516-NEWXA');
+
+        $response->assertStatus(200);
+        $response->assertDontSee('data-testid="shipment-card"', false);
+    }
+
+    // ─── CTA conditional (upload only when payable) ────────────────────────
+
+    public function test_track_page_shows_upload_cta_when_unpaid(): void
+    {
+        $response = $this->get('/track/MFP-20260516-NEWXA');
+
+        $response->assertStatus(200);
+        $response->assertSee('data-testid="cta-upload"', false);
+    }
+
+    public function test_track_page_shows_upload_cta_when_partial_paid(): void
+    {
+        $response = $this->get('/track/MFP-20260516-PARTG');
+
+        $response->assertStatus(200);
+        $response->assertSee('data-testid="cta-upload"', false);
+    }
+
+    public function test_track_page_hides_upload_cta_when_completed(): void
+    {
+        $response = $this->get('/track/MFP-20260516-DONEZ');
+
+        $response->assertStatus(200);
+        $response->assertDontSee('data-testid="cta-upload"', false);
+    }
+
+    // ─── Wa admin link ─────────────────────────────────────────────────────
+
+    public function test_track_page_renders_wa_admin_link(): void
+    {
+        $response = $this->get('/track/MFP-20260516-ABC123');
+
+        $response->assertStatus(200);
+        $waNumber = config('store.wa_admin.number');
+        $response->assertSee('https://wa.me/'.$waNumber, false);
+        $response->assertSee('Tanya Admin', false);
+    }
+}
