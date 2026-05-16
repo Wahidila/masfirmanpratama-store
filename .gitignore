@@ -1,0 +1,12 @@
+.env
+.env.local
+node_modules/
+.next/
+dist/
+build/
+*.log
+.DS_Store
+
+# MC infra (per-environment, bukan project code)
+.discord.json
+.kanban-task-ids.json
