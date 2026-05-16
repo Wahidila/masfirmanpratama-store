@@ -1,0 +1,434 @@
+[
+  {
+    "slug": "home",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3091/index.html",
+    "status": 200,
+    "file": "home__proto__firefox__mobile-375.png"
+  },
+  {
+    "slug": "home",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3001/",
+    "status": 200,
+    "file": "home__blade__firefox__mobile-375.png"
+  },
+  {
+    "slug": "product-list",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3001/produk",
+    "status": 200,
+    "file": "product-list__blade__firefox__mobile-375.png"
+  },
+  {
+    "slug": "book-detail",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3091/book-detail.html",
+    "status": 200,
+    "file": "book-detail__proto__firefox__mobile-375.png"
+  },
+  {
+    "slug": "book-detail",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3001/produk/10-keajaiban-pikiran",
+    "status": 200,
+    "file": "book-detail__blade__firefox__mobile-375.png"
+  },
+  {
+    "slug": "course-detail",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3091/course-detail.html",
+    "status": 200,
+    "file": "course-detail__proto__firefox__mobile-375.png"
+  },
+  {
+    "slug": "course-detail",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3001/produk/kelas-amc-reguler",
+    "status": 200,
+    "file": "course-detail__blade__firefox__mobile-375.png"
+  },
+  {
+    "slug": "product-detail-bs",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3091/product-detail.html",
+    "status": 200,
+    "file": "product-detail-bs__proto__firefox__mobile-375.png"
+  },
+  {
+    "slug": "cart",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3091/cart.html",
+    "status": 200,
+    "file": "cart__proto__firefox__mobile-375.png"
+  },
+  {
+    "slug": "cart",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3001/cart",
+    "status": 200,
+    "file": "cart__blade__firefox__mobile-375.png"
+  },
+  {
+    "slug": "checkout",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3091/checkout.html",
+    "status": 200,
+    "file": "checkout__proto__firefox__mobile-375.png"
+  },
+  {
+    "slug": "checkout",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3001/checkout",
+    "status": 200,
+    "file": "checkout__blade__firefox__mobile-375.png"
+  },
+  {
+    "slug": "checkout-success",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3091/checkout-success.html",
+    "status": 200,
+    "file": "checkout-success__proto__firefox__mobile-375.png"
+  },
+  {
+    "slug": "checkout-success",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3001/checkout/success/MFP-20260516-ABC123",
+    "status": 200,
+    "file": "checkout-success__blade__firefox__mobile-375.png"
+  },
+  {
+    "slug": "track",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3001/track/MFP-20260516-ABC123",
+    "status": 200,
+    "file": "track__blade__firefox__mobile-375.png"
+  },
+  {
+    "slug": "upload",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "mobile-375",
+    "url": "http://127.0.0.1:3001/upload/MFP-20260516-ABC123",
+    "status": 200,
+    "file": "upload__blade__firefox__mobile-375.png"
+  },
+  {
+    "slug": "home",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3091/index.html",
+    "status": 200,
+    "file": "home__proto__firefox__tablet-768.png"
+  },
+  {
+    "slug": "home",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3001/",
+    "status": 200,
+    "file": "home__blade__firefox__tablet-768.png"
+  },
+  {
+    "slug": "product-list",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3001/produk",
+    "status": 200,
+    "file": "product-list__blade__firefox__tablet-768.png"
+  },
+  {
+    "slug": "book-detail",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3091/book-detail.html",
+    "status": 200,
+    "file": "book-detail__proto__firefox__tablet-768.png"
+  },
+  {
+    "slug": "book-detail",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3001/produk/10-keajaiban-pikiran",
+    "status": 200,
+    "file": "book-detail__blade__firefox__tablet-768.png"
+  },
+  {
+    "slug": "course-detail",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3091/course-detail.html",
+    "status": 200,
+    "file": "course-detail__proto__firefox__tablet-768.png"
+  },
+  {
+    "slug": "course-detail",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3001/produk/kelas-amc-reguler",
+    "status": 200,
+    "file": "course-detail__blade__firefox__tablet-768.png"
+  },
+  {
+    "slug": "product-detail-bs",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3091/product-detail.html",
+    "status": 200,
+    "file": "product-detail-bs__proto__firefox__tablet-768.png"
+  },
+  {
+    "slug": "cart",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3091/cart.html",
+    "status": 200,
+    "file": "cart__proto__firefox__tablet-768.png"
+  },
+  {
+    "slug": "cart",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3001/cart",
+    "status": 200,
+    "file": "cart__blade__firefox__tablet-768.png"
+  },
+  {
+    "slug": "checkout",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3091/checkout.html",
+    "status": 200,
+    "file": "checkout__proto__firefox__tablet-768.png"
+  },
+  {
+    "slug": "checkout",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3001/checkout",
+    "status": 200,
+    "file": "checkout__blade__firefox__tablet-768.png"
+  },
+  {
+    "slug": "checkout-success",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3091/checkout-success.html",
+    "status": 200,
+    "file": "checkout-success__proto__firefox__tablet-768.png"
+  },
+  {
+    "slug": "checkout-success",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3001/checkout/success/MFP-20260516-ABC123",
+    "status": 200,
+    "file": "checkout-success__blade__firefox__tablet-768.png"
+  },
+  {
+    "slug": "track",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3001/track/MFP-20260516-ABC123",
+    "status": 200,
+    "file": "track__blade__firefox__tablet-768.png"
+  },
+  {
+    "slug": "upload",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "tablet-768",
+    "url": "http://127.0.0.1:3001/upload/MFP-20260516-ABC123",
+    "status": 200,
+    "file": "upload__blade__firefox__tablet-768.png"
+  },
+  {
+    "slug": "home",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3091/index.html",
+    "status": 200,
+    "file": "home__proto__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "home",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3001/",
+    "status": 200,
+    "file": "home__blade__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "product-list",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3001/produk",
+    "status": 200,
+    "file": "product-list__blade__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "book-detail",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3091/book-detail.html",
+    "status": 200,
+    "file": "book-detail__proto__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "book-detail",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3001/produk/10-keajaiban-pikiran",
+    "status": 200,
+    "file": "book-detail__blade__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "course-detail",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3091/course-detail.html",
+    "status": 200,
+    "file": "course-detail__proto__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "course-detail",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3001/produk/kelas-amc-reguler",
+    "status": 200,
+    "file": "course-detail__blade__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "product-detail-bs",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3091/product-detail.html",
+    "status": 200,
+    "file": "product-detail-bs__proto__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "cart",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3091/cart.html",
+    "status": 200,
+    "file": "cart__proto__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "cart",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3001/cart",
+    "status": 200,
+    "file": "cart__blade__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "checkout",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3091/checkout.html",
+    "status": 200,
+    "file": "checkout__proto__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "checkout",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3001/checkout",
+    "status": 200,
+    "file": "checkout__blade__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "checkout-success",
+    "side": "proto",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3091/checkout-success.html",
+    "status": 200,
+    "file": "checkout-success__proto__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "checkout-success",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3001/checkout/success/MFP-20260516-ABC123",
+    "status": 200,
+    "file": "checkout-success__blade__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "track",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3001/track/MFP-20260516-ABC123",
+    "status": 200,
+    "file": "track__blade__firefox__desktop-1440.png"
+  },
+  {
+    "slug": "upload",
+    "side": "blade",
+    "browser": "firefox",
+    "viewport": "desktop-1440",
+    "url": "http://127.0.0.1:3001/upload/MFP-20260516-ABC123",
+    "status": 200,
+    "file": "upload__blade__firefox__desktop-1440.png"
+  }
+]
