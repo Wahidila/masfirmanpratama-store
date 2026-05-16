@@ -6,15 +6,22 @@
     <title>Admin Panel — MasFirmanPratama</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 font-sans antialiased">
+<body class="relative min-h-screen overflow-hidden bg-slate-50 font-sans">
+    <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div class="absolute -left-24 top-[-10%] h-96 w-96 rounded-full bg-primary-100 mix-blend-multiply blur-3xl opacity-60 animate-blob"></div>
+        <div class="absolute -right-24 top-1/3 h-96 w-96 rounded-full bg-secondary-50 mix-blend-multiply blur-3xl opacity-70 animate-blob" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-[-10%] left-1/3 h-80 w-80 rounded-full bg-accent-500/20 mix-blend-multiply blur-3xl opacity-60 animate-blob" style="animation-delay: 4s;"></div>
+    </div>
+
     <main class="flex min-h-screen items-center justify-center px-4">
-        <div x-data="{ countdown: 'M2' }" class="max-w-xl rounded-3xl bg-white/80 p-10 text-center shadow-xl ring-1 ring-slate-200 backdrop-blur">
-            <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-indigo-700">
-                <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+        <div x-data="{ countdown: 'M2' }" class="glass hover-lift max-w-xl rounded-3xl p-10 text-center shadow-xl animate-fade-in-up">
+            <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-primary-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary-700">
+                <span class="h-2 w-2 rounded-full bg-primary-500 animate-float"></span>
                 Coming soon
             </div>
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                Admin panel coming in <span x-text="countdown" class="text-gradient bg-gradient-to-r from-indigo-600 to-teal-600 bg-clip-text text-transparent">M2</span>
+            <h1 class="text-3xl font-bold tracking-tight text-slate-850 sm:text-4xl">
+                Admin panel coming in
+                <span x-text="countdown" class="text-gradient">M2</span>
             </h1>
             <p class="mt-4 text-base leading-relaxed text-slate-600">
                 Halaman manajemen produk, pesanan, verifikasi pembayaran, dan resi
