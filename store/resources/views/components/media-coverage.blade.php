@@ -22,7 +22,7 @@
 >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         @if ($eyebrow)
-            <p class="text-center text-sm font-bold text-slate-400 tracking-widest uppercase mb-8">
+            <p class="text-center text-sm font-bold text-slate-500 tracking-widest uppercase mb-8">
                 {{ $eyebrow }}
             </p>
         @endif
@@ -40,7 +40,10 @@
                 <img
                     src="{{ $logo['src'] }}"
                     alt="{{ $logo['alt'] }}"
+                    width="160"
+                    height="48"
                     loading="lazy"
+                    decoding="async"
                     class="h-8 md:h-10 lg:h-12 w-auto object-contain cursor-pointer hover:scale-105 transition-transform {{ $hidden }}"
                 >
             @endforeach

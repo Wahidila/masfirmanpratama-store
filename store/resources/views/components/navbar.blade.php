@@ -37,16 +37,18 @@
 
                 {{-- Cart icon --}}
                 <a
-                    href="{{ url('/keranjang') }}"
-                    class="relative inline-flex items-center justify-center w-10 h-10 rounded-full text-slate-600 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                    href="{{ route('cart.index') }}"
+                    class="relative inline-flex items-center justify-center w-11 h-11 rounded-full text-slate-600 hover:text-primary-600 hover:bg-primary-50 transition-colors"
                     aria-label="Keranjang belanja"
                 >
                     <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                    @if ($cartCount > 0)
-                        <span class="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-accent-500 text-white text-[10px] font-bold ring-2 ring-white">
-                            {{ $cartCount > 99 ? '99+' : $cartCount }}
-                        </span>
-                    @endif
+                    {{-- Badge: Alpine-reactive ($store.cart.count) with SSR fallback for pre-hydration --}}
+                    <span
+                        x-cloak
+                        x-show="$store.cart && $store.cart.count > 0"
+                        x-text="$store.cart && $store.cart.count > 99 ? '99+' : ($store.cart ? $store.cart.count : 0)"
+                        class="absolute top-1 right-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-accent-500 text-white text-[10px] font-bold ring-2 ring-white"
+                    >{{ $cartCount > 99 ? '99+' : ($cartCount > 0 ? $cartCount : '') }}</span>
                 </a>
 
                 <x-button :href="$ctaHref" size="sm" icon="message-circle" iconPosition="left">
@@ -55,25 +57,26 @@
             </div>
 
             {{-- Mobile toggle --}}
-            <div class="md:hidden flex items-center gap-2">
+            <div class="md:hidden flex items-center gap-1">
                 <a
-                    href="{{ url('/keranjang') }}"
-                    class="relative inline-flex items-center justify-center w-10 h-10 rounded-full text-slate-600 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                    href="{{ route('cart.index') }}"
+                    class="relative inline-flex items-center justify-center w-11 h-11 rounded-full text-slate-600 hover:text-primary-600 hover:bg-primary-50 transition-colors"
                     aria-label="Keranjang belanja"
                 >
                     <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                    @if ($cartCount > 0)
-                        <span class="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-accent-500 text-white text-[10px] font-bold ring-2 ring-white">
-                            {{ $cartCount > 99 ? '99+' : $cartCount }}
-                        </span>
-                    @endif
+                    <span
+                        x-cloak
+                        x-show="$store.cart && $store.cart.count > 0"
+                        x-text="$store.cart && $store.cart.count > 99 ? '99+' : ($store.cart ? $store.cart.count : 0)"
+                        class="absolute top-1 right-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-accent-500 text-white text-[10px] font-bold ring-2 ring-white"
+                    ></span>
                 </a>
                 <button
                     type="button"
                     @click="open = !open"
                     :aria-expanded="open"
                     aria-controls="mobile-nav"
-                    class="text-slate-600 hover:text-primary-600 focus:outline-none p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                    class="inline-flex items-center justify-center w-11 h-11 rounded-lg text-slate-600 hover:text-primary-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 transition-colors"
                     aria-label="Buka menu navigasi"
                 >
                     <i data-lucide="menu" class="w-6 h-6" x-show="!open"></i>
@@ -89,15 +92,20 @@
         x-show="open"
         x-cloak
         x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0 -translate-y-2"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        class="md:hidden bg-white border-t border-slate-100 shadow-xl"
+        x-transition:enter-start="opacity-0 -translate-y-3 scale-95"
+        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 -translate-y-2"
+        class="md:hidden bg-white border-t border-slate-100 shadow-xl origin-top"
+        @click.outside="open = false"
+        @keydown.escape.window="open = false"
     >
         <div class="px-4 pt-3 pb-6 space-y-1">
-            <a href="{{ url('/') }}" class="block px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Beranda</a>
-            <a href="{{ url('/produk') }}" class="block px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Produk</a>
-            <a href="{{ url('/tentang') }}" class="block px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Tentang</a>
-            <a href="{{ url('/kontak') }}" class="block px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Kontak</a>
+            <a href="{{ url('/') }}" class="flex items-center min-h-[44px] px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Beranda</a>
+            <a href="{{ url('/produk') }}" class="flex items-center min-h-[44px] px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Produk</a>
+            <a href="{{ url('/tentang') }}" class="flex items-center min-h-[44px] px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Tentang</a>
+            <a href="{{ url('/kontak') }}" class="flex items-center min-h-[44px] px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Kontak</a>
 
             <div class="pt-2">
                 <x-button :href="$ctaHref" size="md" icon="message-circle" iconPosition="left" class="w-full">

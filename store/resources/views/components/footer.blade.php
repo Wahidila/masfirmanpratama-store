@@ -53,7 +53,7 @@
                         {{ $brandText }}<span class="text-primary-500">{{ $brandAccent }}</span>
                     </span>
                 </div>
-                <p class="text-sm mb-6 text-slate-400 leading-relaxed">{{ $tagline }}</p>
+                <p class="text-sm mb-6 text-slate-300 leading-relaxed">{{ $tagline }}</p>
 
                 <div class="flex gap-3">
                     @foreach ($socialLinks as $social)
@@ -62,7 +62,7 @@
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label="{{ $social['label'] ?? ucfirst($social['icon']) }}"
-                            class="w-10 h-10 rounded-full bg-slate-800 hover:bg-primary-600 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+                            class="w-10 h-10 rounded-full bg-slate-800 hover:bg-primary-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
                         >
                             <i data-lucide="{{ $social['icon'] }}" class="w-5 h-5"></i>
                         </a>
@@ -73,7 +73,7 @@
             {{-- Sitemap groups --}}
             @foreach ($sitemapLinks as $heading => $items)
                 <div>
-                    <h4 class="text-white font-bold mb-6">{{ $heading }}</h4>
+                    <h3 class="text-white font-bold mb-6">{{ $heading }}</h3>
                     <ul class="space-y-3 text-sm">
                         @foreach ($items as $item)
                             <li>
@@ -91,7 +91,7 @@
 
             {{-- Contact --}}
             <div>
-                <h4 class="text-white font-bold mb-6">Pusat Layanan</h4>
+                <h3 class="text-white font-bold mb-6">Pusat Layanan</h3>
                 <ul class="space-y-4 text-sm">
                     <li class="flex items-start gap-3">
                         <i data-lucide="map-pin" class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5"></i>

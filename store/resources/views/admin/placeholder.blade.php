@@ -27,7 +27,7 @@
                 Halaman manajemen produk, pesanan, verifikasi pembayaran, dan resi
                 akan tersedia di milestone M2 (target 2026-05-25).
             </p>
-            <p class="mt-6 text-xs text-slate-400">
+            <p class="mt-6 text-xs text-slate-500">
                 MasFirmanPratama.com — Online Store · Sprint M1
             </p>
         </div>

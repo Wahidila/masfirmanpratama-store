@@ -56,7 +56,7 @@
         <div class="mt-auto flex items-baseline gap-2">
             <span class="text-lg font-extrabold text-primary-600">{{ $formattedPrice }}</span>
             @if ($formattedOriginal)
-                <span class="text-sm text-slate-400 line-through">{{ $formattedOriginal }}</span>
+                <span class="text-sm text-slate-500 line-through">{{ $formattedOriginal }}</span>
             @endif
         </div>
 
