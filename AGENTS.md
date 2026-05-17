@@ -212,3 +212,5 @@ magis/futuristik (gradients, blur, glassmorphism).
 - 2026-05-16 | Klien (via Naufalix) | Domain admin = prefix `/admin` (bukan subdomain) | Setup hosting lebih sederhana
 - 2026-05-16 | Klien (via Naufalix) | Theme Store ikut DESIGN.md (light Indigo/Teal/Amber) | Konsisten brand utama
 - 2026-05-16 | mc-planning | Sprint M1 = FE Store only, 17 task di kanban | Decoupling FE/BE biar paralel
+- 2026-05-17 | Naufalix + MCAIAgent | Force push local M1 work ke `naufalix/affiliate` main, archive seluruh upstream tree ke `docs/upstream-archive/`, tag `upstream-pre-mc` di SHA `c8e166e` | Local & upstream punya unrelated histories (bootstrap fresh vs git clone), butuh single source of truth tanpa kehilangan konten klien existing
+- 2026-05-17 | MCAIAgent | `.kanban-task-ids.json` di-untrack dari git (sudah di .gitignore tapi committed sebelum ignored) | Hindari MC infra state leak ke repo upstream
