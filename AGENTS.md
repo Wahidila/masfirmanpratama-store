@@ -164,27 +164,44 @@ magis/futuristik (gradients, blur, glassmorphism).
 - **Admin panel UNIFIED** — 1 login control 2 DB. Hati-hati cross-DB query
   performance, pertimbangkan caching di dashboard.
 
-## 🚀 Sprint aktif — M1 Frontend Online Store (2026-05-16 → 2026-05-22)
+## 🏁 Sprint selesai — M1 Frontend Online Store (closed 2026-05-16)
 
-**Scope:** Public-facing Online Store FE saja (no admin, no affiliate, no webhook).
-**Kanban board:** `masfirmanpratama` (17 task, mapping ID: `.kanban-task-ids.json`)
-**Owner agent split:** mc-fullstack (13 task), mc-ui (2 task), mc-qc (2 task)
-**ETA:** ~67h (52h raw + 30% buffer) → 5-7 hari kerja 1 dev
+QC approved (`docs/qc/visual-review-M1.md`, `docs/qc/lighthouse-M1.md`):
+- ✅ 7 route ported, semua HTTP 200
+- ✅ A11y ≥95 di 6/7 route
+- ⚠ Perf <90 — artefak `php artisan serve` (single-thread, no gzip), bukan code issue, re-audit di nginx prod
+- ⚠ 2 high-sev finding (#H1 palette + #H2 anchor) → carryover ke M2 tail
+- ⚠ `/produk/kelas-amc-reguler` Lighthouse timeout (curl OK 26ms 76kB) → carryover ke M2 tail untuk root-cause
+- ⚠ Kanban task IDs M1 (t_8779b460 ... t_9cf308a8) hilang setelah VPS migration 2026-05-18 — DB pindah kosong, tapi git history + QC report cukup sebagai audit trail
 
-**Decisions klien (2026-05-16) untuk sprint ini:**
-- Skema cicilan = bebas diatur admin → FE checkout pakai dropdown dynamic dari `config/store.php`, jadwal auto-generate via Alpine
-- Rekening tujuan = dummy (BCA + Mandiri "PT. Dummy AMC") di `config/store.php`, gampang di-swap dari settings DB di M2
-- Foto produk = ada 13 file di `/tmp/mc-intake/affiliate/` (7 produk + logo + 5 media coverage), sync di task #0
-- Domain admin = prefix `/admin` (route stub task #1, halaman admin out-of-scope sprint ini)
-- Theme = ikut `DESIGN.md` (light, Indigo/Teal/Amber + Inter), prototype dark affiliate hanya reference layout
+## 🚀 Sprint aktif — M2 Admin Panel Store + Wire FE→BE (2026-05-18 → 2026-05-25)
 
-**Pending integration (TODO untuk M2 Fullstack):**
-- Wire form action POST `/checkout`, `/upload/{order_number}` ke controller real + DB save
-- Replace dummy bank accounts dari `config/store.php` → `settings` table
-- Replace dummy installment_schemes → `installment_schemes` table CRUD admin
-- Replace ongkir stub (dropdown manual) → Agenwebsite.com API
-- Token-protect route `/upload/{order_number}` & `/track/{order_number}` (signed URL atau JWT)
-- Wire WhatsApp gateway notif (admin alert + customer reminder)
+**Target milestone:** M2 (Day 13, 2026-05-25)
+**Scope:** Admin authentication + dashboard, CRUD produk, pesanan + verifikasi bayar + input resi, settings (bank accounts + store info), installment schemes CRUD, wire Store FE checkout/upload ke backend real, WA notification **stub** (write only, gateway integration ditunda M3+).
+**Out of scope:** WA gateway provider integration, Agenwebsite ongkir API, affiliate system, public→admin role separation (admin = single role di M2).
+**Owner agent split:** mc-fullstack (16 task), mc-ui (2 task), mc-qc (3 task), mc-debug (1 task)
+**ETA:** ~58h (45h raw + 30% buffer) → 6-7 hari kerja 1 dev
+
+**Sprint blocks:**
+- **M1 tail** (3 task) — fix tailwind palette H1, anchor audit H2, debug Lighthouse timeout `/kelas-amc-reguler`
+- **Foundation** (4 task) — admin auth Breeze, admin layout + sidebar, migrations bundle, seeders
+- **Produk CRUD** (3 task) — index/filter, create/edit + image upload, soft delete
+- **Pesanan + verifikasi** (4 task) — index, detail, verifikasi bayar, input resi
+- **Settings** (2 task) — bank accounts + store info, installment schemes
+- **Wire FE→BE** (3 task) — POST /checkout, POST /upload, token-protect /upload + /track
+- **WA stub** (1 task) — write event ke `wa_notifications`, gateway later
+- **QC** (3 task) — admin visual review, backend integration tests, M2 sign-off + nginx Lighthouse re-audit
+
+**Decisions klien yang masih perlu konfirmasi sebelum task tertentu:**
+- WA gateway provider (Fonnte / Wablas / lainnya) — bukan blocker M2, tapi blocker M3 (customer reminder)
+- Order status workflow final — usulan: `pending → awaiting_payment → payment_review → verified → packed → shipped → delivered → cancelled` — minta confirm via Naufalix
+- Image upload storage — M2 default ke local disk `storage/app/public/products/`, switchable via `.env` filesystem driver
+
+**Carry over ke M3 (Affiliate System):**
+- Replace WA stub dengan provider integration (after gateway dipilih)
+- Replace ongkir manual input → Agenwebsite.com API
+- Wire affiliate.* domain + register flow
+- Webhook HMAC-SHA256 Store→Affiliate untuk `order-paid` / `order-refunded`
 
 ## 🔓 Open decisions (perlu konfirmasi klien)
 
@@ -214,3 +231,6 @@ magis/futuristik (gradients, blur, glassmorphism).
 - 2026-05-16 | mc-planning | Sprint M1 = FE Store only, 17 task di kanban | Decoupling FE/BE biar paralel
 - 2026-05-17 | Naufalix + MCAIAgent | Force push local M1 work ke `naufalix/affiliate` main, archive seluruh upstream tree ke `docs/upstream-archive/`, tag `upstream-pre-mc` di SHA `c8e166e` | Local & upstream punya unrelated histories (bootstrap fresh vs git clone), butuh single source of truth tanpa kehilangan konten klien existing
 - 2026-05-17 | MCAIAgent | `.kanban-task-ids.json` di-untrack dari git (sudah di .gitignore tapi committed sebelum ignored) | Hindari MC infra state leak ke repo upstream
+- 2026-05-18 | Lead MC + MCAIAgent | VPS migration recovery — VPS lama off, full restore dari `naufalix/affiliate` (main + feat/m1-store-fe + project-plan + tag upstream-pre-mc) sukses, working tree clean | Code + AGENTS.md + QC report + upstream archive intact via git, satu-satunya state yang hilang = kanban task IDs M1 (di-record di sprint closed section, ngga di-rebuild)
+- 2026-05-18 | mc-planning | Sprint M1 closed (QC approved 2026-05-16), kick off M2 Admin Panel Store + Wire FE→BE | Day 6/30, on-track ke target M2 (Day 13, 2026-05-25)
+- 2026-05-18 | mc-planning | M1 tail (H1 palette, H2 anchor, /kelas-amc-reguler timeout) digabung ke M2 sprint, bukan sprint terpisah | 3 task ringan, ngga worth standalone sprint, parallel dengan M2 foundation
