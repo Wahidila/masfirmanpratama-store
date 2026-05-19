@@ -55,17 +55,25 @@ Referral tracking via `/ref/{code}` → cookie 30 hari attached ke order.
 
 ## 🌐 Preview server (development)
 
-- **URL preview:** http://104.64.223.234:3001
-- **Port:** `3001` (alokasi dari `~/malang-creative/_ports.json`)
-- **Bind address:** `0.0.0.0:3001` (jangan `127.0.0.1`, biar bisa diakses dari IP publik)
+- **URL preview store:** http://104.64.220.129:3001
+- **Port store:** `3001` (alokasi dari `/root/malang-creative/_ports.json`, key `masfirmanpratama-store`)
+- **Bind address:** `0.0.0.0:<port>` (jangan `127.0.0.1`, biar bisa diakses dari IP publik)
+- **Multi-app**: project ini punya `store/` + `affiliate/` (TBD) — tiap app dapet port sendiri
 - **Cara start dev server:**
   ```bash
-  # Vite       : npm run dev -- --host 0.0.0.0 --port 3001
-  # Next.js    : PORT=3001 npm run dev -- -H 0.0.0.0
-  # Plain Node : PORT=3001 node server.js
-  # Python     : python -m http.server 3001 --bind 0.0.0.0
+  mc-preview start masfirmanpratama --app store       # auto-detect Laravel, bind 0.0.0.0:3001
+  mc-preview start masfirmanpratama --app affiliate   # auto-allocate port baru pas affiliate dibuat
+  mc-preview status                                    # cek semua project running
+  mc-preview logs masfirmanpratama --app store        # tail server log
+  mc-preview restart masfirmanpratama --app store     # reload setelah config change
+  mc-preview stop masfirmanpratama --app store        # matiin preview
   ```
-- Buka firewall sekali per project: `ufw allow 3001/tcp` (kalau ufw aktif)
+- **Custom command (kalau butuh full Laravel 11 dev concurrent — vite + queue + pail):**
+  ```bash
+  # Hati-hati: composer run dev default bind 127.0.0.1, jadi modify composer.json scripts.dev
+  # untuk pass --host=0.0.0.0 ke artisan serve, baru pake:
+  mc-preview start masfirmanpratama --app store --cmd "composer run dev"
+  ```
 
 ## 🎨 Brand & design tokens
 
