@@ -190,10 +190,32 @@ if (! app()->environment('production')) {
 
 /*
 |--------------------------------------------------------------------------
-| Admin (placeholder, akan dipindah ke routes/admin.php di M2)
+| Admin (M2 — auth + dashboard)
 |--------------------------------------------------------------------------
+|
+| Guest routes: GET /admin/login + POST /admin/login (login attempt).
+| Protected routes: semua di belakang middleware `auth:admin`.
+| Logout via POST /admin/logout (CSRF + session invalidate).
+|
 */
 
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\DashboardController;
+
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', fn () => view('admin.placeholder'))->name('home');
+    // Guest (login form + attempt)
+    Route::middleware('guest:admin')->group(function () {
+        Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [AuthController::class, 'login'])
+            ->middleware('throttle:6,1')
+            ->name('login.attempt');
+    });
+
+    // Authenticated
+    Route::middleware('auth:admin')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+        Route::get('/', fn () => redirect()->route('admin.dashboard'))->name('home');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    });
 });
