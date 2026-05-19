@@ -201,6 +201,7 @@ if (! app()->environment('production')) {
 
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -224,5 +225,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('products', ProductController::class)
             ->except(['show'])
             ->parameters(['products' => 'product']);
+
+        // Pesanan (M2 — task t_b543e461) — index list dengan filter & pagination
+        Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     });
 });
