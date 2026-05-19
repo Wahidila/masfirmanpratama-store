@@ -10,12 +10,12 @@
         ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'grid', 'route' => 'admin.dashboard', 'enabled' => true],
         ['key' => 'products', 'label' => 'Produk', 'icon' => 'package', 'route' => 'admin.products.index', 'enabled' => true],
         ['key' => 'orders', 'label' => 'Pesanan', 'icon' => 'shopping-bag', 'route' => 'admin.orders.index', 'enabled' => true],
+        ['key' => 'settings', 'label' => 'Settings', 'icon' => 'settings', 'route' => 'admin.settings.index', 'enabled' => true],
     ];
 
     $comingSoon = [
         ['key' => 'payments', 'label' => 'Verifikasi Bayar', 'icon' => 'check-circle'],
         ['key' => 'installments', 'label' => 'Skema Cicilan', 'icon' => 'layers'],
-        ['key' => 'settings', 'label' => 'Settings', 'icon' => 'settings'],
     ];
 
     $iconClass = 'h-4 w-4 shrink-0';
