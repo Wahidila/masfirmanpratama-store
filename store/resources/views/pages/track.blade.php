@@ -276,7 +276,7 @@
     */
     $rp = fn (int $amount) => 'Rp '.number_format($amount, 0, ',', '.');
 
-    $waAdmin = config('store.wa_admin', ['number' => '6281234567890', 'label' => 'Admin']);
+    $waAdmin = \App\Services\Settings::getWaAdmin();
     $waText = rawurlencode("Halo Admin, mau tanya status order {$orderNumber}.");
     $waLink = "https://wa.me/{$waAdmin['number']}?text={$waText}";
 

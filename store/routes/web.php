@@ -203,6 +203,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\SettingsController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     // Guest (login form + attempt)
@@ -232,5 +233,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Pesanan (M2 — task t_b543e461) — index list dengan filter & pagination
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+
+        // Settings (M2 — task t_6be9a4e4) — store info + bank accounts CRUD
+        Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::put('settings/store-info', [SettingsController::class, 'updateStoreInfo'])
+            ->name('settings.store-info.update');
+        Route::put('settings/bank-accounts', [SettingsController::class, 'updateBankAccounts'])
+            ->name('settings.bank-accounts.update');
     });
 });

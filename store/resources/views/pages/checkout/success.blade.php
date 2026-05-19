@@ -6,9 +6,9 @@
     /** @var array<int, array{label?: string, note?: string, due_label?: string, amount?: int}> $schedule */
 
     /** @var array<int, array{bank: string, number: string, holder: string, logo_color?: string}> $bankAccounts */
-    $bankAccounts = config('store.bank_accounts', []);
+    $bankAccounts = \App\Services\Settings::getBankAccounts();
     /** @var array{number: string, label: string} $waAdmin */
-    $waAdmin = config('store.wa_admin', ['number' => '6281234567890', 'label' => 'Admin']);
+    $waAdmin = \App\Services\Settings::getWaAdmin();
 
     $isInstallment = $paymentType === 'cicilan';
     $waText = rawurlencode("Halo Admin, saya baru saja checkout order {$order}. Mau konfirmasi pembayaran.");

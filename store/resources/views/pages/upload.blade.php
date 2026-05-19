@@ -8,7 +8,7 @@
     $isInstallment = $paymentType === 'cicilan' && $totalPayments > 1;
 
     /** @var array{number: string, label: string} $waAdmin */
-    $waAdmin = config('store.wa_admin', ['number' => '6281234567890', 'label' => 'Admin']);
+    $waAdmin = \App\Services\Settings::getWaAdmin();
     $waText = rawurlencode("Halo Admin, saya baru saja upload bukti bayar untuk order {$orderNumber}. Mohon dicek.");
     $waLink = "https://wa.me/{$waAdmin['number']}?text={$waText}";
 
