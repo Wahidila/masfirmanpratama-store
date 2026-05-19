@@ -169,36 +169,124 @@
                                     default => 'bg-slate-100 text-slate-700 ring-slate-200',
                                 };
                             @endphp
-                            <li class="px-5 py-4 flex items-start gap-4">
-                                <div class="flex-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-base font-semibold text-slate-900">
-                                            Rp {{ number_format((float) $payment->amount, 0, ',', '.') }}
-                                        </span>
-                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset {{ $pToneClass }}">
-                                            {{ $paymentLabel[$payment->status] ?? $payment->status }}
-                                        </span>
-                                    </div>
-                                    <div class="mt-1 text-xs text-slate-500">
-                                        Metode: <span class="text-slate-700 font-medium">{{ ucfirst($payment->method) }}</span>
-                                        @if ($payment->paid_at)
-                                            · Dibayar {{ $payment->paid_at->format('d M Y H:i') }}
+                            <li class="px-5 py-4" x-data="{ showApprove: false, showReject: false }">
+                                <div class="flex items-start gap-4">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-base font-semibold text-slate-900">
+                                                Rp {{ number_format((float) $payment->amount, 0, ',', '.') }}
+                                            </span>
+                                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset {{ $pToneClass }}">
+                                                {{ $paymentLabel[$payment->status] ?? $payment->status }}
+                                            </span>
+                                        </div>
+                                        <div class="mt-1 text-xs text-slate-500">
+                                            Metode: <span class="text-slate-700 font-medium">{{ ucfirst($payment->method) }}</span>
+                                            @if ($payment->paid_at)
+                                                · Dibayar {{ $payment->paid_at->format('d M Y H:i') }}
+                                            @endif
+                                        </div>
+                                        @if ($payment->verified_at)
+                                            <div class="mt-1 text-xs {{ $payment->status === 'verified' ? 'text-secondary-700' : 'text-slate-500' }}">
+                                                {{ $payment->status === 'verified' ? 'Diverifikasi' : 'Diproses' }}
+                                                {{ $payment->verified_at->format('d M Y H:i') }}
+                                                @if ($payment->verifier)
+                                                    oleh {{ $payment->verifier->name }}
+                                                @endif
+                                            </div>
+                                        @endif
+                                        @if ($payment->status === 'rejected' && $payment->rejection_reason)
+                                            <div class="mt-2 rounded-lg bg-slate-50 border border-slate-100 px-3 py-2 text-xs text-slate-700">
+                                                <div class="font-medium text-slate-500 uppercase tracking-wide mb-0.5">Alasan tolak</div>
+                                                <div>{{ $payment->rejection_reason }}</div>
+                                            </div>
                                         @endif
                                     </div>
-                                    @if ($payment->verified_at)
-                                        <div class="mt-1 text-xs text-secondary-700">
-                                            Diverifikasi {{ $payment->verified_at->format('d M Y H:i') }}
-                                            @if ($payment->verifier)
-                                                oleh {{ $payment->verifier->name }}
-                                            @endif
+                                    @if ($payment->proof_path)
+                                        <div class="text-xs">
+                                            <span class="text-slate-500">Bukti:</span>
+                                            <span class="font-mono text-slate-700">{{ basename($payment->proof_path) }}</span>
                                         </div>
                                     @endif
                                 </div>
-                                @if ($payment->proof_path)
-                                    <div class="text-xs">
-                                        <span class="text-slate-500">Bukti:</span>
-                                        <span class="font-mono text-slate-700">{{ basename($payment->proof_path) }}</span>
+
+                                @if ($payment->status === 'pending')
+                                    <div class="mt-3 flex flex-wrap gap-2">
+                                        <button type="button"
+                                                @click="showApprove = !showApprove; showReject = false"
+                                                class="inline-flex items-center rounded-lg bg-secondary-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-secondary-500 transition">
+                                            ✓ Approve
+                                        </button>
+                                        <button type="button"
+                                                @click="showReject = !showReject; showApprove = false"
+                                                class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
+                                            ✗ Reject
+                                        </button>
                                     </div>
+
+                                    {{-- Approve form --}}
+                                    <form x-show="showApprove" x-cloak
+                                          method="POST"
+                                          action="{{ route('admin.orders.payments.approve', [$order, $payment]) }}"
+                                          class="mt-3 rounded-xl border border-secondary-100 bg-secondary-50/50 p-4 space-y-3">
+                                        @csrf
+                                        <div>
+                                            <label for="approve-amount-{{ $payment->id }}" class="block text-xs font-medium text-slate-700 mb-1">
+                                                Nominal terverifikasi
+                                            </label>
+                                            <input id="approve-amount-{{ $payment->id }}"
+                                                   type="number"
+                                                   name="amount"
+                                                   step="0.01"
+                                                   min="0"
+                                                   value="{{ $payment->amount }}"
+                                                   class="block w-full rounded-lg border-slate-200 text-sm focus:border-secondary-500 focus:ring-secondary-500/40">
+                                            <p class="mt-1 text-xs text-slate-500">
+                                                Edit kalau jumlah aktual transfer beda dari yang diinput customer.
+                                            </p>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button type="submit"
+                                                    class="inline-flex items-center rounded-lg bg-secondary-600 px-4 py-2 text-sm font-medium text-white hover:bg-secondary-500 transition">
+                                                Konfirmasi Approve
+                                            </button>
+                                            <button type="button" @click="showApprove = false"
+                                                    class="inline-flex items-center rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition">
+                                                Batal
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    {{-- Reject form --}}
+                                    <form x-show="showReject" x-cloak
+                                          method="POST"
+                                          action="{{ route('admin.orders.payments.reject', [$order, $payment]) }}"
+                                          class="mt-3 rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3">
+                                        @csrf
+                                        <div>
+                                            <label for="reject-reason-{{ $payment->id }}" class="block text-xs font-medium text-slate-700 mb-1">
+                                                Alasan tolak <span class="text-rose-500">*</span>
+                                            </label>
+                                            <textarea id="reject-reason-{{ $payment->id }}"
+                                                      name="reason"
+                                                      rows="3"
+                                                      required
+                                                      minlength="3"
+                                                      maxlength="500"
+                                                      class="block w-full rounded-lg border-slate-200 text-sm focus:border-primary-500 focus:ring-primary-500/40"
+                                                      placeholder="Mis. nominal tidak sesuai, bukti tidak jelas, transfer ke rekening yang salah..."></textarea>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button type="submit"
+                                                    class="inline-flex items-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-500 transition">
+                                                Konfirmasi Reject
+                                            </button>
+                                            <button type="button" @click="showReject = false"
+                                                    class="inline-flex items-center rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition">
+                                                Batal
+                                            </button>
+                                        </div>
+                                    </form>
                                 @endif
                             </li>
                         @endforeach
@@ -249,8 +337,9 @@
             <x-admin.card>
                 <h2 class="text-sm font-semibold text-slate-700 mb-3">Aksi</h2>
                 <p class="text-xs text-slate-500">
-                    Verifikasi bayar &amp; transition status (approve/reject, input resi)
-                    akan tersedia di task berikutnya. Saat ini halaman ini read-only.
+                    Verifikasi pembayaran tersedia di panel <span class="font-medium text-slate-700">Pembayaran</span>
+                    di kiri (button Approve / Reject pada entri status <span class="font-medium">Menunggu</span>).
+                    Input resi & status transition ke shipped akan ditambahkan di task berikutnya.
                 </p>
             </x-admin.card>
         </div>
