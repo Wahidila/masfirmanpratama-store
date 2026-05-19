@@ -96,6 +96,33 @@ magis/futuristik (gradients, blur, glassmorphism).
   design) — implementasi Laravel di-init terpisah per app (`store/` & `affiliate/`),
   bisa subfolder di repo yang sama atau split repo (decision pending)
 
+### Hash anchor canonical names
+
+Decision (task `t_719570cc`, audit M1 tail): adopt `#kelas` + `#katalog` sebagai
+nama canonical karena lebih spesifik dari prototype generic. Prototype lama pakai
+`#kategori`/`#buku` (silent-404 di Blade home — section ID-nya `#kelas`/`#katalog`).
+
+| Konteks                    | Anchor canonical | Section ID di `home.blade.php` |
+|----------------------------|------------------|--------------------------------|
+| Daftar kelas / kursus      | `#kelas`         | `<section id="kelas">`         |
+| Katalog buku / produk fisik| `#katalog`       | `<section id="katalog">`       |
+
+Mapping untuk migrasi konten dari prototype / WA copy template:
+
+| Prototype lama  | Canonical (Blade) |
+|-----------------|-------------------|
+| `#kategori`     | `#kelas`          |
+| `#buku`         | `#katalog`        |
+
+Aturan:
+
+- Semua Blade di `store/`, AGENTS.md, dan dokumentasi internal **wajib** pakai
+  `#kelas` / `#katalog`.
+- Folder `prototype/` (top-level + `docs/upstream-archive/prototype/`)
+  dipertahankan as-is sebagai baseline visual reference — **tidak** ikut di-fix.
+- Cek pre-commit untuk milestone berikutnya:
+  `grep -rnE 'href="#(kategori|buku)"' store/ AGENTS.md` → harus `0 hits`.
+
 ## 🚦 Acceptance criteria umum
 
 - [ ] Lighthouse Performance ≥ 90 (mobile)
