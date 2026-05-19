@@ -235,6 +235,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         // Pesanan detail (M2 — task t_11e4dc6b) — items, payments, customer info
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        // Verifikasi bayar (M2 — task t_812d1980) — approve/reject payment, recalc order status
+        Route::post('orders/{order}/payments/{payment}/approve', [OrderController::class, 'approvePayment'])
+            ->name('orders.payments.approve');
+        Route::post('orders/{order}/payments/{payment}/reject', [OrderController::class, 'rejectPayment'])
+            ->name('orders.payments.reject');
 
         // Settings (M2 — task t_6be9a4e4) — store info + bank accounts CRUD
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');

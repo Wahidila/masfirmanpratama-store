@@ -19,6 +19,7 @@ class OrderPayment extends Model
         'verified_at',
         'verified_by',
         'status',
+        'rejection_reason',
     ];
 
     protected function casts(): array

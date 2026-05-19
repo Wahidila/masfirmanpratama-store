@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderPayment;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class OrderController extends Controller
@@ -125,5 +128,87 @@ class OrderController extends Controller
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    /**
+     * Approve payment: set verified, recalculate order status (full vs partial).
+     */
+    public function approvePayment(Request $request, Order $order, OrderPayment $payment): RedirectResponse
+    {
+        abort_if($payment->order_id !== $order->id, 404);
+        abort_if($payment->status !== 'pending', 422, 'Payment sudah diproses sebelumnya.');
+
+        $validated = $request->validate([
+            'amount' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        DB::transaction(function () use ($order, $payment, $validated, $request) {
+            if (isset($validated['amount']) && $validated['amount'] !== null) {
+                $payment->amount = $validated['amount'];
+            }
+            $payment->status = 'verified';
+            $payment->verified_at = now();
+            $payment->verified_by = $request->user('admin')?->id;
+            $payment->rejection_reason = null;
+            $payment->save();
+
+            $this->recalcOrderStatus($order);
+        });
+
+        return redirect()
+            ->route('admin.orders.show', $order)
+            ->with('status', 'Pembayaran berhasil diverifikasi.');
+    }
+
+    /**
+     * Reject payment: set rejected with reason, order status NOT changed.
+     */
+    public function rejectPayment(Request $request, Order $order, OrderPayment $payment): RedirectResponse
+    {
+        abort_if($payment->order_id !== $order->id, 404);
+        abort_if($payment->status !== 'pending', 422, 'Payment sudah diproses sebelumnya.');
+
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'min:3', 'max:500'],
+        ]);
+
+        DB::transaction(function () use ($payment, $validated, $request) {
+            $payment->status = 'rejected';
+            $payment->rejection_reason = $validated['reason'];
+            $payment->verified_at = now();
+            $payment->verified_by = $request->user('admin')?->id;
+            $payment->save();
+        });
+
+        return redirect()
+            ->route('admin.orders.show', $order)
+            ->with('status', 'Pembayaran ditolak dengan alasan tercatat.');
+    }
+
+    /**
+     * Recompute order.status based on verified payments vs order.total.
+     * Cancelled / refunded / shipped+ stay sticky — only mutate from
+     * pending/partial_paid/paid (early flow before fulfillment).
+     */
+    protected function recalcOrderStatus(Order $order): void
+    {
+        if (in_array($order->status, ['shipped', 'completed', 'cancelled', 'refunded'], true)) {
+            return;
+        }
+
+        $totalVerified = (float) $order->payments()
+            ->where('status', 'verified')
+            ->sum('amount');
+        $orderTotal = (float) $order->total;
+
+        if ($totalVerified <= 0) {
+            $order->status = 'pending';
+        } elseif ($totalVerified >= $orderTotal) {
+            $order->status = 'paid';
+        } else {
+            $order->status = 'partial_paid';
+        }
+
+        $order->save();
     }
 }
