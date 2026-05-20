@@ -122,11 +122,11 @@ Route::post('/upload/{order_number}', [UploadController::class, 'store'])
 /*
  * GET /track/{order_number}
  * --------------------------------------------------------------------------
- * Customer track order via signed URL (task t_8a063559). Akses tanpa
- * signature → 403, expired (>30d) → 410.
+ * Customer track order via signed URL (task t_8a063559). Akses tanpa signature
+ * → 403, expired (>30d) → 410.
  *
- * M2 hydrate (task t_34ed789d): kalau order_number cocok ke DB, pass real
- * Order ke view supaya track page bisa override shipment block dengan data
+ * M2 hydrate (task t_34ed789d): kalau order_number cocok ke DB, pass real Order
+ * ke view supaya track page bisa override shipment block dengan data
  * shipping_courier/shipping_resi/shipped_at yang baru di-input admin. Kalau
  * ngga ada, fallback ke dummy heuristic lama (backward compat M1).
  */
@@ -157,11 +157,6 @@ if (! app()->environment('production')) {
 |--------------------------------------------------------------------------
 | Admin (M2 — auth + dashboard)
 |--------------------------------------------------------------------------
-|
-| Guest routes: GET /admin/login + POST /admin/login (login attempt).
-| Protected routes: semua di belakang middleware `auth:admin`.
-| Logout via POST /admin/logout (CSRF + session invalidate).
-|
 */
 
 use App\Http\Controllers\Admin\AuthController;
@@ -170,9 +165,9 @@ use App\Http\Controllers\Admin\InstallmentSchemeController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\WaNotificationController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Guest (login form + attempt)
     Route::middleware('guest:admin')->group(function () {
         Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [AuthController::class, 'login'])
@@ -180,15 +175,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('login.attempt');
     });
 
-    // Authenticated
     Route::middleware('auth:admin')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
         Route::get('/', fn () => redirect()->route('admin.dashboard'))->name('home');
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        // Produk CRUD (M2 — task t_2dce058d, t_e51df9e5)
-        // Bind {product} pakai slug (Product::getRouteKeyName()).
         Route::post('products/bulk', [ProductController::class, 'bulk'])->name('products.bulk');
         Route::post('products/{product}/restore', [ProductController::class, 'restore'])
             ->withTrashed()
@@ -197,34 +189,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->except(['show'])
             ->parameters(['products' => 'product']);
 
-        // Pesanan (M2 — task t_b543e461) — index list dengan filter & pagination
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
-        // Pesanan detail (M2 — task t_11e4dc6b) — items, payments, customer info
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-        // Verifikasi bayar (M2 — task t_812d1980) — approve/reject payment, recalc order status
         Route::post('orders/{order}/payments/{payment}/approve', [OrderController::class, 'approvePayment'])
             ->name('orders.payments.approve');
         Route::post('orders/{order}/payments/{payment}/reject', [OrderController::class, 'rejectPayment'])
             ->name('orders.payments.reject');
 
-        // Input resi + transition ke shipped (M2 — task t_34ed789d)
-        // Precondition: order.status='paid'. Validate kurir + resi, fire OrderShipped event.
         Route::post('orders/{order}/ship', [OrderController::class, 'markShipped'])
             ->name('orders.ship');
 
-        // Settings (M2 — task t_6be9a4e4) — store info + bank accounts CRUD
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::put('settings/store-info', [SettingsController::class, 'updateStoreInfo'])
             ->name('settings.store-info.update');
         Route::put('settings/bank-accounts', [SettingsController::class, 'updateBankAccounts'])
             ->name('settings.bank-accounts.update');
 
-        // Installment schemes (M2 — task t_8446fbd4) — global + per-product CRUD
         Route::post('installment-schemes/{installment_scheme}/toggle',
             [InstallmentSchemeController::class, 'toggle'])
             ->name('installment-schemes.toggle');
         Route::resource('installment-schemes', InstallmentSchemeController::class)
             ->except(['show'])
             ->parameters(['installment-schemes' => 'installment_scheme']);
+
+        // WA Notifications (M2 — task t_e5d877f3) — read-only list, queued log.
+        // Gateway sender M3+. Pakai dash di URL ('wa-notifications') tapi
+        // route name pakai dash juga biar konsisten.
+        Route::get('wa-notifications', [WaNotificationController::class, 'index'])
+            ->name('wa-notifications.index');
     });
 });

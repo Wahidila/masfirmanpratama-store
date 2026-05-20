@@ -13,9 +13,9 @@ class TrackOrderPageTest extends TestCase
     /**
      * Generate signed URL ke /track/{order_number} buat test.
      * Track route protected via 'signed' middleware (task t_8a063559).
-     * Dummy order_number (suffix-based heuristic) — Order DB lookup di
-     * route closure return null, fallback ke dummy view path (M1 backward
-     * compat). Real DB hydrate path di-test di Admin\OrderShipTest.
+     * Pakai dummy order_number (suffix-based heuristic) — Order DB lookup
+     * di route closure return null, fallback ke dummy view path (M1 backward
+     * compat). Real DB hydrate path di-test di TrackOrderDbHydrateTest.
      */
     private function signedTrack(string $orderNumber): string
     {
