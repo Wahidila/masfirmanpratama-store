@@ -3,7 +3,6 @@
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\UploadController;
 use App\Models\Order;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -91,12 +90,13 @@ Route::get('/checkout/success/{order}', function (string $order) {
  * payments count. Fallback ke M1 stub kalau order_number ngga match (backward
  * compat dengan prototype + signed URL dari checkout).
  *
- * TODO (task t_8a063559): wajib harden token-protect (signed URL Laravel atau
- * JWT) — saat ini signed URL TTL 24h dari CheckoutController, tapi route ini
- * belum require signed middleware (biar M1 stub flow tetap jalan).
+ * Token-protect (task t_8a063559): require Laravel signed middleware. URL
+ * generated di CheckoutController::store via URL::temporarySignedRoute.
+ * TTL configurable via config('checkout.upload_url_ttl_seconds') default 7d.
  */
 Route::get('/upload/{order_number}', [UploadController::class, 'show'])
     ->where('order_number', '[A-Za-z0-9\\-]+')
+    ->middleware('signed')
     ->name('upload.show');
 
 /*
@@ -110,15 +110,26 @@ Route::get('/upload/{order_number}', [UploadController::class, 'show'])
  * pending|partial_paid|paid|... ngga punya 'payment_review'). Status
  * transition ke 'paid' / 'partial_paid' di OrderController::approvePayment
  * setelah admin verify.
+ *
+ * Token-protect (task t_8a063559): require signed middleware juga — form di
+ * upload page submit ulang URL yang sama dengan signature.
  */
 Route::post('/upload/{order_number}', [UploadController::class, 'store'])
     ->where('order_number', '[A-Za-z0-9\\-]+')
+    ->middleware('signed')
     ->name('upload.store');
 
-// Order tracking — M1 dummy + M2 hydrate (task t_34ed789d):
-// Kalau order_number cocok ke DB, pass real Order ke view supaya track page
-// bisa override shipment block dengan data shipping_courier/shipping_resi/shipped_at
-// yang baru di-input admin. Kalau ngga ada, fallback ke dummy heuristic lama.
+/*
+ * GET /track/{order_number}
+ * --------------------------------------------------------------------------
+ * Customer track order via signed URL (task t_8a063559). Akses tanpa
+ * signature → 403, expired (>30d) → 410.
+ *
+ * M2 hydrate (task t_34ed789d): kalau order_number cocok ke DB, pass real
+ * Order ke view supaya track page bisa override shipment block dengan data
+ * shipping_courier/shipping_resi/shipped_at yang baru di-input admin. Kalau
+ * ngga ada, fallback ke dummy heuristic lama (backward compat M1).
+ */
 Route::get('/track/{order_number}', function (string $order_number) {
     $order = Order::where('order_number', $order_number)->first();
 
@@ -128,6 +139,7 @@ Route::get('/track/{order_number}', function (string $order_number) {
     ]);
 })
     ->where('order_number', '[A-Za-z0-9\\-]+')
+    ->middleware('signed')
     ->name('track.show');
 
 /*
