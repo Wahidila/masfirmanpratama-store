@@ -35,7 +35,7 @@ class BookDetailPageTest extends TestCase
         $response->assertSeeInOrder(['/build/assets/app-', '.css'], false);
         $response->assertSeeInOrder(['/build/assets/app-', '.js'], false);
         $response->assertSee('csrf-token', false);
-        $response->assertSee('lucide@latest', false);
+        $response->assertSee('lucide@0.469.0', false);
 
         // Book template specific markers.
         $response->assertSee('Spesifikasi Buku', false);

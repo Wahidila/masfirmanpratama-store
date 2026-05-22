@@ -58,8 +58,10 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
     </noscript>
 
-    {{-- Icons: Lucide --}}
-    <script src="https://unpkg.com/lucide@latest" defer></script>
+    {{-- Icons: Lucide (PIN VERSION — `@latest` di unpkg redirect ke legacy v1.16.0
+         yang ngga punya brand icons facebook/youtube/instagram, bikin createIcons
+         loop warn-cycle dan hang Lighthouse di route ber-Alpine berat. Fix t_5e6b03f1.) --}}
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js" defer></script>
 
     {{-- Vite assets (Tailwind + Alpine) --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -103,7 +105,13 @@
     {{-- Per-page scripts (e.g. structured data, page-specific Alpine components) --}}
     {{ $scripts ?? '' }}
 
-    {{-- Lucide init: render on initial load + after Alpine mounts/updates --}}
+    {{-- Lucide init: render on initial load + after Alpine mounts.
+         CATATAN PENTING (fix t_5e6b03f1): JANGAN listen `alpine:morphed`.
+         createIcons() mutate `<i data-lucide>` jadi `<svg>` → mutation re-trigger
+         alpine:morphed → loop infinite (35k+ console errors / 17ms saat icon
+         missing, atau silent main-thread block saat icons tersedia).
+         alpine:initialized + initial render udah cukup; tab-button per-tab
+         re-render dihandle oleh `x-init` di-template. --}}
     <script>
         (function () {
             const renderIcons = () => window.lucide && window.lucide.createIcons();
@@ -113,7 +121,6 @@
                 renderIcons();
             }
             document.addEventListener('alpine:initialized', renderIcons);
-            document.addEventListener('alpine:morphed', renderIcons);
         })();
     </script>
 </body>
