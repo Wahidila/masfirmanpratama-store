@@ -190,7 +190,7 @@
                                         : 'text-slate-500 border-transparent hover:text-primary-600 hover:bg-white/50'"
                                     class="shrink-0 inline-flex items-center gap-2 px-4 sm:px-5 py-4 text-sm font-semibold border-b-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                                 >
-                                    <i :data-lucide="t.icon" class="w-4 h-4" x-init="$nextTick(() => window.lucide && window.lucide.createIcons())"></i>
+                                    <i :data-lucide="t.icon" class="w-4 h-4"></i>
                                     <span x-text="t.label"></span>
                                 </button>
                             </template>
