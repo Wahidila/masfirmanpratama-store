@@ -209,34 +209,56 @@ QC approved (`docs/qc/visual-review-M1.md`, `docs/qc/lighthouse-M1.md`):
 - ⚠ `/produk/kelas-amc-reguler` Lighthouse timeout (curl OK 26ms 76kB) → carryover ke M2 tail untuk root-cause
 - ⚠ Kanban task IDs M1 (t_8779b460 ... t_9cf308a8) hilang setelah VPS migration 2026-05-18 — DB pindah kosong, tapi git history + QC report cukup sebagai audit trail
 
-## 🚀 Sprint aktif — M2 Admin Panel Store + Wire FE→BE (2026-05-18 → 2026-05-25)
+## 🏁 Sprint selesai — M2 Admin Panel Store + Wire FE→BE (closed 2026-05-22, sign-off PASS-WITH-NOTES)
 
-**Target milestone:** M2 (Day 13, 2026-05-25)
-**Scope:** Admin authentication + dashboard, CRUD produk, pesanan + verifikasi bayar + input resi, settings (bank accounts + store info), installment schemes CRUD, wire Store FE checkout/upload ke backend real, WA notification **stub** (write only, gateway integration ditunda M3+).
-**Out of scope:** WA gateway provider integration, Agenwebsite ongkir API, affiliate system, public→admin role separation (admin = single role di M2).
-**Owner agent split:** mc-fullstack (16 task), mc-ui (2 task), mc-qc (3 task), mc-debug (1 task)
-**ETA:** ~58h (45h raw + 30% buffer) → 6-7 hari kerja 1 dev
+QC delivered (`docs/qc/lighthouse-M2.md`, `docs/qc/visual-review-M2-admin.md`, `docs/qc/integration-tests-M2.md`):
+- ✅ Admin foundation + Produk CRUD + Pesanan + Verifikasi bayar + Input resi + Settings + Installment schemes + WA notification stub — semua functional
+- ✅ Backend integration tests 270/270 pass, 1019 assertions, 6.62s
+- ✅ Lighthouse re-audit production-like nginx: 4/5 route ≥90 perf mobile (cart 94, checkout 93, produk-list 99, produk-buku 99), A11y 95-100, BP+SEO 100
+- ✅ Wire FE→BE complete — checkout, upload bukti bayar, token-protect /upload + /track via signed URL
+- ⚠ Sign-off PASS-WITH-NOTES: 1 Critical (mobile admin nav drawer absent) + 2 High (palette red/rose split, home perf 65 due to 385KB founder JPEG + Lucide CDN) + 3 Medium (Pint clean 5 file, Larastan ngga install, CLS cart/checkout) + 2 Low (sidebar dead code, logo extract) → 7 carryover di-handle di M2-hardening sprint
+- ✅ Lucide CDN pin + alpine loop fix landed (PR #7 t_5e6b03f1) — `/produk/kelas-amc-reguler` no more Lighthouse PROTOCOL_TIMEOUT
+- ✅ message-square icon whitelist + dev-time guard landed (PR #8) — admin sidebar WA Notifikasi render proper
+
+## 🚀 Sprint aktif — M2-hardening (2026-05-22 → 2026-05-25)
+
+**Target:** M2 final sign-off PASS clean (no carryover Critical/High) sebelum kick off M3 Affiliate System.
+**Scope:** address 7 carryover dari QC M2 sign-off — 1 Critical mobile drawer, 2 High palette + perf, 3 Medium tooling+CLS, 2 Low cleanup, plus QC re-screenshot + re-Lighthouse + final sign-off + sprint transition.
+**Out of scope:** AdminNavComposer extract (defer M3 — perlu pas affiliate admin dibikin), affiliate system foundation, webhook integration.
+**Owner agent split:** mc-fullstack (10 task), mc-qc (3 task), mc-planning (1 task)
+**ETA:** ~17-22h → 2-3 hari kerja 1 dev (target Day 13, on-track ke M3 kick off Day 14)
 
 **Sprint blocks:**
-- **M1 tail** (3 task) — fix tailwind palette H1, anchor audit H2, debug Lighthouse timeout `/kelas-amc-reguler`
-- **Foundation** (4 task) — admin auth Breeze, admin layout + sidebar, migrations bundle, seeders
-- **Produk CRUD** (3 task) — index/filter, create/edit + image upload, soft delete
-- **Pesanan + verifikasi** (4 task) — index, detail, verifikasi bayar, input resi
-- **Settings** (2 task) — bank accounts + store info, installment schemes
-- **Wire FE→BE** (3 task) — POST /checkout, POST /upload, token-protect /upload + /track
-- **WA stub** (1 task) — write event ke `wa_notifications`, gateway later
-- **QC** (3 task) — admin visual review, backend integration tests, M2 sign-off + nginx Lighthouse re-audit
+- **Quick wins paralel** (4 task) — H2 orange→accent (5min), H3 firman-foto webp + picture (30min), Pint auto-fix (15min), CLS cart/checkout (2h)
+- **Foundation work paralel** (2 task) — C1 mobile admin drawer Option A inline (4-6h), H1 destructive palette red→rose canonical (2-3h)
+- **Dependent cleanup** (3 task) — M1 emerald→secondary token (dep H1, 1h), Larastan install level 6 (dep Pint, 1h), L1+L2 sidebar cleanup + logo extract (dep C1, 35min)
+- **QC** (3 task) — re-screenshot 33 view × 3 viewport (dep C1+H1+H2+M1+L1+L2), re-Lighthouse production-like (dep H3+CLS), final sign-off PASS clean
+- **Closure** (1 task) — flip AGENTS.md sprint section + decisions log + commit transition (dep QC-3)
 
-**Decisions klien yang masih perlu konfirmasi sebelum task tertentu:**
-- WA gateway provider (Fonnte / Wablas / lainnya) — bukan blocker M2, tapi blocker M3 (customer reminder)
+**Kanban task IDs (M2-hardening sprint):**
+- Quick wins: `t_5a6300c6` (H2), `t_fdafe7cc` (H3), `t_286a87d4` (Pint), `t_cfa26d49` (CLS)
+- Foundation: `t_7445eb21` (C1 mobile drawer), `t_940c0131` (H1 palette)
+- Dependent: `t_fd0bc7f9` (M1 emerald), `t_0d5ddbe9` (Larastan), `t_4c2b0ba8` (L1), `t_59d3cb68` (L2)
+- QC: `t_5bab0bd3` (visual re-review), `t_ab94a31f` (Lighthouse re-audit), `t_de99d26b` (final sign-off)
+- Closure: `t_478d6207` (DOC-1 sprint transition)
+
+**Decisions M2-hardening:**
+- C1 mobile drawer: Option A (Alpine inline di `layouts/admin.blade.php`) — fastest path 4-6h, Option B (extract `$primaryNav` ke `AdminNavComposer`) defer ke M3 backlog (akan dipakai pas affiliate admin)
+- H1 palette: bulk find-replace `red-* → rose-*` per-file (manual review per match) — refactor ke `tailwind.config.js::colors.danger` semantic token defer ke M3 backlog (PR lebih besar tapi DRY long-term)
+- Carryover full 16 → trim ke 14 task: keep semua 7 sev item + Larastan + L2 logo (gak skip apapun, klien dapet polish maksimum)
+
+**Decisions klien yang masih perlu konfirmasi:**
+- WA gateway provider (Fonnte / Wablas / lainnya) — blocker M3 customer reminder + cicilan reminder
 - Order status workflow final — usulan: `pending → awaiting_payment → payment_review → verified → packed → shipped → delivered → cancelled` — minta confirm via Naufalix
-- Image upload storage — M2 default ke local disk `storage/app/public/products/`, switchable via `.env` filesystem driver
+- Affiliate design system: ikut Store DESIGN.md (Indigo/Teal/Amber) atau distinct palette? — blocker mc-ui mockup affiliate landing
 
 **Carry over ke M3 (Affiliate System):**
 - Replace WA stub dengan provider integration (after gateway dipilih)
 - Replace ongkir manual input → Agenwebsite.com API
 - Wire affiliate.* domain + register flow
 - Webhook HMAC-SHA256 Store→Affiliate untuk `order-paid` / `order-refunded`
+- AdminNavComposer extract (refactor `$primaryNav` reusable buat affiliate admin)
+- (Optional) Refactor destructive palette ke `tailwind.config.js::colors.danger` semantic token
 
 ## 🔓 Open decisions (perlu konfirmasi klien)
 
@@ -269,3 +291,9 @@ QC approved (`docs/qc/visual-review-M1.md`, `docs/qc/lighthouse-M1.md`):
 - 2026-05-18 | Lead MC + MCAIAgent | VPS migration recovery — VPS lama off, full restore dari `naufalix/affiliate` (main + feat/m1-store-fe + project-plan + tag upstream-pre-mc) sukses, working tree clean | Code + AGENTS.md + QC report + upstream archive intact via git, satu-satunya state yang hilang = kanban task IDs M1 (di-record di sprint closed section, ngga di-rebuild)
 - 2026-05-18 | mc-planning | Sprint M1 closed (QC approved 2026-05-16), kick off M2 Admin Panel Store + Wire FE→BE | Day 6/30, on-track ke target M2 (Day 13, 2026-05-25)
 - 2026-05-18 | mc-planning | M1 tail (H1 palette, H2 anchor, /kelas-amc-reguler timeout) digabung ke M2 sprint, bukan sprint terpisah | 3 task ringan, ngga worth standalone sprint, parallel dengan M2 foundation
+- 2026-05-22 | mc-debug | Root-cause `/produk/kelas-amc-reguler` Lighthouse PROTOCOL_TIMEOUT — 3 stacked causes (lucide CDN broken, alpine:morphed loop, x-for x-init multiplier), pin `lucide@0.469.0` + drop morphed listener + drop per-tab x-init | M1 tail debug task `t_5e6b03f1` resolved, regression test `CourseDetailLighthouseGuardTest` ditambah
+- 2026-05-22 | mc-review-qc | M2 sign-off PASS-WITH-NOTES (4/5 route ≥90 perf, 270/270 backend tests, A11y 95-100) — 7 carryover (1 Critical mobile drawer + 2 High palette+perf + 3 Medium tooling+CLS + 2 Low cleanup) | M2 deliverable functional, polish gap → handle di M2-hardening sprint sebelum M3 kick off
+- 2026-05-22 | Lead MC + mc-planning | Kick off M2-hardening sprint (14 task, ~17-22h, 2-3 hari) instead of langsung lompat ke M3 | Pastikan M2 PASS clean dulu sebelum tambah scope affiliate (1 Critical blocker `/admin` mobile, 2 High palette+perf langsung impact UX)
+- 2026-05-22 | mc-planning | Destructive palette canonical = `rose-*` (M2-hardening H1 decision) | Konsistensi visual + kontras lebih baik dengan primary indigo. Refactor ke `tailwind.config.js::colors.danger` semantic token defer ke M3 backlog (hindari PR besar di hardening)
+- 2026-05-22 | mc-planning | C1 mobile drawer pakai Option A (Alpine inline) bukan Option B (AdminNavComposer extract) | Option A 4-6h vs Option B 6-8h, Option B refactor reusable di-defer ke M3 backlog karena akan dipakai pas affiliate admin dibikin
+- 2026-05-22 | Lead MC + mc-planning | PR #7 (lucide fix `t_5e6b03f1`) + PR #8 (admin icon whitelist `message-square`) merged ke main sebagai M2-hardening unblocker | Course detail no more Lighthouse timeout di main, sidebar WA Notifikasi render proper
