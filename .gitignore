@@ -10,3 +10,6 @@ build/
 # MC infra (per-environment, bukan project code)
 .discord.json
 .kanban-task-ids.json
+
+# Third-party reference plugin (GPL WooCommerce, audit-only — jangan masuk repo)
+docs_dev/reference/agenwebsite-shipping/
