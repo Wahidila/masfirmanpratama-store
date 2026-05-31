@@ -13,7 +13,7 @@
 
     // Image preview src — pakai existing image kalau edit, else null.
     $existingImage = $product->image_path
-        ? asset('storage/'.$product->image_path)
+        ? asset($product->image_path)
         : null;
 @endphp
 
@@ -47,14 +47,14 @@
                     value="{{ old('title', $product->title) }}"
                     maxlength="200"
                     required
-                    class="block w-full rounded-xl border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                     placeholder="mis. Buku Mind Power 101">
             </x-admin.form-group>
 
             <x-admin.form-group label="Slug" for="slug" name="slug" required
                 hint="Otomatis dari judul. Pakai huruf kecil + tanda hubung (mis. mind-power-101).">
                 <div class="flex">
-                    <span class="inline-flex items-center rounded-l-xl border border-r-0 border-slate-200 bg-slate-50 px-3 text-xs text-slate-500">/produk/</span>
+                    <span class="inline-flex items-center rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 px-3 text-xs text-gray-500 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400">/produk/</span>
                     <input
                         type="text"
                         id="slug"
@@ -63,7 +63,7 @@
                         @input="autoSlug = false"
                         value="{{ old('slug', $product->slug) }}"
                         maxlength="200"
-                        class="block w-full rounded-r-xl border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100">
+                        class="h-11 w-full rounded-r-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                 </div>
             </x-admin.form-group>
 
@@ -72,7 +72,7 @@
                     id="type"
                     name="type"
                     required
-                    class="block w-full rounded-xl border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100">
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                     @foreach (['book' => 'Buku', 'course' => 'Kelas / Kursus'] as $value => $label)
                         <option value="{{ $value }}" @selected(old('type', $product->type) === $value)>{{ $label }}</option>
                     @endforeach
@@ -93,7 +93,7 @@
                     step="1"
                     value="{{ old('price', $product->price ?? 0) }}"
                     required
-                    class="block w-full rounded-xl border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                     placeholder="150000">
             </x-admin.form-group>
 
@@ -106,7 +106,7 @@
                     step="1"
                     value="{{ old('stock', $product->stock ?? 0) }}"
                     required
-                    class="block w-full rounded-xl border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100">
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
             </x-admin.form-group>
 
             <x-admin.form-group label="Status" for="status" name="status" required>
@@ -114,7 +114,7 @@
                     id="status"
                     name="status"
                     required
-                    class="block w-full rounded-xl border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100">
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                     @foreach (['draft' => 'Draft (belum tayang)', 'active' => 'Active (live)', 'archived' => 'Archived'] as $value => $label)
                         <option value="{{ $value }}" @selected(old('status', $product->status ?? 'draft') === $value)>{{ $label }}</option>
                     @endforeach
@@ -137,24 +137,24 @@
                     name="image"
                     accept="image/jpeg,image/png,image/webp"
                     @change="onImageChange($event)"
-                    class="block w-full text-sm text-slate-600 file:mr-3 file:rounded-full file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-primary-700 hover:file:bg-primary-100">
+                    class="block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-brand-700 hover:file:bg-brand-100 dark:text-gray-400 dark:file:bg-brand-500/15 dark:file:text-brand-400">
 
                 @if ($isEdit && $product->image_path)
-                    <label class="mt-3 inline-flex items-center gap-2 text-xs text-slate-600">
-                        <input type="checkbox" name="remove_image" value="1" class="rounded border-slate-300 text-rose-600 focus:ring-rose-200">
+                    <label class="mt-3 inline-flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                        <input type="checkbox" name="remove_image" value="1" class="rounded border-gray-300 text-error-500 focus:ring-error-200 dark:border-gray-700">
                         Hapus gambar saat ini
                     </label>
                 @endif
             </x-admin.form-group>
 
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">Preview</label>
-                <div class="relative aspect-square w-full max-w-[240px] overflow-hidden rounded-2xl border border-dashed border-slate-200 bg-slate-50">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-300">Preview</label>
+                <div class="relative aspect-square w-full max-w-[240px] overflow-hidden rounded-2xl border border-dashed border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03]">
                     <template x-if="previewUrl">
                         <img :src="previewUrl" alt="Preview gambar produk" class="h-full w-full object-cover">
                     </template>
                     <template x-if="!previewUrl">
-                        <div class="flex h-full w-full flex-col items-center justify-center gap-1.5 text-slate-400">
+                        <div class="flex h-full w-full flex-col items-center justify-center gap-1.5 text-gray-400 dark:text-gray-500">
                             <x-admin.icon name="image" class="h-8 w-8" />
                             <span class="text-xs">Belum ada gambar</span>
                         </div>
@@ -177,7 +177,7 @@
                     name="description"
                     rows="6"
                     maxlength="8000"
-                    class="block w-full rounded-xl border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+                    class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                     placeholder="Ceritakan produk ini ke calon pembeli...">{{ old('description', $product->description) }}</textarea>
             </x-admin.form-group>
 
@@ -190,7 +190,7 @@
                         name="meta_title"
                         maxlength="160"
                         value="{{ old('meta_title', $metaSeo['title'] ?? '') }}"
-                        class="block w-full rounded-xl border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100">
+                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                 </x-admin.form-group>
 
                 <x-admin.form-group label="Meta description (SEO)" for="meta_description" name="meta_description"
@@ -201,7 +201,7 @@
                         name="meta_description"
                         maxlength="320"
                         value="{{ old('meta_description', $metaSeo['description'] ?? '') }}"
-                        class="block w-full rounded-xl border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100">
+                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                 </x-admin.form-group>
             </div>
         </div>
@@ -209,14 +209,13 @@
 
     {{-- Footer actions --}}
     <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
-        <a href="{{ route('admin.products.index') }}"
-            class="inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+        <x-admin.button href="{{ route('admin.products.index') }}" variant="outline">
             Batal
-        </a>
+        </x-admin.button>
         <button type="submit"
             :disabled="submitting"
             :class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-            class="inline-flex items-center justify-center gap-2 rounded-full bg-primary-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary-500/30 transition hover:bg-primary-700">
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-6 py-3 text-sm font-semibold text-white shadow-theme-xs transition hover:bg-brand-600">
             <x-admin.icon name="check" class="h-4 w-4" />
             <span x-text="submitting ? 'Menyimpan…' : '{{ $isEdit ? 'Simpan perubahan' : 'Tambahkan produk' }}'"></span>
         </button>
