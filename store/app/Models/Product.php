@@ -21,6 +21,11 @@ class Product extends Model
         'image_path',
         'description',
         'meta_seo',
+        'weight_kg',
+        'length_cm',
+        'width_cm',
+        'height_cm',
+        'is_shippable',
     ];
 
     protected function casts(): array
@@ -29,6 +34,11 @@ class Product extends Model
             'price' => 'decimal:2',
             'stock' => 'integer',
             'meta_seo' => 'array',
+            'weight_kg' => 'decimal:2',
+            'length_cm' => 'integer',
+            'width_cm' => 'integer',
+            'height_cm' => 'integer',
+            'is_shippable' => 'boolean',
         ];
     }
 

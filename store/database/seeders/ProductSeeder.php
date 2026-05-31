@@ -17,6 +17,18 @@ class ProductSeeder extends Seeder
         'buku' => 'book',
     ];
 
+    /**
+     * Realistic weight (kg) mapping based on page count / thickness.
+     */
+    private const WEIGHT_MAP = [
+        '10-keajaiban-pikiran' => 0.3,
+        'alpha-telepathy' => 0.5,
+        'instan-hypnosis' => 0.5,
+        'kitab-101-kalimat-sugesti-ajaib' => 0.3,
+        'kitab-kunci-penarik-rezeki' => 0.5,
+        'formula-amc-firman-pratama' => 0.5,
+    ];
+
     public function run(): void
     {
         $items = config('products.items', []);
@@ -49,6 +61,8 @@ class ProductSeeder extends Seeder
                     'image_path' => $p['image'] ?? null,
                     'description' => $description,
                     'meta_seo' => $metaSeo ?: null,
+                    'weight_kg' => $type === 'book' ? (self::WEIGHT_MAP[$slug] ?? 0.3) : null,
+                    'is_shippable' => $type !== 'course',
                 ],
             );
         }
