@@ -3,12 +3,6 @@
 @section('title', 'Produk')
 
 @php
-    $statusBadge = [
-        'draft' => 'bg-slate-100 text-slate-700',
-        'active' => 'bg-secondary-50 text-secondary-700',
-        'archived' => 'bg-amber-50 text-amber-700',
-    ];
-
     $typeLabel = [
         'book' => 'Buku',
         'course' => 'Kelas',
@@ -23,11 +17,10 @@
         subtitle="Kelola katalog buku & kelas. Status draft = belum tayang, active = live di store, archived = disembunyikan dari FE.">
         <x-slot name="actions">
             @unless ($isTrashed)
-                <a href="{{ route('admin.products.create') }}"
-                    class="inline-flex items-center gap-1.5 rounded-full bg-primary-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-primary-500/30 hover:bg-primary-700 transition">
+                <x-admin.button href="{{ route('admin.products.create') }}" size="sm">
                     <x-admin.icon name="plus" class="h-3.5 w-3.5" />
                     Tambah Produk
-                </a>
+                </x-admin.button>
             @endunless
         </x-slot>
     </x-admin.page-header>
@@ -41,12 +34,12 @@
     {{-- View tabs (active vs trashed/arsip) --}}
     <div class="mb-6 flex items-center gap-2 text-xs font-medium">
         <a href="{{ route('admin.products.index') }}"
-            class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 transition {{ ! $isTrashed ? 'border-primary-300 bg-primary-50 text-primary-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-100' }}">
+            class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 transition {{ ! $isTrashed ? 'border-brand-500 bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400' }}">
             Aktif
             <span class="text-[10px] opacity-70">{{ $stats['total'] }}</span>
         </a>
         <a href="{{ route('admin.products.index', ['view' => 'trashed']) }}"
-            class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 transition {{ $isTrashed ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-100' }}">
+            class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 transition {{ $isTrashed ? 'border-brand-500 bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400' }}">
             <x-admin.icon name="trash" class="h-3 w-3" />
             Arsip (soft-deleted)
             <span class="text-[10px] opacity-70">{{ $stats['trashed'] }}</span>
@@ -65,22 +58,22 @@
 
     {{-- Filter bar --}}
     <form method="GET" action="{{ route('admin.products.index') }}"
-        class="mb-6 flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:flex-row sm:items-end">
+        class="mb-6 flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs sm:flex-row sm:items-end dark:border-gray-800 dark:bg-white/[0.03]">
         <input type="hidden" name="view" value="{{ $view ?? 'active' }}">
         <div class="flex-1">
-            <label for="q" class="block text-xs font-medium text-slate-600 mb-1">Cari</label>
+            <label for="q" class="block text-xs font-medium text-gray-700 mb-1 dark:text-gray-300">Cari</label>
             <div class="relative">
-                <x-admin.icon name="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <x-admin.icon name="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                 <input type="text" id="q" name="q" value="{{ $search }}" placeholder="Judul atau slug…"
-                    class="block w-full rounded-xl border-slate-200 bg-white pl-9 pr-3 py-2 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100">
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
             </div>
         </div>
 
         @unless ($isTrashed)
             <div class="sm:w-40">
-                <label for="status" class="block text-xs font-medium text-slate-600 mb-1">Status</label>
+                <label for="status" class="block text-xs font-medium text-gray-700 mb-1 dark:text-gray-300">Status</label>
                 <select id="status" name="status"
-                    class="block w-full rounded-xl border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100">
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                     <option value="">Semua</option>
                     @foreach (['draft' => 'Draft', 'active' => 'Active', 'archived' => 'Archived'] as $value => $label)
                         <option value="{{ $value }}" @selected($filterStatus === $value)>{{ $label }}</option>
@@ -90,9 +83,9 @@
         @endunless
 
         <div class="sm:w-40">
-            <label for="type" class="block text-xs font-medium text-slate-600 mb-1">Tipe</label>
+            <label for="type" class="block text-xs font-medium text-gray-700 mb-1 dark:text-gray-300">Tipe</label>
             <select id="type" name="type"
-                class="block w-full rounded-xl border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100">
+                class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                 <option value="">Semua</option>
                 @foreach (['book' => 'Buku', 'course' => 'Kelas'] as $value => $label)
                     <option value="{{ $value }}" @selected($filterType === $value)>{{ $label }}</option>
@@ -100,17 +93,15 @@
             </select>
         </div>
 
-        <button type="submit"
-            class="inline-flex items-center justify-center gap-1.5 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition">
+        <x-admin.button type="submit" size="sm">
             <x-admin.icon name="filter" class="h-3.5 w-3.5" />
             Filter
-        </button>
+        </x-admin.button>
 
         @if ($search || $filterStatus || $filterType)
-            <a href="{{ route('admin.products.index', ['view' => $view ?? 'active']) }}"
-                class="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <x-admin.button href="{{ route('admin.products.index', ['view' => $view ?? 'active']) }}" variant="outline" size="sm">
                 Reset
-            </a>
+            </x-admin.button>
         @endif
     </form>
 
@@ -125,43 +116,43 @@
 
         {{-- Bulk action toolbar (sticky bottom-style, conditional) --}}
         <div x-show="hasSelection" x-cloak
-            class="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 p-3 text-xs">
-            <span class="font-medium text-primary-900">
+            class="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 p-3 text-xs dark:border-brand-500/30 dark:bg-brand-500/15">
+            <span class="font-medium text-brand-900 dark:text-brand-400">
                 <span x-text="selected.length"></span> dipilih
             </span>
-            <span class="text-slate-400">·</span>
+            <span class="text-gray-400 dark:text-gray-500">·</span>
 
             @if ($isTrashed)
                 <button type="submit" name="action" value="restore"
-                    class="inline-flex items-center gap-1 rounded-full bg-secondary-600 px-3 py-1.5 font-medium text-white hover:bg-secondary-500 transition">
+                    class="inline-flex items-center gap-1 rounded-lg bg-success-500 px-3 py-1.5 font-medium text-white hover:bg-success-600 transition">
                     <x-admin.icon name="check" class="h-3 w-3" />
                     Restore
                 </button>
                 <button type="submit" name="action" value="force_delete"
                     onclick="return confirm('Hapus permanen produk yang dipilih? Tindakan ini tidak bisa dibatalkan.');"
-                    class="inline-flex items-center gap-1 rounded-full bg-rose-600 px-3 py-1.5 font-medium text-white hover:bg-rose-500 transition">
+                    class="inline-flex items-center gap-1 rounded-lg bg-error-500 px-3 py-1.5 font-medium text-white hover:bg-error-600 transition">
                     <x-admin.icon name="trash" class="h-3 w-3" />
                     Hapus permanen
                 </button>
             @else
                 <button type="submit" name="action" value="activate"
-                    class="inline-flex items-center gap-1 rounded-full bg-secondary-600 px-3 py-1.5 font-medium text-white hover:bg-secondary-500 transition">
+                    class="inline-flex items-center gap-1 rounded-lg bg-success-500 px-3 py-1.5 font-medium text-white hover:bg-success-600 transition">
                     Activate
                 </button>
                 <button type="submit" name="action" value="archive"
-                    class="inline-flex items-center gap-1 rounded-full bg-amber-600 px-3 py-1.5 font-medium text-white hover:bg-amber-500 transition">
+                    class="inline-flex items-center gap-1 rounded-lg bg-warning-500 px-3 py-1.5 font-medium text-white hover:bg-warning-600 transition">
                     Archive (status)
                 </button>
                 <button type="submit" name="action" value="soft_delete"
                     onclick="return confirm('Pindahkan ke arsip (soft delete)? Bisa di-restore.');"
-                    class="inline-flex items-center gap-1 rounded-full bg-rose-600 px-3 py-1.5 font-medium text-white hover:bg-rose-500 transition">
+                    class="inline-flex items-center gap-1 rounded-lg bg-error-500 px-3 py-1.5 font-medium text-white hover:bg-error-600 transition">
                     <x-admin.icon name="trash" class="h-3 w-3" />
                     Soft delete
                 </button>
             @endif
 
             <button type="button" @click="selected = []; document.querySelectorAll('input[name=&quot;ids[]&quot;]').forEach(el => el.checked = false)"
-                class="ml-auto inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100 transition">
+                class="ml-auto inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-50 transition dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-white/[0.03]">
                 Clear
             </button>
         </div>
@@ -180,43 +171,41 @@
             :rows="$products"
             empty="Belum ada produk yang cocok dengan filter ini.">
             @foreach ($products as $product)
-                <tr class="hover:bg-slate-50/50 transition {{ $isTrashed ? 'opacity-75' : '' }}">
+                <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition {{ $isTrashed ? 'opacity-75' : '' }}">
                     <td class="px-4 py-3">
                         <input type="checkbox" name="ids[]" value="{{ $product->id }}"
                             x-on:change="$event.target.checked ? selected.push({{ $product->id }}) : (selected = selected.filter(id => id !== {{ $product->id }}))"
-                            class="rounded border-slate-300 text-primary-600 focus:ring-primary-500">
+                            class="rounded border-gray-300 text-brand-500 focus:ring-brand-500 dark:border-gray-700">
                     </td>
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-3">
-                            <div class="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+                            <div class="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03]">
                                 @if ($product->image_path)
-                                    <img src="{{ asset('storage/'.$product->image_path) }}" alt="{{ $product->title }}" class="h-full w-full object-cover">
+                                    <img src="{{ asset($product->image_path) }}" alt="{{ $product->title }}" class="h-full w-full object-cover">
                                 @else
-                                    <div class="flex h-full w-full items-center justify-center text-slate-300">
+                                    <div class="flex h-full w-full items-center justify-center text-gray-300 dark:text-gray-600">
                                         <x-admin.icon name="image" class="h-5 w-5" />
                                     </div>
                                 @endif
                             </div>
                             <div class="min-w-0">
-                                <p class="font-medium text-slate-900 truncate">{{ $product->title }}</p>
-                                <p class="text-xs text-slate-500 font-mono truncate">/{{ $product->slug }}</p>
+                                <p class="font-medium text-gray-800 truncate dark:text-white/90">{{ $product->title }}</p>
+                                <p class="text-xs text-gray-500 font-mono truncate dark:text-gray-400">/{{ $product->slug }}</p>
                                 @if ($product->deleted_at)
-                                    <p class="text-[10px] text-amber-600 mt-0.5">Soft-deleted {{ $product->deleted_at->diffForHumans() }}</p>
+                                    <p class="text-[10px] text-warning-600 mt-0.5 dark:text-warning-500">Soft-deleted {{ $product->deleted_at->diffForHumans() }}</p>
                                 @endif
                             </div>
                         </div>
                     </td>
                     <td class="px-4 py-3">
-                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
                             {{ $typeLabel[$product->type] ?? $product->type }}
                         </span>
                     </td>
-                    <td class="px-4 py-3 font-medium text-slate-900">Rp {{ number_format((float) $product->price, 0, ',', '.') }}</td>
-                    <td class="px-4 py-3 text-slate-700">{{ $product->stock }}</td>
+                    <td class="px-4 py-3 font-medium text-gray-800 dark:text-white/90">Rp {{ number_format((float) $product->price, 0, ',', '.') }}</td>
+                    <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ $product->stock }}</td>
                     <td class="px-4 py-3">
-                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $statusBadge[$product->status] ?? 'bg-slate-100 text-slate-700' }}">
-                            {{ ucfirst($product->status) }}
-                        </span>
+                        <x-admin.status-badge :status="$product->status" />
                     </td>
                     <td class="px-4 py-3 text-right">
                         <div class="inline-flex items-center gap-1.5">
@@ -225,14 +214,14 @@
                                 <form method="POST" action="{{ route('admin.products.restore', $product) }}" class="inline">
                                     @csrf
                                     <button type="submit"
-                                        class="inline-flex items-center gap-1 rounded-full border border-secondary-200 bg-white px-3 py-1.5 text-xs font-medium text-secondary-700 hover:bg-secondary-50 transition">
+                                        class="inline-flex items-center gap-1 rounded-lg border border-success-200 bg-white px-3 py-1.5 text-xs font-medium text-success-700 hover:bg-success-50 transition dark:border-success-500/30 dark:bg-white/[0.03] dark:text-success-500 dark:hover:bg-success-500/15">
                                         <x-admin.icon name="check" class="h-3 w-3" />
                                         Restore
                                     </button>
                                 </form>
                             @else
                                 <a href="{{ route('admin.products.edit', $product) }}"
-                                    class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 transition">
+                                    class="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.03]">
                                     <x-admin.icon name="edit" class="h-3 w-3" />
                                     Edit
                                 </a>
@@ -242,7 +231,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
-                                        class="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-3 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50 transition">
+                                        class="inline-flex items-center gap-1 rounded-lg border border-error-200 bg-white px-3 py-1.5 text-xs font-medium text-error-600 hover:bg-error-50 transition dark:border-error-500/30 dark:bg-white/[0.03] dark:text-error-500 dark:hover:bg-error-500/15">
                                         <x-admin.icon name="trash" class="h-3 w-3" />
                                         Hapus
                                     </button>

@@ -5,6 +5,7 @@
 
 @php
     $statusMap = [
+        // Order statuses
         'pending' => ['tone' => 'warning', 'label' => 'Pending'],
         'partial_paid' => ['tone' => 'warning', 'label' => 'Cicilan'],
         'paid' => ['tone' => 'brand', 'label' => 'Lunas'],
@@ -12,6 +13,10 @@
         'completed' => ['tone' => 'success', 'label' => 'Selesai'],
         'cancelled' => ['tone' => 'error', 'label' => 'Batal'],
         'refunded' => ['tone' => 'gray', 'label' => 'Refund'],
+        // Product statuses
+        'draft' => ['tone' => 'gray', 'label' => 'Draft'],
+        'active' => ['tone' => 'success', 'label' => 'Active'],
+        'archived' => ['tone' => 'warning', 'label' => 'Archived'],
     ];
 
     $cfg = $statusMap[$status] ?? ['tone' => 'gray', 'label' => ucfirst(str_replace('_', ' ', $status))];
