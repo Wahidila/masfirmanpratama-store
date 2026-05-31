@@ -10,6 +10,7 @@ use App\Listeners\SendAdminPaymentReviewAlert;
 use App\Listeners\SendCustomerOrderShippedNotification;
 use App\Listeners\SendCustomerPaymentRejectedNotification;
 use App\Listeners\SendCustomerPaymentVerifiedNotification;
+use App\Listeners\SendOrderShippedEmail;
 use App\Services\Shipping\AgenwebsiteClient;
 use App\Services\Shipping\ShippingRateService;
 use Illuminate\Support\Facades\Event;
@@ -38,5 +39,6 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(PaymentVerified::class, SendCustomerPaymentVerifiedNotification::class);
         Event::listen(PaymentRejected::class, SendCustomerPaymentRejectedNotification::class);
         Event::listen(OrderShipped::class, SendCustomerOrderShippedNotification::class);
+        Event::listen(OrderShipped::class, SendOrderShippedEmail::class);
     }
 }
