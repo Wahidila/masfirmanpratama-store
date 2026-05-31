@@ -1,0 +1,32 @@
+<?php
+
+return [
+    'api_url' => env('AGENWEBSITE_SHIPPING_API_URL', 'https://api-v2.agenwebsite.com/v2'),
+    'license' => env('AGENWEBSITE_SHIPPING_LICENSE', ''),
+    'product' => 'agenwebsite-shipping',
+    // Header replikasi wp_remote_post — WAJIB supaya API tidak balik 500
+    'user_agent' => env('AGENWEBSITE_SHIPPING_UA', 'WordPress/6.8.3; '.env('APP_URL', 'https://masfirmanpratama.com')),
+    'plugin_version' => '2.3.11',
+    'wordpress_version' => '6.8.3',
+    'woocommerce_version' => '10.0',
+    'site_url' => env('APP_URL', 'https://masfirmanpratama.com'),
+    'timeout' => 30,
+
+    // Origin pengiriman (Surabaya)
+    'origin' => env('SHIPPING_ORIGIN', 'surabaya'),
+    'origin_zipcode' => env('SHIPPING_ORIGIN_ZIPCODE', '60111'),
+
+    // Kurir domestik yang diaktifkan (interseksi dgn service API)
+    'couriers' => ['jne', 'jnt', 'sicepat', 'anteraja', 'pos'],
+
+    // Berat & dimensi default produk (kg & cm) bila produk tak punya data
+    'default_weight_kg' => 1,
+    'default_dimensions_cm' => ['length' => 10, 'width' => 10, 'height' => 5],
+
+    // Cache TTL (detik): master data couriers/services 24 jam; rate harga pendek
+    'cache_master_ttl' => 86400,
+    'cache_rate_ttl' => 1800,
+
+    // Markup per service (extra_cost), key = service_id. Kosong = tanpa markup.
+    'service_markup' => [],
+];
