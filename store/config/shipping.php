@@ -4,12 +4,16 @@ return [
     'api_url' => env('AGENWEBSITE_SHIPPING_API_URL', 'https://api-v2.agenwebsite.com/v2'),
     'license' => env('AGENWEBSITE_SHIPPING_LICENSE', ''),
     'product' => 'agenwebsite-shipping',
-    // Header replikasi wp_remote_post — WAJIB supaya API tidak balik 500
-    'user_agent' => env('AGENWEBSITE_SHIPPING_UA', 'WordPress/6.8.3; '.env('APP_URL', 'https://masfirmanpratama.com')),
+    // Header replikasi wp_remote_post — WAJIB supaya API tidak balik 500.
+    // PENTING: site_url HARUS domain terdaftar di license (masfirmanpratama.com),
+    // BUKAN APP_URL. License agenwebsite domain-bound — localhost:8052 → HTTP 401
+    // "Domain yang Anda gunakan salah". Decoupled dari APP_URL supaya rate jalan
+    // di dev/preview/tunnel. Override via AGENWEBSITE_SHIPPING_SITE_URL bila domain ganti.
+    'site_url' => env('AGENWEBSITE_SHIPPING_SITE_URL', 'https://masfirmanpratama.com'),
+    'user_agent' => env('AGENWEBSITE_SHIPPING_UA', 'WordPress/6.8.3; '.env('AGENWEBSITE_SHIPPING_SITE_URL', 'https://masfirmanpratama.com')),
     'plugin_version' => '2.3.11',
     'wordpress_version' => '6.8.3',
     'woocommerce_version' => '10.0',
-    'site_url' => env('APP_URL', 'https://masfirmanpratama.com'),
     'timeout' => 30,
 
     // Origin pengiriman (Surabaya)
