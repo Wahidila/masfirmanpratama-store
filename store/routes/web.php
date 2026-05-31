@@ -3,6 +3,7 @@
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ShippingRateController;
 use App\Http\Controllers\UploadController;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
@@ -143,6 +144,11 @@ Route::get('/track/{order_number}', function (string $order_number) {
     ->where('order_number', '[A-Za-z0-9\\-]+')
     ->middleware('signed')
     ->name('track.show');
+
+// Shipping rate lookup (AJAX from checkout page)
+Route::post('/shipping/rates', [ShippingRateController::class, 'rates'])
+    ->middleware('throttle:30,1')
+    ->name('shipping.rates');
 
 /*
 |--------------------------------------------------------------------------
