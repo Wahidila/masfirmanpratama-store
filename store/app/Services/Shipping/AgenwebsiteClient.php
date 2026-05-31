@@ -3,6 +3,7 @@
 namespace App\Services\Shipping;
 
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class AgenwebsiteClient
@@ -66,5 +67,44 @@ class AgenwebsiteClient
     public function activateLicense(): array
     {
         return $this->post('license/activate');
+    }
+
+    public function couriers(): array
+    {
+        return Cache::remember('shipping.couriers', $this->cfg['cache_master_ttl'], function () {
+            $result = $this->post('shipping/couriers');
+
+            if ($result['status'] === 'success' && is_array($result['result']) && count($result['result']) > 0) {
+                return $result['result'];
+            }
+
+            return $this->fallbackJson('couriers.json');
+        });
+    }
+
+    public function services(string $category = 'domestic'): array
+    {
+        $cacheKey = 'shipping.services.'.$category;
+
+        return Cache::remember($cacheKey, $this->cfg['cache_master_ttl'], function () use ($category) {
+            $result = $this->post('shipping/services', [], ['category' => $category]);
+
+            if ($result['status'] === 'success' && is_array($result['result']) && count($result['result']) > 0) {
+                return $result['result'];
+            }
+
+            return $this->fallbackJson('services.json');
+        });
+    }
+
+    protected function fallbackJson(string $filename): array
+    {
+        $path = storage_path('app/shipping/'.$filename);
+
+        if (file_exists($path)) {
+            return json_decode(file_get_contents($path), true) ?? [];
+        }
+
+        return [];
     }
 }
