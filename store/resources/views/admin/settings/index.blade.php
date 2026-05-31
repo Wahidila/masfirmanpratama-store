@@ -14,17 +14,17 @@
     @endif
 
     {{-- Tabs --}}
-    <div class="mb-6 flex items-center gap-2 text-xs font-medium border-b border-slate-200">
+    <div class="mb-6 flex items-center gap-2 text-xs font-medium border-b border-gray-200 dark:border-gray-800">
         <a href="{{ route('admin.settings.index', ['tab' => 'store-info']) }}"
-            class="px-4 py-2.5 -mb-px border-b-2 transition {{ $tab === 'store-info' ? 'border-primary-600 text-primary-700' : 'border-transparent text-slate-600 hover:text-slate-900' }}">
+            class="px-4 py-2.5 -mb-px border-b-2 transition {{ $tab === 'store-info' ? 'border-primary-600 text-primary-700 dark:text-brand-400' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
             Store Info
         </a>
         <a href="{{ route('admin.settings.index', ['tab' => 'bank-accounts']) }}"
-            class="px-4 py-2.5 -mb-px border-b-2 transition {{ $tab === 'bank-accounts' ? 'border-primary-600 text-primary-700' : 'border-transparent text-slate-600 hover:text-slate-900' }}">
+            class="px-4 py-2.5 -mb-px border-b-2 transition {{ $tab === 'bank-accounts' ? 'border-primary-600 text-primary-700 dark:text-brand-400' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
             Bank Accounts
         </a>
         <a href="{{ route('admin.settings.index', ['tab' => 'shipping']) }}"
-            class="px-4 py-2.5 -mb-px border-b-2 transition {{ $tab === 'shipping' ? 'border-primary-600 text-primary-700' : 'border-transparent text-slate-600 hover:text-slate-900' }}">
+            class="px-4 py-2.5 -mb-px border-b-2 transition {{ $tab === 'shipping' ? 'border-primary-600 text-primary-700 dark:text-brand-400' : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
             Shipping
         </a>
     </div>

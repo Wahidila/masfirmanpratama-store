@@ -23,23 +23,23 @@
     {{-- Stat strip --}}
     <section class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
         <a href="{{ route('admin.installment-schemes.index') }}"
-           class="rounded-xl border px-3 py-2.5 transition {{ ! $filterScope ? 'border-primary-300 bg-primary-50' : 'border-slate-100 bg-white hover:border-slate-200' }}">
-            <div class="text-xs text-slate-500">Total</div>
-            <div class="mt-1 text-lg font-semibold text-slate-900">{{ $stats['total'] }}</div>
+           class="rounded-xl border px-3 py-2.5 transition {{ ! $filterScope ? 'border-primary-300 bg-primary-50 dark:bg-brand-500/15 dark:border-brand-500/40' : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-gray-700' }}">
+            <div class="text-xs text-gray-500 dark:text-gray-400">Total</div>
+            <div class="mt-1 text-lg font-semibold text-gray-800 dark:text-white/90">{{ $stats['total'] }}</div>
         </a>
-        <div class="rounded-xl border border-slate-100 bg-white px-3 py-2.5">
-            <div class="text-xs text-slate-500">Aktif</div>
-            <div class="mt-1 text-lg font-semibold text-secondary-700">{{ $stats['active'] }}</div>
+        <div class="rounded-xl border border-gray-200 bg-white px-3 py-2.5 dark:border-gray-800 dark:bg-white/[0.03]">
+            <div class="text-xs text-gray-500 dark:text-gray-400">Aktif</div>
+            <div class="mt-1 text-lg font-semibold text-secondary-700 dark:text-secondary-400">{{ $stats['active'] }}</div>
         </div>
         <a href="{{ route('admin.installment-schemes.index', ['scope' => 'global']) }}"
-           class="rounded-xl border px-3 py-2.5 transition {{ $filterScope === 'global' ? 'border-primary-300 bg-primary-50' : 'border-slate-100 bg-white hover:border-slate-200' }}">
-            <div class="text-xs text-slate-500">Global</div>
-            <div class="mt-1 text-lg font-semibold text-slate-900">{{ $stats['global'] }}</div>
+           class="rounded-xl border px-3 py-2.5 transition {{ $filterScope === 'global' ? 'border-primary-300 bg-primary-50 dark:bg-brand-500/15 dark:border-brand-500/40' : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-gray-700' }}">
+            <div class="text-xs text-gray-500 dark:text-gray-400">Global</div>
+            <div class="mt-1 text-lg font-semibold text-gray-800 dark:text-white/90">{{ $stats['global'] }}</div>
         </a>
         <a href="{{ route('admin.installment-schemes.index', ['scope' => 'product']) }}"
-           class="rounded-xl border px-3 py-2.5 transition {{ $filterScope === 'product' ? 'border-primary-300 bg-primary-50' : 'border-slate-100 bg-white hover:border-slate-200' }}">
-            <div class="text-xs text-slate-500">Per Produk</div>
-            <div class="mt-1 text-lg font-semibold text-slate-900">{{ $stats['product'] }}</div>
+           class="rounded-xl border px-3 py-2.5 transition {{ $filterScope === 'product' ? 'border-primary-300 bg-primary-50 dark:bg-brand-500/15 dark:border-brand-500/40' : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-gray-700' }}">
+            <div class="text-xs text-gray-500 dark:text-gray-400">Per Produk</div>
+            <div class="mt-1 text-lg font-semibold text-gray-800 dark:text-white/90">{{ $stats['product'] }}</div>
         </a>
     </section>
 
@@ -51,14 +51,14 @@
             @endif
             <input type="search" name="q" value="{{ $search }}"
                    placeholder="Cari nama skema atau produk..."
-                   class="block w-full rounded-xl border-slate-200 text-sm focus:border-primary-500 focus:ring-primary-500/40">
+                   class="block w-full rounded-xl border-gray-200 text-sm focus:border-primary-500 focus:ring-primary-500/40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:placeholder-gray-500">
             <button type="submit"
                     class="inline-flex items-center justify-center rounded-xl bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-500 transition">
                 Cari
             </button>
             @if ($search || $filterScope)
                 <a href="{{ route('admin.installment-schemes.index') }}"
-                   class="inline-flex items-center text-xs text-slate-500 hover:text-slate-700">
+                   class="inline-flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                     Reset
                 </a>
             @endif
@@ -79,42 +79,42 @@
         :rows="$schemes"
         empty="Belum ada skema. Klik 'Skema Baru' untuk mulai.">
         @foreach ($schemes as $scheme)
-            <tr class="hover:bg-slate-50/60">
+            <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.03]">
                 <td class="px-4 py-3">
-                    <div class="font-medium text-slate-900">{{ $scheme->name }}</div>
-                    <div class="text-xs text-slate-500 font-mono">#{{ $scheme->id }}</div>
+                    <div class="font-medium text-gray-800 dark:text-white/90">{{ $scheme->name }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 font-mono">#{{ $scheme->id }}</div>
                 </td>
                 <td class="px-4 py-3 text-sm">
                     @if ($scheme->product_id && $scheme->product)
-                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset bg-primary-50 text-primary-800 ring-primary-200">
+                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset bg-primary-50 text-primary-800 ring-primary-200 dark:bg-brand-500/15 dark:text-brand-400 dark:ring-brand-500/40">
                             {{ $scheme->product->title }}
                         </span>
                     @else
-                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset bg-secondary-50 text-secondary-800 ring-secondary-200">
+                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset bg-secondary-50 text-secondary-800 ring-secondary-200 dark:bg-secondary-500/15 dark:text-secondary-400 dark:ring-secondary-500/40">
                             Global (semua produk)
                         </span>
                     @endif
                 </td>
-                <td class="px-4 py-3 text-sm">{{ rtrim(rtrim((string) $scheme->dp_pct, '0'), '.') }}%</td>
+                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ rtrim(rtrim((string) $scheme->dp_pct, '0'), '.') }}%</td>
                 <td class="px-4 py-3 text-sm">
                     @if ($scheme->n_installments <= 1)
-                        <span class="text-slate-700">Lunas</span>
+                        <span class="text-gray-700 dark:text-gray-300">Lunas</span>
                     @else
-                        <span class="text-slate-700">{{ $scheme->n_installments }}x</span>
+                        <span class="text-gray-700 dark:text-gray-300">{{ $scheme->n_installments }}x</span>
                     @endif
                 </td>
-                <td class="px-4 py-3 text-sm text-slate-600">{{ $scheme->interval_days }} hari</td>
+                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $scheme->interval_days }} hari</td>
                 <td class="px-4 py-3">
                     <form method="POST" action="{{ route('admin.installment-schemes.toggle', $scheme) }}" class="inline">
                         @csrf
                         @if ($scheme->active)
                             <button type="submit"
-                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset bg-secondary-50 text-secondary-800 ring-secondary-200 hover:bg-secondary-100 transition">
+                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset bg-secondary-50 text-secondary-800 ring-secondary-200 hover:bg-secondary-100 transition dark:bg-secondary-500/15 dark:text-secondary-400 dark:ring-secondary-500/40 dark:hover:bg-secondary-500/20">
                                 ✓ Aktif
                             </button>
                         @else
                             <button type="submit"
-                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset bg-slate-100 text-slate-600 ring-slate-200 hover:bg-slate-200 transition">
+                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset bg-gray-100 text-gray-600 ring-gray-200 hover:bg-gray-200 transition dark:bg-white/5 dark:text-gray-400 dark:ring-gray-600 dark:hover:bg-white/10">
                                 Nonaktif
                             </button>
                         @endif
