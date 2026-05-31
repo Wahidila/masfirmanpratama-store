@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderPayment;
 use App\Models\Product;
+use App\Services\Shipping\ShippingRateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,10 @@ use Illuminate\Validation\ValidationException;
  */
 class CheckoutController extends Controller
 {
+    public function __construct(
+        private ShippingRateService $shippingRateService,
+    ) {}
+
     /**
      * Kurir whitelist — dari config/store.php shipping_methods (pakai key 'code').
      * Cart bisa cuma kelas (digital, ngga butuh shipping) — shipping_method optional.
@@ -89,8 +94,22 @@ class CheckoutController extends Controller
             ]);
         }
 
-        // Shipping cost: ambil dari config kalau code match. Default 0 (kelas digital).
-        $shippingCost = $this->resolveShippingCost($validated['shipping_method'] ?? null);
+        // Shipping cost: try dynamic rate via API first, fallback ke flat config.
+        $shippingMethod = $validated['shipping_method'] ?? null;
+        $address = [
+            'province' => $validated['address_province'] ?? '',
+            'city' => $validated['address_city'] ?? '',
+            'postal' => $validated['address_postal'] ?? '',
+        ];
+        $shippingCost = $this->resolveDynamicShippingCost($shippingMethod, $address, $cart);
+        $shippingCourier = null;
+
+        if ($shippingCost === 0) {
+            $shippingCost = $this->resolveShippingCost($shippingMethod);
+        } elseif ($shippingMethod !== null && $shippingMethod !== '') {
+            $shippingCourier = explode('_', $shippingMethod)[0];
+        }
+
         $grandTotal = $serverSubtotal + $shippingCost;
 
         // Sanity check: client-reported total ngga boleh menyimpang > 1% dari server.
@@ -107,6 +126,7 @@ class CheckoutController extends Controller
             $resolvedItems,
             $grandTotal,
             $scheme,
+            $shippingCourier,
         ) {
             $order = Order::create([
                 'order_number' => $this->generateOrderNumber(),
@@ -122,6 +142,7 @@ class CheckoutController extends Controller
                 'total' => $grandTotal,
                 'status' => 'pending',
                 'ref_code' => $validated['ref_code'] ?? null,
+                'shipping_courier' => $shippingCourier,
             ]);
 
             foreach ($resolvedItems as $item) {
@@ -238,6 +259,45 @@ class CheckoutController extends Controller
         foreach ($methods as $method) {
             if (($method['code'] ?? null) === $code) {
                 return (int) ($method['price'] ?? 0);
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Re-validate dynamic shipping rates server-side (anti-tamper).
+     * Calls ShippingRateService::getRates() with destination and cart items,
+     * finds matching rate by service_id, returns server-computed price.
+     * Returns 0 if no match (digital-only cart or unknown service).
+     */
+    protected function resolveDynamicShippingCost(?string $shippingMethod, array $address, array $cart): int
+    {
+        if (! $shippingMethod) {
+            return 0;
+        }
+
+        $cartItems = array_map(fn ($item) => [
+            'slug' => $item['slug'] ?? '',
+            'qty' => (int) ($item['qty'] ?? 1),
+        ], $cart);
+
+        $destination = [
+            'province' => $address['province'] ?? '',
+            'city' => $address['city'] ?? '',
+            'district' => '',
+            'zipcode' => $address['postal'] ?? '',
+        ];
+
+        $rates = $this->shippingRateService->getRates($destination, $cartItems);
+
+        if (empty($rates)) {
+            return 0;
+        }
+
+        foreach ($rates as $rate) {
+            if (($rate['service'] ?? '') === $shippingMethod) {
+                return (int) ($rate['price'] ?? 0);
             }
         }
 

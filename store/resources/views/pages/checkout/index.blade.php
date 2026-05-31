@@ -349,31 +349,79 @@
 
                         {{-- Ongkir method --}}
                         <div class="sm:col-span-2">
-                            <label for="shipping_method" class="mb-1.5 block text-sm font-semibold text-slate-700">
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700">
                                 Metode Pengiriman <span class="text-rose-500">*</span>
                             </label>
-                            <select
-                                id="shipping_method"
-                                name="shipping_method"
-                                x-model="form.shipping_method"
-                                @change="touch('shipping_method')"
-                                :class="errorClasses('shipping_method')"
-                                class="w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 transition focus:outline-none focus:ring-2"
-                                required
-                            >
-                                <option value="">Pilih metode pengiriman</option>
-                                <template x-for="method in shippingMethods" :key="method.code">
-                                    <option
-                                        :value="method.code"
-                                        x-text="method.label + ' — ' + format(method.price)"
-                                    ></option>
-                                </template>
+
+                            {{-- Loading spinner --}}
+                            <template x-if="loadingRates">
+                                <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
+                                    <svg class="h-4 w-4 animate-spin text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                    <span>Mengecek tarif pengiriman...</span>
+                                </div>
+                            </template>
+
+                            {{-- No rates available --}}
+                            <template x-if="!loadingRates && shippingRates.length === 0 && rateError">
+                                <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                                    <span x-text="rateError"></span>
+                                </div>
+                            </template>
+
+                            {{-- Empty — address not filled --}}
+                            <template x-if="!loadingRates && shippingRates.length === 0 && !rateError && form.address_city && form.address_province && form.address_postal">
+                                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                                    Tidak ada tarif tersedia untuk alamat ini.
+                                </div>
+                            </template>
+
+                            <template x-if="!loadingRates && shippingRates.length === 0 && !rateError && (!form.address_city || !form.address_province || !form.address_postal)">
+                                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                                    Masukkan alamat lengkap untuk cek ongkir.
+                                </div>
+                            </template>
+
+                            {{-- Dynamic radio list --}}
+                            <template x-if="!loadingRates && shippingRates.length > 0">
+                                <div class="space-y-2">
+                                    <template x-for="rate in shippingRates" :key="rate.service">
+                                        <label
+                                            class="relative flex cursor-pointer items-center gap-3 rounded-xl border-2 bg-white p-4 transition"
+                                            :class="form.shipping_method === rate.service ? 'border-primary-500 ring-2 ring-primary-200' : 'border-slate-200 hover:border-primary-300'"
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="shipping_method"
+                                                :value="rate.service"
+                                                x-model="form.shipping_method"
+                                                @change="touch('shipping_method')"
+                                                class="sr-only"
+                                            >
+                                            <span
+                                                class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition"
+                                                :class="form.shipping_method === rate.service ? 'border-primary-600 bg-primary-600' : 'border-slate-300 bg-white'"
+                                            >
+                                                <span x-show="form.shipping_method === rate.service" class="block h-2 w-2 rounded-full bg-white"></span>
+                                            </span>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-semibold text-slate-900 truncate" x-text="rate.label"></p>
+                                                <p class="text-xs text-slate-500" x-text="'Estimasi: ' + (rate.etd || 'TBD')"></p>
+                                            </div>
+                                            <p class="shrink-0 text-sm font-bold text-primary-600" x-text="format(rate.price)"></p>
+                                        </label>
+                                    </template>
+                                </div>
+                            </template>
+
+                            {{-- Hidden select for backward compat (keeps id for tests) --}}
+                            <select id="shipping_method" name="shipping_method" x-model="form.shipping_method" class="hidden" aria-hidden="true">
+                                <option value="">Pilih</option>
                             </select>
+
                             <p x-text="errors.shipping_method || '\u00A0'" class="mt-1.5 min-h-[1.25rem] text-xs font-medium text-rose-600" :class="errors.shipping_method ? 'opacity-100' : 'opacity-0'" aria-live="polite"></p>
-                            <p class="mt-2 text-xs text-slate-500">
-                                <i data-lucide="info" class="mr-1 inline-block h-3.5 w-3.5 align-text-bottom"></i>
-                                Tarif final + estimasi sampai akan dihitung otomatis lewat Agenwebsite.com pada milestone berikutnya.
-                            </p>
                         </div>
                     </div>
                 </section>
@@ -719,6 +767,11 @@
                     touched: {},
                     submitting: false,
 
+                    // Shipping rate fetching (dynamic API)
+                    shippingRates: [],
+                    loadingRates: false,
+                    rateError: '',
+
                     // ── Computed ────────────────────────────────────────
                     get cartSubtotal() {
                         return this.$store.cart && this.$store.cart.subtotal
@@ -727,6 +780,10 @@
                     },
 
                     get shippingPrice() {
+                        if (this.shippingRates.length > 0) {
+                            const r = this.shippingRates.find((x) => x.service === this.form.shipping_method);
+                            if (r) return Number(r.price) || 0;
+                        }
                         const m = this.shippingMethods.find((x) => x.code === this.form.shipping_method);
                         return m ? Number(m.price) || 0 : 0;
                     },
@@ -908,6 +965,54 @@
                     _formatDate(d) {
                         const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
                         return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+                    },
+
+                    // ── Dynamic shipping rates ──────────────────────────
+                    fetchRates() {
+                        if (! this.form.address_city || ! this.form.address_province || ! this.form.address_postal) {
+                            this.shippingRates = [];
+                            return;
+                        }
+                        this.loadingRates = true;
+                        this.rateError = '';
+                        const csrfToken = document.querySelector('input[name=_token]')
+                            ? document.querySelector('input[name=_token]').value
+                            : '';
+                        fetch('/shipping/rates', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                            body: JSON.stringify({
+                                city: this.form.address_city,
+                                province: this.form.address_province,
+                                zipcode: this.form.address_postal,
+                                cart_json: JSON.stringify(this.$store.cart.items.map((i) => ({ slug: i.slug, qty: i.qty }))),
+                            }),
+                        })
+                            .then((r) => r.json())
+                            .then((data) => {
+                                this.shippingRates = Array.isArray(data.rates) ? data.rates : [];
+                                this.rateError = '';
+                            })
+                            .catch(() => {
+                                this.shippingRates = [];
+                                this.rateError = 'Gagal memuat tarif';
+                            })
+                            .finally(() => { this.loadingRates = false; });
+                    },
+
+                    init() {
+                        this.$watch('form.address_city', () => {
+                            clearTimeout(this._rateTimer);
+                            this._rateTimer = setTimeout(() => this.fetchRates(), 500);
+                        });
+                        this.$watch('form.address_province', () => {
+                            clearTimeout(this._rateTimer);
+                            this._rateTimer = setTimeout(() => this.fetchRates(), 500);
+                        });
+                        this.$watch('form.address_postal', () => {
+                            clearTimeout(this._rateTimer);
+                            this._rateTimer = setTimeout(() => this.fetchRates(), 500);
+                        });
                     },
                 };
             };
