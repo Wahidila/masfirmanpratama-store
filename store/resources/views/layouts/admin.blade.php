@@ -11,9 +11,39 @@
     <title>@yield('title', $title)</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- Anti-flash: set .dark on <html> before paint (admin-scoped, key: admin-theme) --}}
+    <script>
+        (function() {
+            var t = localStorage.getItem('admin-theme');
+            if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+
     <style>[x-cloak] { display: none !important; }</style>
+
+    {{-- Alpine admin theme store (scoped to admin layout only) --}}
+    <script>
+        document.addEventListener('alpine:init', function() {
+            Alpine.store('adminTheme', {
+                mode: localStorage.getItem('admin-theme') || (document.documentElement.classList.contains('dark') ? 'dark' : 'light'),
+                get isDark() { return this.mode === 'dark'; },
+                toggle() {
+                    this.mode = this.mode === 'dark' ? 'light' : 'dark';
+                    localStorage.setItem('admin-theme', this.mode);
+                    document.documentElement.classList.toggle('dark', this.mode === 'dark');
+                },
+                init() {
+                    // Sync class on init
+                    document.documentElement.classList.toggle('dark', this.mode === 'dark');
+                }
+            });
+        });
+    </script>
 </head>
-<body class="min-h-full bg-slate-50 antialiased text-slate-800">
+<body class="min-h-full bg-gray-50 dark:bg-gray-900 antialiased text-gray-800 dark:text-gray-300">
     <div class="min-h-screen flex">
 
         <x-admin.sidebar :active="$active" />
@@ -24,24 +54,24 @@
 
             {{-- Mobile / tablet header + drawer (replace navbar di < lg) --}}
             <div x-data="{ open: false }" class="lg:hidden">
-                <header class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4">
+                <header class="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4">
                     <button type="button"
                         @click="open = true"
                         aria-label="Buka menu navigasi"
                         aria-controls="admin-mobile-drawer"
                         :aria-expanded="open ? 'true' : 'false'"
-                        class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
                         <x-admin.icon name="menu" class="h-5 w-5" />
                     </button>
 
-                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 font-semibold text-slate-900">
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 font-semibold text-gray-900 dark:text-white">
                         <x-admin.logo />
                         Admin
                     </a>
 
                     <form method="POST" action="{{ route('admin.logout') }}">
                         @csrf
-                        <button type="submit" class="inline-flex items-center gap-1 text-xs font-medium text-slate-700 hover:text-slate-900">
+                        <button type="submit" class="inline-flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                             <x-admin.icon name="logout" class="h-3.5 w-3.5" />
                             Logout
                         </button>
@@ -61,7 +91,7 @@
 
                     {{-- Backdrop --}}
                     <div @click="open = false"
-                         class="absolute inset-0 bg-slate-900/60"
+                         class="absolute inset-0 bg-gray-900/60"
                          aria-hidden="true"></div>
 
                     {{-- Panel --}}
@@ -72,17 +102,17 @@
                            x-transition:leave="transition transform ease-in duration-150"
                            x-transition:leave-start="translate-x-0"
                            x-transition:leave-end="-translate-x-full"
-                           class="relative flex h-full w-64 max-w-[80vw] flex-col bg-white shadow-xl">
+                           class="relative flex h-full w-[290px] max-w-[80vw] flex-col bg-white dark:bg-gray-900 shadow-xl">
 
-                        <div class="flex h-16 items-center justify-between border-b border-slate-100 px-4">
-                            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 font-semibold tracking-tight text-slate-900">
+                        <div class="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4">
+                            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 font-semibold tracking-tight text-gray-900 dark:text-white">
                                 <x-admin.logo />
                                 Admin Panel
                             </a>
                             <button type="button"
                                 @click="open = false"
                                 aria-label="Tutup menu navigasi"
-                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
                                 <x-admin.icon name="x" class="h-4 w-4" />
                             </button>
                         </div>
@@ -94,10 +124,10 @@
                             ])
                         </nav>
 
-                        <div class="border-t border-slate-100 p-4">
-                            <div class="text-xs text-slate-500">Login sebagai</div>
-                            <div class="mt-1 text-sm font-medium text-slate-900 truncate">{{ $admin->name ?? 'Unknown' }}</div>
-                            <div class="text-xs text-slate-500 truncate">{{ $admin->email ?? '' }}</div>
+                        <div class="border-t border-gray-200 dark:border-gray-800 p-4">
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Login sebagai</div>
+                            <div class="mt-1 text-sm font-medium text-gray-900 dark:text-white truncate">{{ $admin->name ?? 'Unknown' }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $admin->email ?? '' }}</div>
                         </div>
                     </aside>
                 </div>
