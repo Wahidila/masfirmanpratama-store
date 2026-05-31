@@ -26,8 +26,8 @@
 
     <section class="mt-10">
         <div class="mb-3 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-slate-900">Pesanan terbaru</h2>
-            <span class="text-xs text-slate-500">5 terakhir</span>
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Pesanan terbaru</h2>
+            <span class="text-xs text-gray-500 dark:text-gray-400">5 terakhir</span>
         </div>
 
         <x-admin.table
@@ -46,11 +46,9 @@
                     <td class="px-4 py-3">{{ $order->customer_name }}</td>
                     <td class="px-4 py-3">Rp {{ number_format((float) $order->total, 0, ',', '.') }}</td>
                     <td class="px-4 py-3">
-                        <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
-                            {{ $order->status }}
-                        </span>
+                        <x-admin.status-badge :status="$order->status" />
                     </td>
-                    <td class="px-4 py-3 text-slate-500">{{ $order->created_at?->diffForHumans() }}</td>
+                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $order->created_at?->diffForHumans() }}</td>
                 </tr>
             @endforeach
         </x-admin.table>
