@@ -10,6 +10,7 @@ use App\Listeners\SendAdminPaymentReviewAlert;
 use App\Listeners\SendCustomerOrderShippedNotification;
 use App\Listeners\SendCustomerPaymentRejectedNotification;
 use App\Listeners\SendCustomerPaymentVerifiedNotification;
+use App\Services\Shipping\AgenwebsiteClient;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(AgenwebsiteClient::class, fn () => AgenwebsiteClient::fromConfig());
     }
 
     /**
