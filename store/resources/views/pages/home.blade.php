@@ -467,6 +467,34 @@
     </section>
 
     {{-- ======================================================
+       | PROMO BANNER — Kelas Reguler AMC Surabaya 23 Mei 2026
+       |====================================================== --}}
+    <section class="py-10 lg:py-14 bg-slate-50" aria-label="Promo event terdekat">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-xs tracking-[0.2em] font-extrabold text-accent-600 uppercase mb-5 text-center">
+                Jadwal Terdekat
+            </p>
+            <a
+                href="https://wa.me/6281230633464?text=Saya%20mau%20daftar%20Kelas%20Reguler%20AMC%20Surabaya%2023%20Mei%202026"
+                target="_blank"
+                rel="noopener"
+                class="block rounded-2xl lg:rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                aria-label="Daftar Kelas Reguler Alpha Mind Control Surabaya 23 Mei 2026 via WhatsApp"
+            >
+                <img
+                    src="{{ asset('assets/images/jadwal-amc-surabaya.webp') }}"
+                    alt="Kelas Reguler Alpha Mind Control — Surabaya 23 Mei 2026 di Hotel Bisanta bersama Mas Firman"
+                    width="1280"
+                    height="312"
+                    loading="lazy"
+                    decoding="async"
+                    class="w-full h-auto"
+                >
+            </a>
+        </div>
+    </section>
+
+    {{-- ======================================================
        | 2. BENEFIT AMC (4 cards)
        |====================================================== --}}
     <section id="benefit" class="py-20 lg:py-24 bg-white border-t border-slate-100">
