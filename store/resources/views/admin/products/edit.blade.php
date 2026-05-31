@@ -7,16 +7,15 @@
         title="Edit Produk"
         :subtitle="'Edit data produk: ' . $product->title">
         <x-slot name="actions">
-            <a href="{{ route('admin.products.index') }}"
-                class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 transition">
+            <x-admin.button href="{{ route('admin.products.index') }}" variant="outline" size="sm">
                 ← Kembali ke daftar
-            </a>
+            </x-admin.button>
             <form method="POST" action="{{ route('admin.products.destroy', $product) }}"
                 onsubmit="return confirm('Hapus produk &quot;{{ $product->title }}&quot;? Bisa di-restore dari arsip.');">
                 @csrf
                 @method('DELETE')
                 <button type="submit"
-                    class="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-white px-4 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 transition">
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-error-200 bg-white px-4 py-2 text-xs font-medium text-error-600 hover:bg-error-50 transition dark:border-error-500/30 dark:bg-white/[0.03] dark:text-error-500 dark:hover:bg-error-500/15">
                     <x-admin.icon name="trash" class="h-3.5 w-3.5" />
                     Hapus
                 </button>

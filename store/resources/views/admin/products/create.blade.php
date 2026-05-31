@@ -7,10 +7,9 @@
         title="Tambah Produk Baru"
         subtitle="Bikin produk untuk katalog store. Status default-nya draft — switch ke active kalau siap tayang.">
         <x-slot name="actions">
-            <a href="{{ route('admin.products.index') }}"
-                class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 transition">
+            <x-admin.button href="{{ route('admin.products.index') }}" variant="outline" size="sm">
                 ← Kembali ke daftar
-            </a>
+            </x-admin.button>
         </x-slot>
     </x-admin.page-header>
 
