@@ -43,7 +43,7 @@
         });
     </script>
 </head>
-<body class="min-h-full bg-gray-50 dark:bg-gray-900 antialiased text-gray-800 dark:text-gray-300">
+<body x-data="{}" class="min-h-full bg-gray-50 dark:bg-gray-900 antialiased text-gray-800 dark:text-gray-300">
     <div class="min-h-screen flex">
 
         <x-admin.sidebar :active="$active" />
