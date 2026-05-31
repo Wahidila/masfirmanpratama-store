@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function __invoke()
+    public function __invoke(): View
     {
         $products = Product::where('status', 'active')
             ->where('type', 'book')

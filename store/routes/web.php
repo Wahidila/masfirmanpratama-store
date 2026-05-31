@@ -4,8 +4,8 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShippingRateController;
-use App\Http\Controllers\UploadController;
 use App\Http\Controllers\TrackController;
+use App\Http\Controllers\UploadController;
 use App\Http\Controllers\Webhooks\AwbCallbackController;
 use Illuminate\Support\Facades\Route;
 

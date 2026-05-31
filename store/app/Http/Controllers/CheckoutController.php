@@ -114,10 +114,10 @@ class CheckoutController extends Controller
             ], $cart);
 
             $destination = [
-                'province' => $address['province'] ?? '',
-                'city' => $address['city'] ?? '',
+                'province' => $address['province'],
+                'city' => $address['city'],
                 'district' => '',
-                'zipcode' => $address['postal'] ?? '',
+                'zipcode' => $address['postal'],
             ];
 
             $rates = $this->shippingRateService->getRates($destination, $cartItems);

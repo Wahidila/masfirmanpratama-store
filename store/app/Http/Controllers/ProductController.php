@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $products = Product::where('status', 'active')
             ->orderBy('type')
@@ -37,7 +38,7 @@ class ProductController extends Controller
         return view('pages.products.index', compact('products', 'productCounts', 'productIndex', 'productTotal'));
     }
 
-    public function show(string $slug)
+    public function show(string $slug): View
     {
         $productModel = Product::where('slug', $slug)->where('status', 'active')->first();
         $configProduct = config('products.items.'.$slug, []);

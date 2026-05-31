@@ -14,6 +14,11 @@ parameters:
         - identifier: missingType.iterableValue
         # Eloquent collection generic typing — udah cukup ketat tanpa explicit
         - identifier: missingType.generics
+        # FulfillmentService: pertahankan ?-> untuk produk soft-deleted (relasi
+        # bisa null saat runtime walau Larastan type non-null). Keamanan > saran.
+        -
+            identifier: nullsafe.neverNull
+            path: app/Services/Shipping/FulfillmentService.php
 
     # Skip vendor + storage cache build artifact
     excludePaths:

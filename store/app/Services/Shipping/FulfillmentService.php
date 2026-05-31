@@ -3,6 +3,8 @@
 namespace App\Services\Shipping;
 
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
 
 class FulfillmentService
 {
@@ -74,7 +76,9 @@ class FulfillmentService
         $totalHeight = 0;
         $shipmentItems = [];
 
+        /** @var OrderItem $item */
         foreach ($items as $item) {
+            /** @var Product|null $product */
             $product = $item->product;
             $weight = (float) ($product?->weight_kg ?? config('shipping.default_weight_kg', 1));
             $totalWeight += $weight * $item->qty;

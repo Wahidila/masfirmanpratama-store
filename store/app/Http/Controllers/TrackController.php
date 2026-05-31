@@ -17,7 +17,7 @@ class TrackController extends Controller
         if ($order && $order->shipping_resi && $order->shipping_courier) {
             $client = AgenwebsiteClient::fromConfig();
             $result = $client->tracking($order->shipping_resi, $order->shipping_courier);
-            $trackingHistory = is_array($result) ? $result : [];
+            $trackingHistory = $result;
         }
 
         return view('pages.track', [
