@@ -14,10 +14,10 @@
 
 <div {{ $attributes->class(['space-y-1.5']) }}>
     @if ($label)
-        <label @if ($controlId) for="{{ $controlId }}" @endif class="block text-sm font-medium text-slate-700">
+        <label @if ($controlId) for="{{ $controlId }}" @endif class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
             {{ $label }}
             @if ($required)
-                <span class="text-rose-500" aria-hidden="true">*</span>
+                <span class="text-error-500" aria-hidden="true">*</span>
             @endif
         </label>
     @endif
@@ -25,10 +25,10 @@
     {{ $slot }}
 
     @if ($hint && ! $errorMsg)
-        <p class="text-xs text-slate-500">{{ $hint }}</p>
+        <p class="mt-1.5 text-theme-xs text-gray-500 dark:text-gray-400">{{ $hint }}</p>
     @endif
 
     @if ($errorMsg)
-        <p class="text-xs text-rose-600">{{ $errorMsg }}</p>
+        <p class="mt-1.5 text-theme-xs text-error-500">{{ $errorMsg }}</p>
     @endif
 </div>
