@@ -3,6 +3,7 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
+        "build:admin": "bash build-admin-css.sh",
         "dev": "vite"
     },
     "devDependencies": {
