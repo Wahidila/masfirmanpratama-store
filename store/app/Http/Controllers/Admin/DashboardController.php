@@ -33,7 +33,7 @@ class DashboardController extends Controller
         $months = [];
         $counts = [];
         for ($i = 0; $i < 6; $i++) {
-            $date = Carbon::now()->subMonths(5 - $i);
+            $date = Carbon::now()->startOfMonth()->subMonths(5 - $i);
             $months[] = [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][$date->month];
             $counts[] = Order::whereYear('created_at', $date->year)->whereMonth('created_at', $date->month)->count();
         }
