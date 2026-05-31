@@ -12,6 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Trust reverse-proxy / tunnel headers (cloudflared, nginx, load balancer)
+        // supaya Laravel baca X-Forwarded-Proto: https dan generate asset URL
+        // dengan scheme yang benar. Tanpa ini, halaman dibuka via HTTPS tunnel
+        // tapi asset di-generate http:// → browser blokir (mixed content) → CSS mati.
+        $middleware->trustProxies(at: '*');
+
         // Untuk guard 'admin', redirect unauthenticated ke /admin/login
         // (default Laravel pakai route('login') yang tidak terdefinisi di app ini).
         $middleware->redirectGuestsTo(function ($request) {
