@@ -2,6 +2,7 @@
     /** @var string $orderNumber */
     /** @var \App\Models\Order|null $dbOrder */
     $dbOrder = $dbOrder ?? null;
+    $trackingHistory = $trackingHistory ?? null;
 
     /*
     |--------------------------------------------------------------------------
@@ -881,6 +882,109 @@
                             </a>
                         @endif
                     </div>
+                </div>
+            </section>
+        @endif
+
+        {{-- ================================================================ --}}
+        {{-- Tracking History (live dari Agenwebsite API)                      --}}
+        {{-- ================================================================ --}}
+        @if (!is_null($trackingHistory))
+            <section
+                id="trackingHistoryCard"
+                class="panel-card glass mt-6 rounded-3xl border border-white/60 p-6 sm:p-8"
+                aria-labelledby="trackingHistoryLabel"
+                data-testid="tracking-history-card"
+            >
+                <header class="flex items-start gap-3">
+                    <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary-50 text-secondary-600">
+                        <i data-lucide="truck" class="h-5 w-5"></i>
+                    </span>
+                    <div>
+                        <h2 id="trackingHistoryLabel" class="text-xl font-bold leading-tight text-slate-900 sm:text-2xl">
+                            Riwayat Lacak Paket
+                        </h2>
+                        <p class="mt-1 text-sm text-slate-500">
+                            Update terkini pengiriman paket Anda.
+                        </p>
+                    </div>
+                </header>
+
+                @if (count($trackingHistory) > 0)
+                    <ol class="mt-6 space-y-0" role="list" aria-label="Tracking history timeline">
+                        @foreach ($trackingHistory as $i => $entry)
+                            @php
+                                $isFirst = $i === 0;
+                                $isLast = $i === count($trackingHistory) - 1;
+                                $datetime = $entry['datetime'] ?? $entry['date'] ?? $entry['time'] ?? null;
+                                $status = $entry['status'] ?? $entry['description'] ?? '';
+                                $location = $entry['location'] ?? $entry['city'] ?? null;
+                            @endphp
+                            <li class="relative flex gap-4 pb-6 last:pb-0" data-testid="tracking-entry">
+                                @unless ($isLast)
+                                    <span class="absolute left-5 top-10 h-full w-0.5 bg-slate-200" aria-hidden="true"></span>
+                                @endunless
+                                <span
+                                    @class([
+                                        'relative z-10 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-4 ring-white',
+                                        'bg-secondary-600 text-white' => $isFirst,
+                                        'bg-slate-100 text-slate-500' => !$isFirst,
+                                    ])
+                                >
+                                    @if ($isFirst)
+                                        <i data-lucide="map-pin" class="h-5 w-5"></i>
+                                    @else
+                                        <i data-lucide="circle" class="h-3 w-3"></i>
+                                    @endif
+                                </span>
+                                <div class="min-w-0 flex-1 pt-1">
+                                    <p class="text-sm font-bold leading-tight text-slate-900">{{ $status }}</p>
+                                    @if ($datetime)
+                                        <p class="mt-0.5 text-xs text-slate-600">{{ $datetime }}</p>
+                                    @endif
+                                    @if ($location)
+                                        <p class="mt-0.5 text-xs text-slate-500">{{ $location }}</p>
+                                    @endif
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                @else
+                    <div class="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-5 py-8 text-center">
+                        <i data-lucide="package-search" class="mx-auto h-8 w-8 text-slate-300"></i>
+                        <p class="mt-3 text-sm font-semibold text-slate-700">Melacak paket...</p>
+                        <p class="mt-1 text-sm text-slate-500">
+                            Data pelacakan sedang diperbarui. Coba lagi beberapa saat.
+                        </p>
+                    </div>
+                @endif
+            </section>
+        @else
+            <section
+                id="trackingHistoryCard"
+                class="panel-card glass mt-6 rounded-3xl border border-white/60 p-6 sm:p-8"
+                aria-labelledby="trackingHistoryLabel"
+                data-testid="tracking-history-card"
+            >
+                <header class="flex items-start gap-3">
+                    <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary-50 text-secondary-600">
+                        <i data-lucide="truck" class="h-5 w-5"></i>
+                    </span>
+                    <div>
+                        <h2 id="trackingHistoryLabel" class="text-xl font-bold leading-tight text-slate-900 sm:text-2xl">
+                            Riwayat Lacak Paket
+                        </h2>
+                        <p class="mt-1 text-sm text-slate-500">
+                            Update terkini pengiriman paket Anda.
+                        </p>
+                    </div>
+                </header>
+                <div class="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-5 py-8 text-center">
+                    <i data-lucide="package-search" class="mx-auto h-8 w-8 text-slate-300"></i>
+                    <p class="mt-3 text-sm font-semibold text-slate-700">Resi belum tersedia</p>
+                    <p class="mt-1 text-sm text-slate-500">
+                        Nomor resi akan muncul setelah admin menginput pengiriman.
+                    </p>
                 </div>
             </section>
         @endif

@@ -5,8 +5,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShippingRateController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\TrackController;
 use App\Http\Controllers\Webhooks\AwbCallbackController;
-use App\Models\Order;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -134,14 +134,7 @@ Route::post('/upload/{order_number}', [UploadController::class, 'store'])
  * shipping_courier/shipping_resi/shipped_at yang baru di-input admin. Kalau
  * ngga ada, fallback ke dummy heuristic lama (backward compat M1).
  */
-Route::get('/track/{order_number}', function (string $order_number) {
-    $order = Order::where('order_number', $order_number)->first();
-
-    return view('pages.track', [
-        'orderNumber' => $order_number,
-        'dbOrder' => $order,
-    ]);
-})
+Route::get('/track/{order_number}', [TrackController::class, 'show'])
     ->where('order_number', '[A-Za-z0-9\\-]+')
     ->middleware('signed')
     ->name('track.show');
