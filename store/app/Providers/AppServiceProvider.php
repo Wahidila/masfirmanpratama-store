@@ -11,6 +11,7 @@ use App\Listeners\SendCustomerOrderShippedNotification;
 use App\Listeners\SendCustomerPaymentRejectedNotification;
 use App\Listeners\SendCustomerPaymentVerifiedNotification;
 use App\Services\Shipping\AgenwebsiteClient;
+use App\Services\Shipping\ShippingRateService;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(AgenwebsiteClient::class, fn () => AgenwebsiteClient::fromConfig());
+        $this->app->singleton(ShippingRateService::class, fn ($app) => new ShippingRateService($app->make(AgenwebsiteClient::class)));
     }
 
     /**
