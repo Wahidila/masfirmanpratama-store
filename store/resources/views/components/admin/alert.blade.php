@@ -6,10 +6,10 @@
 
 @php
     $tones = [
-        'info' => ['border' => 'border-primary-200', 'bg' => 'bg-primary-50', 'text' => 'text-primary-900', 'icon' => 'info', 'iconClass' => 'text-primary-500'],
-        'success' => ['border' => 'border-secondary-200', 'bg' => 'bg-secondary-50', 'text' => 'text-secondary-900', 'icon' => 'check', 'iconClass' => 'text-secondary-600'],
-        'warning' => ['border' => 'border-accent-200', 'bg' => 'bg-accent-50', 'text' => 'text-accent-900', 'icon' => 'alert-triangle', 'iconClass' => 'text-accent-600'],
-        'error' => ['border' => 'border-rose-200', 'bg' => 'bg-rose-50', 'text' => 'text-rose-900', 'icon' => 'alert-triangle', 'iconClass' => 'text-rose-600'],
+        'info' => ['border' => 'border-primary-200', 'bg' => 'bg-primary-50', 'text' => 'text-primary-900', 'icon' => 'info', 'iconClass' => 'text-primary-500', 'dark' => 'dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-200'],
+        'success' => ['border' => 'border-secondary-200', 'bg' => 'bg-secondary-50', 'text' => 'text-secondary-900', 'icon' => 'check', 'iconClass' => 'text-secondary-600', 'dark' => 'dark:border-secondary-500/30 dark:bg-secondary-500/10 dark:text-secondary-200'],
+        'warning' => ['border' => 'border-accent-200', 'bg' => 'bg-accent-50', 'text' => 'text-accent-900', 'icon' => 'alert-triangle', 'iconClass' => 'text-accent-600', 'dark' => 'dark:border-warning-500/30 dark:bg-warning-500/10 dark:text-warning-200'],
+        'error' => ['border' => 'border-rose-200', 'bg' => 'bg-rose-50', 'text' => 'text-rose-900', 'icon' => 'alert-triangle', 'iconClass' => 'text-rose-600', 'dark' => 'dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-200'],
     ];
     $cfg = $tones[$tone] ?? $tones['info'];
 @endphp
@@ -21,6 +21,7 @@
         $cfg['border'],
         $cfg['bg'],
         $cfg['text'],
+        $cfg['dark'],
     ]) }}
     role="alert">
     <x-admin.icon :name="$cfg['icon']" :class="'h-4 w-4 mt-0.5 shrink-0 '.$cfg['iconClass']" />
