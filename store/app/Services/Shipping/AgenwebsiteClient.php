@@ -132,4 +132,72 @@ class AgenwebsiteClient
 
         return [];
     }
+
+    public function fulfillmentRates(array $params): array
+    {
+        return $this->post('shipment/rates', $params);
+    }
+
+    public function createShipment(array $data): array
+    {
+        $response = $this->post('shipment/create-order', $data);
+
+        if ($response['status'] === 'error') {
+            return [
+                'status' => 'error',
+                'message' => $response['message'] ?? 'Unknown error',
+            ];
+        }
+
+        $result = $response['result'] ?? [];
+
+        if (! is_array($result)) {
+            return ['status' => 'error', 'message' => 'Invalid response'];
+        }
+
+        $normalized = [
+            'reference_id' => $result['reference_id'] ?? null,
+            'order_id' => $result['order_id'] ?? null,
+        ];
+
+        if (isset($result['airwaybill'])) {
+            $normalized['status'] = 'awb_ready';
+            $normalized['airwaybill'] = $result['airwaybill'];
+        } elseif (isset($result['payment_url'])) {
+            $normalized['status'] = 'pending_payment';
+            $normalized['payment_url'] = $result['payment_url'];
+        } else {
+            $normalized['status'] = 'waiting_awb';
+        }
+
+        return $normalized;
+    }
+
+    public function requestPickup(array $data): array
+    {
+        return $this->post('shipment/request-pickup', $data);
+    }
+
+    public function eligibility(array $data): array
+    {
+        return $this->post('shipment/eligibility', $data);
+    }
+
+    public function tracking(string $awb, string $courier): array
+    {
+        $cacheKey = 'shipping.tracking.'.md5($awb.'|'.$courier);
+
+        return Cache::remember($cacheKey, 900, function () use ($awb, $courier) {
+            $response = $this->post('shipping/tracking', [
+                'awb' => $awb,
+                'courier' => $courier,
+            ]);
+
+            if ($response['status'] !== 'success' || ! is_array($response['result'])) {
+                return [];
+            }
+
+            return $response['result'];
+        });
+    }
 }
