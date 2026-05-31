@@ -6,6 +6,8 @@ use Tests\TestCase;
 
 class BookDetailPageTest extends TestCase
 {
+    protected bool $seed = true;
+
     /**
      * @return array<string, array{0: string, 1: string}>
      */

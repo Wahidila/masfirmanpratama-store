@@ -31,63 +31,6 @@
         ],
     ];
 
-    $products = [
-        [
-            'image' => 'assets/images/alpha-telepathy.webp',
-            'title' => 'Buku Alpha Telepati',
-            'price' => 165000,
-            'originalPrice' => 200000,
-            'category' => 'Mindset',
-            'badge' => 'Best Seller',
-            'href' => url('/produk/alpha-telepathy'),
-        ],
-        [
-            'image' => 'assets/images/10-keajaiban-pikiran.webp',
-            'title' => 'Buku 10 Keajaiban Pikiran',
-            'price' => 145000,
-            'originalPrice' => null,
-            'category' => 'Fondasi',
-            'badge' => null,
-            'href' => url('/produk/10-keajaiban-pikiran'),
-        ],
-        [
-            'image' => 'assets/images/kitab-kunci-penarik-rezeki.webp',
-            'title' => 'Kitab Kunci Penarik Rezeki',
-            'price' => 185000,
-            'originalPrice' => null,
-            'category' => 'Spiritualitas',
-            'badge' => 'Eksklusif',
-            'href' => url('/produk/kitab-kunci-penarik-rezeki'),
-        ],
-        [
-            'image' => 'assets/images/kitab-101-kalimat-sugesti-ajaib.webp',
-            'title' => 'Kitab 101 Kalimat Sugesti Ajaib',
-            'price' => 175000,
-            'originalPrice' => null,
-            'category' => 'Sugesti',
-            'badge' => null,
-            'href' => url('/produk/kitab-101-kalimat-sugesti-ajaib'),
-        ],
-        [
-            'image' => 'assets/images/instan-hypnosis.webp',
-            'title' => 'Buku Instan Hypnosis',
-            'price' => 155000,
-            'originalPrice' => null,
-            'category' => 'Hipnosis',
-            'badge' => null,
-            'href' => url('/produk/instan-hypnosis'),
-        ],
-        [
-            'image' => 'assets/images/formula-amc-firman-pratama.webp',
-            'title' => 'Bonus Modul Formula AMC',
-            'price' => 'Bonus Kelas',
-            'originalPrice' => null,
-            'category' => 'Bonus',
-            'badge' => 'Khusus Peserta',
-            'href' => url('/produk?kategori=kelas'),
-        ],
-    ];
-
     $pricing = [
         [
             'name' => 'Kelas Reguler',
@@ -340,19 +283,28 @@
                 </x-button>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5 md:gap-6 lg:gap-8">
-                @foreach ($products as $product)
-                    <x-product-card
-                        :image="asset($product['image'])"
-                        :title="$product['title']"
-                        :price="$product['price']"
-                        :originalPrice="$product['originalPrice']"
-                        :category="$product['category']"
-                        :badge="$product['badge']"
-                        :href="$product['href']"
-                    />
-                @endforeach
-            </div>
+            @if($products->isEmpty())
+                <div class="col-span-full text-center py-12">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-100 text-slate-500 mb-5">
+                        <i data-lucide="book-x" class="w-8 h-8"></i>
+                    </div>
+                    <p class="text-slate-500">Belum ada buku yang tersedia saat ini.</p>
+                </div>
+            @else
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5 md:gap-6 lg:gap-8">
+                    @foreach ($products as $product)
+                        <x-product-card
+                            :image="$product['image']"
+                            :title="$product['title']"
+                            :price="$product['price']"
+                            :originalPrice="$product['originalPrice']"
+                            :category="$product['category']"
+                            :badge="$product['badge']"
+                            :href="$product['href']"
+                        />
+                    @endforeach
+                </div>
+            @endif
         </div>
     </section>
 

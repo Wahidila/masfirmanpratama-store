@@ -7,6 +7,8 @@ use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
+    protected bool $seed = true;
+
     /**
      * A basic test example.
      */

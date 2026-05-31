@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Product;
+
+class ProductController extends Controller
+{
+    public function index()
+    {
+        $products = Product::where('status', 'active')
+            ->orderBy('type')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (Product $p) => [
+                'slug' => $p->slug,
+                'name' => $p->title,
+                'type' => $p->type === 'course' ? 'kelas' : 'buku',
+                'price' => (float) $p->price,
+                'image' => asset($p->image_path ?? 'images/placeholder.webp'),
+                'description' => $p->meta_seo['tagline'] ?? $p->description,
+                'badge' => $p->meta_seo['badge'] ?? null,
+            ]);
+
+        $productCounts = [
+            'kelas' => $products->where('type', 'kelas')->count(),
+            'buku' => $products->where('type', 'buku')->count(),
+        ];
+
+        $productIndex = $products->map(fn ($p) => [
+            'type' => $p['type'],
+            'name' => mb_strtolower($p['name']),
+        ])->values()->all();
+
+        $productTotal = $products->count();
+
+        return view('pages.products.index', compact('products', 'productCounts', 'productIndex', 'productTotal'));
+    }
+
+    public function show(string $slug)
+    {
+        $productModel = Product::where('slug', $slug)->where('status', 'active')->first();
+        $configProduct = config('products.items.'.$slug, []);
+
+        // If product not in DB and not in config, show placeholder
+        if (! $productModel && empty($configProduct)) {
+            return view('pages.products.show', [
+                'productModel' => null,
+                'data' => null,
+                'related' => [],
+                'template' => null,
+                'slug' => $slug,
+            ]);
+        }
+
+        // Build product array: DB takes precedence, config as fallback
+        if ($productModel) {
+            $data = array_merge($configProduct, [
+                'slug' => $productModel->slug,
+                'type' => $productModel->type === 'course' ? 'kelas' : 'buku',
+                'title' => $productModel->title,
+                'price' => (float) $productModel->price,
+                'image' => asset($productModel->image_path ?? 'images/placeholder.webp'),
+                'subtitle' => $productModel->meta_seo['subtitle'] ?? ($configProduct['subtitle'] ?? ''),
+                'tagline' => $productModel->meta_seo['tagline'] ?? ($configProduct['tagline'] ?? null),
+                'badge' => $productModel->meta_seo['badge'] ?? ($configProduct['badge'] ?? null),
+                'category_label' => $productModel->meta_seo['category_label'] ?? ($configProduct['category_label'] ?? 'Buku'),
+                'image_alt' => $productModel->meta_seo['image_alt'] ?? ($configProduct['image_alt'] ?? $productModel->title),
+                'rating' => $productModel->meta_seo['rating'] ?? ($configProduct['rating'] ?? '4.9/5'),
+                'student_count' => $productModel->meta_seo['student_count'] ?? ($configProduct['student_count'] ?? '1000+'),
+                'description' => is_string($productModel->description) ? [$productModel->description] : ($productModel->description ?? ($configProduct['description'] ?? [])),
+                'original_price' => $productModel->meta_seo['original_price'] ?? ($configProduct['original_price'] ?? null),
+            ]);
+        } else {
+            // Config-only fallback (DB not seeded, e.g. test env)
+            $type = $configProduct['type'] ?? 'buku';
+            $data = $configProduct;
+            $data['type'] = $type === 'course' ? 'kelas' : $type;
+            $data['image'] = isset($configProduct['image']) ? asset($configProduct['image']) : null;
+        }
+
+        // Resolve related products
+        $related = [];
+        if (! empty($configProduct['related'])) {
+            foreach ((array) $configProduct['related'] as $relatedSlug) {
+                $relProduct = Product::where('slug', $relatedSlug)->where('status', 'active')->first();
+                $relConfig = config('products.items.'.$relatedSlug, []);
+                if ($relProduct) {
+                    $related[] = array_merge($relConfig, [
+                        'slug' => $relProduct->slug,
+                        'type' => $relProduct->type === 'course' ? 'kelas' : 'buku',
+                        'title' => $relProduct->title,
+                        'price' => (float) $relProduct->price,
+                        'image' => asset($relProduct->image_path ?? 'images/placeholder.webp'),
+                        'subtitle' => $relProduct->meta_seo['subtitle'] ?? ($relConfig['subtitle'] ?? ''),
+                        'badge' => $relProduct->meta_seo['badge'] ?? ($relConfig['badge'] ?? null),
+                        'category_label' => $relProduct->meta_seo['category_label'] ?? ($relConfig['category_label'] ?? 'Buku'),
+                        'image_alt' => $relProduct->meta_seo['image_alt'] ?? ($relConfig['image_alt'] ?? $relProduct->title),
+                    ]);
+                } elseif (! empty($relConfig)) {
+                    $relConfig['image'] = isset($relConfig['image']) ? asset($relConfig['image']) : null;
+                    $relConfig['type'] = ($relConfig['type'] ?? 'buku') === 'course' ? 'kelas' : ($relConfig['type'] ?? 'buku');
+                    $related[] = $relConfig;
+                }
+            }
+        }
+
+        $type = $data['type'] ?? 'buku';
+        $templateMap = [
+            'kelas' => 'pages.products.course',
+            'buku' => 'pages.products.book',
+        ];
+        $template = isset($templateMap[$type]) ? $templateMap[$type] : null;
+
+        return view('pages.products.show', compact('productModel', 'data', 'related', 'template'));
+    }
+}

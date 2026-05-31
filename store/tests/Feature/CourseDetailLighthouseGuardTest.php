@@ -23,6 +23,8 @@ use Tests\TestCase;
  */
 class CourseDetailLighthouseGuardTest extends TestCase
 {
+    protected bool $seed = true;
+
     public function test_layout_pins_lucide_cdn_to_specific_version(): void
     {
         $response = $this->get('/produk/kelas-amc-reguler');

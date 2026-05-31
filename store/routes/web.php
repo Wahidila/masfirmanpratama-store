@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UploadController;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
@@ -17,12 +19,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Homepage
-Route::get('/', fn () => view('pages.home'))->name('home');
+Route::get('/', HomeController::class)->name('home');
 
 // Katalog produk
-Route::get('/produk', fn () => view('pages.products.index'))->name('products.index');
+Route::get('/produk', [ProductController::class, 'index'])->name('products.index');
 
-Route::get('/produk/{slug}', fn (string $slug) => view('pages.products.show', ['slug' => $slug]))
+Route::get('/produk/{slug}', [ProductController::class, 'show'])
     ->where('slug', '[A-Za-z0-9\-]+')
     ->name('products.show');
 
@@ -163,7 +165,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InstallmentSchemeController;
 use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\WaNotificationController;
 
@@ -181,11 +183,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', fn () => redirect()->route('admin.dashboard'))->name('home');
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        Route::post('products/bulk', [ProductController::class, 'bulk'])->name('products.bulk');
-        Route::post('products/{product}/restore', [ProductController::class, 'restore'])
+        Route::post('products/bulk', [AdminProductController::class, 'bulk'])->name('products.bulk');
+        Route::post('products/{product}/restore', [AdminProductController::class, 'restore'])
             ->withTrashed()
             ->name('products.restore');
-        Route::resource('products', ProductController::class)
+        Route::resource('products', AdminProductController::class)
             ->except(['show'])
             ->parameters(['products' => 'product']);
 
