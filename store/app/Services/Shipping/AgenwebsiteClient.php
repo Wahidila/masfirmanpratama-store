@@ -170,6 +170,10 @@ class AgenwebsiteClient
             $normalized['status'] = 'waiting_awb';
         }
 
+        if (isset($result['label_url'])) {
+            $normalized['label_url'] = $result['label_url'];
+        }
+
         return $normalized;
     }
 

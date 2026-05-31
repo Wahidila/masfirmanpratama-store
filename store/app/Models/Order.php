@@ -25,6 +25,13 @@ class Order extends Model
         'shipping_service',
         'shipping_cost',
         'shipping_etd',
+        'fulfillment_status',
+        'tracking_status',
+        'fulfillment_reference_id',
+        'fulfillment_api_order_id',
+        'label_url',
+        'fulfillment_payload',
+        'shipped_email_sent_at',
     ];
 
     protected function casts(): array
@@ -33,6 +40,8 @@ class Order extends Model
             'total' => 'decimal:2',
             'shipped_at' => 'datetime',
             'shipping_cost' => 'integer',
+            'fulfillment_payload' => 'array',
+            'shipped_email_sent_at' => 'datetime',
         ];
     }
 
