@@ -10,26 +10,26 @@
         <div class="space-y-5">
             {{-- Nama --}}
             <div>
-                <label for="name" class="block text-sm font-medium text-slate-700">
-                    Nama Skema <span class="text-rose-500">*</span>
+                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Nama Skema <span class="text-error-500">*</span>
                 </label>
                 <input id="name" type="text" name="name"
                        value="{{ old('name', $scheme->name) }}"
                        required maxlength="120"
                        placeholder="Mis. 3x Cicilan, Lunas, 12x Cicilan Kelas Reguler"
-                       class="mt-1 block w-full rounded-xl border-slate-200 text-sm focus:border-primary-500 focus:ring-primary-500/40">
+                       class="mt-1 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
                 @error('name')
-                    <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                    <p class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</p>
                 @enderror
             </div>
 
             {{-- Scope: global vs per-product --}}
             <div>
-                <label for="product_id" class="block text-sm font-medium text-slate-700">
+                <label for="product_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Berlaku untuk
                 </label>
                 <select id="product_id" name="product_id"
-                        class="mt-1 block w-full rounded-xl border-slate-200 text-sm focus:border-primary-500 focus:ring-primary-500/40">
+                        class="mt-1 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                     <option value="">Global (semua produk)</option>
                     @foreach ($products as $product)
                         <option value="{{ $product->id }}"
@@ -38,56 +38,56 @@
                         </option>
                     @endforeach
                 </select>
-                <p class="mt-1 text-xs text-slate-500">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Pilih "Global" supaya skema muncul di checkout semua produk.
                     Pilih produk spesifik kalau skema hanya berlaku untuk produk itu (mis. 12x untuk kelas reguler).
                 </p>
                 @error('product_id')
-                    <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                    <p class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</p>
                 @enderror
             </div>
 
             {{-- Numeric fields: 3-col grid --}}
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
-                    <label for="dp_pct" class="block text-sm font-medium text-slate-700">
-                        DP (%) <span class="text-rose-500">*</span>
+                    <label for="dp_pct" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        DP (%) <span class="text-error-500">*</span>
                     </label>
                     <input id="dp_pct" type="number" name="dp_pct"
                            value="{{ old('dp_pct', $scheme->dp_pct) }}"
                            min="0" max="100" step="0.01" required
-                           class="mt-1 block w-full rounded-xl border-slate-200 text-sm focus:border-primary-500 focus:ring-primary-500/40">
-                    <p class="mt-1 text-xs text-slate-500">100 = lunas, 30 = DP 30%</p>
+                           class="mt-1 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">100 = lunas, 30 = DP 30%</p>
                     @error('dp_pct')
-                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="n_installments" class="block text-sm font-medium text-slate-700">
-                        Jumlah Pembayaran <span class="text-rose-500">*</span>
+                    <label for="n_installments" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Jumlah Pembayaran <span class="text-error-500">*</span>
                     </label>
                     <input id="n_installments" type="number" name="n_installments"
                            value="{{ old('n_installments', $scheme->n_installments) }}"
                            min="1" max="36" step="1" required
-                           class="mt-1 block w-full rounded-xl border-slate-200 text-sm focus:border-primary-500 focus:ring-primary-500/40">
-                    <p class="mt-1 text-xs text-slate-500">1 = lunas (DP saja), 3 = DP + 2 cicilan</p>
+                           class="mt-1 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">1 = lunas (DP saja), 3 = DP + 2 cicilan</p>
                     @error('n_installments')
-                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="interval_days" class="block text-sm font-medium text-slate-700">
-                        Interval (hari) <span class="text-rose-500">*</span>
+                    <label for="interval_days" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Interval (hari) <span class="text-error-500">*</span>
                     </label>
                     <input id="interval_days" type="number" name="interval_days"
                            value="{{ old('interval_days', $scheme->interval_days) }}"
                            min="0" max="365" step="1" required
-                           class="mt-1 block w-full rounded-xl border-slate-200 text-sm focus:border-primary-500 focus:ring-primary-500/40">
-                    <p class="mt-1 text-xs text-slate-500">Jarak antar cicilan dalam hari (default 30 = bulanan)</p>
+                           class="mt-1 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Jarak antar cicilan dalam hari (default 30 = bulanan)</p>
                     @error('interval_days')
-                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -96,8 +96,8 @@
             <div class="flex items-center gap-3">
                 <input id="active" type="checkbox" name="active" value="1"
                        @checked(old('active', $scheme->active ?? true))
-                       class="rounded border-slate-300 text-primary-600 focus:ring-primary-500/40">
-                <label for="active" class="text-sm text-slate-700">
+                       class="rounded border-gray-300 text-brand-500 focus:ring-brand-500 dark:border-gray-700">
+                <label for="active" class="text-sm text-gray-700 dark:text-gray-300">
                     Aktif (muncul di dropdown checkout)
                 </label>
             </div>
@@ -106,10 +106,9 @@
 
     <div class="flex items-center justify-end gap-3">
         <a href="{{ route('admin.installment-schemes.index') }}"
-           class="text-sm text-slate-600 hover:text-slate-900">Batal</a>
-        <button type="submit"
-                class="inline-flex items-center rounded-xl bg-primary-600 px-5 py-2 text-sm font-medium text-white hover:bg-primary-500 transition">
+           class="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90">Batal</a>
+        <x-admin.button type="submit">
             {{ $scheme->exists ? 'Simpan Perubahan' : 'Buat Skema' }}
-        </button>
+        </x-admin.button>
     </div>
 </form>

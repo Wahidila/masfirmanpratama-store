@@ -7,10 +7,9 @@
         :title="'Edit Skema: ' . $scheme->name"
         subtitle="Ubah skema. Perubahan langsung tercermin di dropdown checkout.">
         <x-slot:actions>
-            <a href="{{ route('admin.installment-schemes.index') }}"
-               class="inline-flex items-center rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 transition">
+            <x-admin.button href="{{ route('admin.installment-schemes.index') }}" variant="outline" size="sm">
                 ← Kembali
-            </a>
+            </x-admin.button>
         </x-slot:actions>
     </x-admin.page-header>
 
