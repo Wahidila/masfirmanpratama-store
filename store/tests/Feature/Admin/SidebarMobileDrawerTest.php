@@ -8,19 +8,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Mobile admin nav drawer regression guard (M2-hardening C1).
+ * TailAdmin shell regression guard (B1 — admin shell swap).
  *
- * Bug case (visual review M2 admin): viewport <lg cuma punya logo + tombol
- * Logout, sidebar di-hide via `hidden lg:flex` tanpa fallback drawer →
- * akses ke Produk / Pesanan / WA Notifikasi / dst hilang di mobile.
- *
- * Strategi (Option A — Alpine inline drawer di layouts/admin.blade.php).
- * Single source of truth nav: config/admin-nav.php (consumed by both
- * desktop sidebar dan mobile drawer via _nav-links partial).
- *
- * Test scope: static-render assertions terhadap markup yang harus ada di
- * SEMUA admin page (mobile header + drawer skeleton). Tidak test interaksi
- * Alpine x-show toggle (perlu E2E browser test untuk itu).
+ * Verifies the TailAdmin verbatim shell layout: sidebar + header + backdrop
+ * are wired correctly, navigation from config renders, and mobile support
+ * exists via Alpine $store.sidebar.
  */
 class SidebarMobileDrawerTest extends TestCase
 {
@@ -42,11 +34,18 @@ class SidebarMobileDrawerTest extends TestCase
 
         $body = $response->getContent();
 
-        // Drawer root: <div x-data="{ open: false }" class="lg:hidden">
-        $this->assertMatchesRegularExpression(
-            '/x-data="\{\s*open:\s*false\s*\}"[^>]*class="[^"]*lg:hidden/i',
+        // TailAdmin: sidebar with Alpine $store.sidebar binding for mobile
+        $this->assertStringContainsString(
+            '$store.sidebar.isMobileOpen',
             $body,
-            'Mobile drawer root (Alpine x-data toggle, lg:hidden) tidak ditemukan di admin layout.'
+            'TailAdmin shell: $store.sidebar.isMobileOpen binding tidak ditemukan.'
+        );
+
+        // Backdrop overlay for mobile
+        $this->assertStringContainsString(
+            '$store.sidebar.setMobileOpen(false)',
+            $body,
+            'TailAdmin backdrop: setMobileOpen(false) click handler tidak ditemukan.'
         );
     }
 
@@ -57,132 +56,130 @@ class SidebarMobileDrawerTest extends TestCase
 
         $body = $response->getContent();
 
-        // Hamburger button buka drawer: aria-controls="admin-mobile-drawer"
+        // Mobile toggle button calls $store.sidebar.toggleMobileOpen()
         $this->assertStringContainsString(
-            'aria-controls="admin-mobile-drawer"',
+            '$store.sidebar.toggleMobileOpen()',
             $body,
-            'Hamburger button dengan aria-controls="admin-mobile-drawer" tidak ditemukan.'
+            'Mobile sidebar toggle button dengan toggleMobileOpen() tidak ditemukan.'
         );
 
+        // Desktop toggle button calls $store.sidebar.toggleExpanded()
         $this->assertStringContainsString(
-            'aria-label="Buka menu navigasi"',
+            '$store.sidebar.toggleExpanded()',
             $body,
-            'Hamburger button aria-label "Buka menu navigasi" hilang.'
+            'Desktop sidebar toggle button dengan toggleExpanded() tidak ditemukan.'
+        );
+
+        // Toggle buttons have aria-label
+        $this->assertStringContainsString(
+            'aria-label="Toggle',
+            $body,
+            'Sidebar toggle button aria-label hilang.'
         );
     }
 
-    public function test_admin_layout_has_drawer_panel_with_dialog_role(): void
+    public function test_admin_layout_has_sidebar_aside_with_tailadmin_structure(): void
     {
         $response = $this->actingAs($this->admin, 'admin')->get(route('admin.dashboard'));
         $response->assertStatus(200);
 
         $body = $response->getContent();
 
-        // Drawer overlay punya role="dialog" + aria-modal + ID matching aria-controls
-        $this->assertMatchesRegularExpression(
-            '/id="admin-mobile-drawer"[^>]*role="dialog"|role="dialog"[^>]*id="admin-mobile-drawer"/is',
+        // Sidebar aside with TailAdmin structure
+        $this->assertStringContainsString(
+            'id="sidebar"',
             $body,
-            'Drawer overlay #admin-mobile-drawer dengan role="dialog" tidak ditemukan.'
+            'TailAdmin sidebar <aside id="sidebar"> tidak ditemukan.'
+        );
+
+        // Sidebar responsive width binding
+        $this->assertStringContainsString(
+            'w-[290px]',
+            $body,
+            'TailAdmin sidebar width binding w-[290px] tidak ditemukan.'
         );
 
         $this->assertStringContainsString(
-            'aria-modal="true"',
+            'w-[90px]',
             $body,
-            'Drawer aria-modal="true" hilang (a11y blocker untuk modal navigation).'
+            'TailAdmin sidebar collapsed width w-[90px] tidak ditemukan.'
         );
     }
 
-    public function test_mobile_drawer_renders_all_primary_nav_links(): void
+    public function test_sidebar_renders_all_primary_nav_links(): void
     {
         $response = $this->actingAs($this->admin, 'admin')->get(route('admin.dashboard'));
         $response->assertStatus(200);
 
         $body = $response->getContent();
 
-        // Drawer pakai <nav data-admin-nav="mobile">. Extract slice dari opening
-        // tag sampai closing </nav> agar assertion tepat di drawer (bukan
-        // desktop sidebar yang punya data-admin-nav="desktop").
-        $this->assertMatchesRegularExpression(
-            '/<nav[^>]*data-admin-nav="mobile"/i',
-            $body,
-            'Mobile drawer <nav data-admin-nav="mobile"> tidak ditemukan.'
-        );
-
-        if (! preg_match('/<nav[^>]*data-admin-nav="mobile"[^>]*>(.*?)<\/nav>/is', $body, $m)) {
-            $this->fail('Tidak bisa extract isi mobile drawer <nav>.');
-        }
-        $drawerNav = $m[1];
-
-        // Verify semua primary nav link ada di dalam drawer nav block
+        // Verify semua primary nav link ada di sidebar
         foreach (config('admin-nav.primary', []) as $item) {
             $href = route($item['route']);
             $this->assertStringContainsString(
                 $href,
-                $drawerNav,
-                "Mobile drawer hilang link '{$item['label']}' (href {$href})."
+                $body,
+                "Sidebar hilang link '{$item['label']}' (href {$href})."
             );
         }
     }
 
-    public function test_mobile_drawer_links_close_drawer_on_click(): void
+    public function test_admin_layout_loads_admin_css_and_js(): void
     {
         $response = $this->actingAs($this->admin, 'admin')->get(route('admin.dashboard'));
         $response->assertStatus(200);
 
         $body = $response->getContent();
 
-        if (! preg_match('/<nav[^>]*data-admin-nav="mobile"[^>]*>(.*?)<\/nav>/is', $body, $m)) {
-            $this->fail('Tidak bisa extract isi mobile drawer <nav>.');
-        }
-        $drawerNav = $m[1];
+        // Admin CSS loaded via asset (not Vite for CSS)
+        $this->assertStringContainsString(
+            'admin/admin.css',
+            $body,
+            'Admin CSS (admin/admin.css) tidak di-load di layout.'
+        );
 
-        // Tiap link di drawer harus punya @click="open = false" untuk auto-close
-        // (better UX: user ngga perlu klik backdrop dulu).
-        $linkCount = preg_match_all('/<a\b[^>]*href=/i', $drawerNav);
-        $autoCloseCount = preg_match_all('/@click="open = false"/i', $drawerNav);
-
-        $this->assertSame(
-            $linkCount,
-            $autoCloseCount,
-            "Drawer punya {$linkCount} <a> link tapi cuma {$autoCloseCount} yang punya ".
-                '@click="open = false". Semua link harus auto-close drawer on klik.'
+        // Admin JS loaded via Vite
+        $this->assertStringContainsString(
+            'admin-',
+            $body,
+            'Admin JS bundle (admin-*.js) tidak di-load via Vite.'
         );
     }
 
-    public function test_desktop_sidebar_remains_intact(): void
+    public function test_admin_layout_has_theme_toggle(): void
     {
         $response = $this->actingAs($this->admin, 'admin')->get(route('admin.dashboard'));
         $response->assertStatus(200);
 
         $body = $response->getContent();
 
-        // Desktop sidebar masih ada (data-admin-nav="desktop" di <nav>) +
-        // wrapped dalam <aside class="hidden lg:flex ...">
-        $this->assertMatchesRegularExpression(
-            '/<nav[^>]*data-admin-nav="desktop"/i',
+        // Theme toggle button calls $store.theme.toggle()
+        $this->assertStringContainsString(
+            '$store.theme.toggle()',
             $body,
-            'Desktop sidebar <nav data-admin-nav="desktop"> hilang setelah drawer added.'
-        );
-
-        $this->assertMatchesRegularExpression(
-            '/<aside[^>]*class="[^"]*hidden\s+lg:flex/i',
-            $body,
-            'Desktop sidebar <aside class="hidden lg:flex"> wrapper hilang.'
+            'Theme toggle button dengan $store.theme.toggle() tidak ditemukan.'
         );
     }
 
-    public function test_drawer_has_escape_key_close_handler(): void
+    public function test_admin_layout_has_user_info_and_logout(): void
     {
         $response = $this->actingAs($this->admin, 'admin')->get(route('admin.dashboard'));
         $response->assertStatus(200);
 
         $body = $response->getContent();
 
-        // Drawer harus close on Escape — a11y best practice untuk modal
-        $this->assertMatchesRegularExpression(
-            '/@keydown\.escape\.window="open\s*=\s*false"/i',
+        // User name rendered
+        $this->assertStringContainsString(
+            $this->admin->name,
             $body,
-            'Drawer tidak handle Escape key (a11y: modal harus dismissable via keyboard).'
+            'User name tidak ditampilkan di header user dropdown.'
+        );
+
+        // Logout form present
+        $this->assertStringContainsString(
+            route('admin.logout'),
+            $body,
+            'Logout form action tidak ditemukan di header.'
         );
     }
 }
