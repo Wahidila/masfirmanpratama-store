@@ -69,7 +69,32 @@
         id="checkoutPage"
         class="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20"
         x-data="checkoutPage()"
-        x-init="$nextTick(() => window.lucide && window.lucide.createIcons())"
+        x-init="
+            // Hydrate server-side validation errors into Alpine
+            const serverErrors = @json($errors->messages());
+            if (Object.keys(serverErrors).length > 0) {
+                // Map server field names to Alpine field names
+                if (serverErrors.installment_scheme_id) {
+                    serverErrors.installment_scheme = serverErrors.installment_scheme_id;
+                    delete serverErrors.installment_scheme_id;
+                }
+                errors = serverErrors;
+                touched = { __all: true };
+                // Hydrate form from old input
+                form.customer_name = '{{ old('customer_name', '') }}';
+                form.customer_email = '{{ old('customer_email', '') }}';
+                form.customer_phone = '{{ old('customer_phone', '') }}';
+                form.address_line = '{{ old('address_line', '') }}';
+                form.address_city = '{{ old('address_city', '') }}';
+                form.address_province = '{{ old('address_province', '') }}';
+                form.address_postal = '{{ old('address_postal', '') }}';
+                form.shipping_method = '{{ old('shipping_method', '') }}';
+                form.payment_type = '{{ old('payment_type', 'lunas') }}';
+                const oldScheme = '{{ old('installment_scheme_id', '') }}';
+                form.installment_scheme = oldScheme ? Number(oldScheme) : null;
+            }
+            $nextTick(() => window.lucide && window.lucide.createIcons());
+        "
     >
         <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-primary-600">Checkout Flow</p>
         <h1 class="mt-3 text-4xl font-extrabold leading-tight text-slate-900 md:text-5xl">
@@ -129,6 +154,27 @@
             class="mt-8 grid gap-8 lg:grid-cols-12"
         >
             @csrf
+
+            @if($errors->any())
+            <div class="lg:col-span-12 rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                <div class="flex items-start gap-3">
+                    <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
+                        <i data-lucide="alert-circle" class="h-4 w-4"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-base font-bold text-rose-800">Periksa kembali data berikut</h3>
+                        <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-rose-700">
+                            @foreach($errors->all() as $msg)
+                                <li>{{ $msg }}</li>
+                            @endforeach
+                        </ul>
+                        @if($errors->has('cart_total') || $errors->has('cart_json'))
+                        <p class="mt-3 text-sm font-semibold text-rose-800">Silakan refresh halaman dan coba lagi.</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
 
             {{-- ─── LEFT COLUMN: form sections ─────────────────────── --}}
             <div class="space-y-6 lg:col-span-7">
