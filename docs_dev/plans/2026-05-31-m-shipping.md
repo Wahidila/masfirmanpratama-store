@@ -9,6 +9,7 @@
 **Tech Stack:** Laravel 11, Http client, SQLite (dev) / MySQL (prod), Pest/PHPUnit (283 test baseline), Pint, PHPStan L6. Provider: `api-v2.agenwebsite.com/v2`.
 
 **CRITICAL FACTS (terverifikasi live 2026-05-31):**
+- ⚠️ **LICENSE DOMAIN-BOUND**: license terikat domain `masfirmanpratama.com`. `site_url`/User-Agent HARUS pakai domain itu — BUKAN `APP_URL` (localhost:8052 → HTTP 401 "Domain yang Anda gunakan salah"). Sudah di-fix di `config/shipping.php` (`AGENWEBSITE_SHIPPING_SITE_URL`, default `masfirmanpratama.com`). Di Task B.7 admin settings: JANGAN biarkan admin set site_url ke APP_URL; site_url bukan field yang diedit admin.
 - API **butuh User-Agent `WordPress/6.8.3; <site-url>`** + body **form-encoded** (bukan JSON). Tanpa UA → HTTP 500.
 - Header wajib: `plugin-version: 2.3.11`, `wordpress-version: 6.8.3`, `woocommerce-version: 10.0`, `php-version`, `site-url`. Body wajib: `license`, `product=agenwebsite-shipping`.
 - **Unit berat = KG** (weight=1 → Rp17.000). Kirim kg aktual, minimum 1.

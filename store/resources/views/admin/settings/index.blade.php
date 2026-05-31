@@ -23,10 +23,19 @@
             class="px-4 py-2.5 -mb-px border-b-2 transition {{ $tab === 'bank-accounts' ? 'border-primary-600 text-primary-700' : 'border-transparent text-slate-600 hover:text-slate-900' }}">
             Bank Accounts
         </a>
+        <a href="{{ route('admin.settings.index', ['tab' => 'shipping']) }}"
+            class="px-4 py-2.5 -mb-px border-b-2 transition {{ $tab === 'shipping' ? 'border-primary-600 text-primary-700' : 'border-transparent text-slate-600 hover:text-slate-900' }}">
+            Shipping
+        </a>
     </div>
 
     @if ($tab === 'store-info')
         @include('admin.settings._store_info', ['storeInfo' => $storeInfo])
+    @elseif ($tab === 'shipping')
+        @include('admin.settings._shipping', [
+            'shippingData' => $shippingData,
+            'availableCouriers' => $availableCouriers,
+        ])
     @else
         @include('admin.settings._bank_accounts', ['bankAccounts' => $bankAccounts])
     @endif

@@ -3,6 +3,7 @@
 namespace App\Services\Shipping;
 
 use App\Models\Product;
+use App\Services\Settings;
 
 class ShippingRateService
 {
@@ -22,15 +23,16 @@ class ShippingRateService
 
         foreach ($cartItems as $item) {
             $product = $products->get($item['slug']);
-            if (!$product || $product->is_shippable === false) {
+            if (! $product || $product->is_shippable === false) {
                 continue;
             }
             $hasShippable = true;
-            $weight = $product->weight_kg ?? config('shipping.default_weight_kg', 1);
+            $defaultWeight = Settings::get('shipping.default_weight_kg', config('shipping.default_weight_kg', 1));
+            $weight = $product->weight_kg ?? $defaultWeight;
             $total += $weight * $item['qty'];
         }
 
-        if (!$hasShippable) {
+        if (! $hasShippable) {
             return 0.0;
         }
 
@@ -57,7 +59,7 @@ class ShippingRateService
 
         foreach ($cartItems as $item) {
             $product = $products->get($item['slug']);
-            if (!$product || $product->is_shippable === false) {
+            if (! $product || $product->is_shippable === false) {
                 continue;
             }
 
@@ -90,17 +92,26 @@ class ShippingRateService
             return [];
         }
 
+        $shippingEnabled = Settings::get('shipping.shipping_enabled');
+        if ($shippingEnabled === false) {
+            return [];
+        }
+
         $dimensions = $this->calculateDimensions($cartItems);
 
+        $origin = Settings::get('shipping.origin', config('shipping.origin'));
+        $originZipcode = Settings::get('shipping.origin_zipcode', config('shipping.origin_zipcode'));
+        $couriers = Settings::get('shipping.couriers', config('shipping.couriers'));
+
         $params = [
-            'origin' => config('shipping.origin'),
-            'origin_zipcode' => config('shipping.origin_zipcode'),
+            'origin' => $origin,
+            'origin_zipcode' => $originZipcode,
             'province' => $destination['province'],
             'city' => $destination['city'],
             'district' => $destination['district'] ?? '',
             'zipcode' => $destination['zipcode'],
             'weight' => (int) ceil($weight),
-            'courier' => implode('|', config('shipping.couriers')),
+            'courier' => implode('|', $couriers),
             'length' => $dimensions['length'],
             'width' => $dimensions['width'],
             'height' => $dimensions['height'],
@@ -113,8 +124,8 @@ class ShippingRateService
                 return [];
             }
 
-            $activeCouriers = config('shipping.couriers', []);
-            $markups = config('shipping.service_markup', []);
+            $activeCouriers = Settings::get('shipping.couriers', config('shipping.couriers', []));
+            $markups = Settings::get('shipping.service_markup', config('shipping.service_markup', []));
 
             $filtered = array_filter($rates, function ($row) use ($activeCouriers) {
                 $courier = explode('_', $row['courier'] ?? '')[0];
@@ -133,7 +144,7 @@ class ShippingRateService
                 return [
                     'courier' => $row['courier'] ?? '',
                     'service' => $service,
-                    'label' => ($row['service_name'] ?? $service) . ' (' . ($row['etd'] ?? 'TBD') . ')',
+                    'label' => ($row['service_name'] ?? $service).' ('.($row['etd'] ?? 'TBD').')',
                     'price' => (int) ($row['price'] ?? 0) + $markup,
                     'etd' => $row['etd'] ?? '',
                 ];

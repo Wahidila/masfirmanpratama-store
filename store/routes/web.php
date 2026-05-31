@@ -212,6 +212,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('settings.store-info.update');
         Route::put('settings/bank-accounts', [SettingsController::class, 'updateBankAccounts'])
             ->name('settings.bank-accounts.update');
+        Route::put('settings/shipping', [SettingsController::class, 'updateShipping'])
+            ->name('settings.shipping.update');
 
         Route::post('installment-schemes/{installment_scheme}/toggle',
             [InstallmentSchemeController::class, 'toggle'])

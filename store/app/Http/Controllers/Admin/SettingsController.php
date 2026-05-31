@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\Settings;
+use App\Services\Shipping\AgenwebsiteClient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -11,24 +12,82 @@ use Illuminate\View\View;
 class SettingsController extends Controller
 {
     /**
-     * Halaman tunggal Settings dengan 2 tab:
+     * Tab yang diizinkan.
+     */
+    protected const ALLOWED_TABS = ['store-info', 'bank-accounts', 'shipping'];
+
+    /**
+     * Daftar kurir yang tersedia.
+     */
+    protected const AVAILABLE_COURIERS = [
+        'jne', 'jnt', 'sicepat', 'anteraja', 'pos', 'tiki', 'spx', 'lion', 'paxel',
+    ];
+
+    /**
+     * Halaman tunggal Settings dengan tab:
      * - store-info: nama/alamat/kota/telp/email/jam operasional
      * - bank-accounts: list rekening (CRUD inline)
+     * - shipping: origin, couriers, markup, ongkir enable/disable
      *
-     * Tab dipilih via query string ?tab=store-info|bank-accounts.
+     * Tab dipilih via query string ?tab=store-info|bank-accounts|shipping.
      */
     public function index(Request $request): View
     {
         $tab = $request->query('tab', 'store-info');
-        if (! in_array($tab, ['store-info', 'bank-accounts'], true)) {
+        if (! in_array($tab, self::ALLOWED_TABS, true)) {
             $tab = 'store-info';
         }
 
-        return view('admin.settings.index', [
+        $viewData = [
             'tab' => $tab,
             'storeInfo' => Settings::getStoreInfo(),
             'bankAccounts' => Settings::getBankAccounts(),
-        ]);
+        ];
+
+        if ($tab === 'shipping') {
+            $viewData['shippingData'] = $this->getShippingData();
+            $viewData['availableCouriers'] = self::AVAILABLE_COURIERS;
+        }
+
+        return view('admin.settings.index', $viewData);
+    }
+
+    /**
+     * Kumpulkan data shipping dari DB + fallback config.
+     *
+     * @return array<string, mixed>
+     */
+    protected function getShippingData(): array
+    {
+        $serviceMarkupRaw = Settings::get('shipping.service_markup', config('shipping.service_markup', []));
+
+        $serviceMarkupLines = '';
+        if (is_array($serviceMarkupRaw) && $serviceMarkupRaw !== []) {
+            $lines = [];
+            foreach ($serviceMarkupRaw as $service => $markup) {
+                $lines[] = $service.':'.$markup;
+            }
+            $serviceMarkupLines = implode("\n", $lines);
+        }
+
+        $licenseStatus = null;
+        try {
+            $client = AgenwebsiteClient::fromConfig();
+            $result = $client->activateLicense();
+            $licenseStatus = $result;
+        } catch (\Throwable $e) {
+            $licenseStatus = ['status' => 'error', 'message' => 'Tidak dapat terhubung dengan server lisensi.', 'result' => null];
+        }
+
+        return [
+            'origin' => Settings::get('shipping.origin', config('shipping.origin')),
+            'origin_zipcode' => Settings::get('shipping.origin_zipcode', config('shipping.origin_zipcode')),
+            'couriers' => Settings::get('shipping.couriers', config('shipping.couriers')),
+            'service_markup_raw' => $serviceMarkupLines,
+            'shipping_enabled' => Settings::get('shipping.shipping_enabled', true),
+            'default_weight_kg' => Settings::get('shipping.default_weight_kg', config('shipping.default_weight_kg')),
+            'license_status' => $licenseStatus,
+        ];
     }
 
     /**
@@ -106,5 +165,70 @@ class SettingsController extends Controller
         return redirect()
             ->route('admin.settings.index', ['tab' => 'bank-accounts'])
             ->with('status', count($accounts).' rekening tersimpan.');
+    }
+
+    /**
+     * Update shipping settings (tab shipping).
+     *
+     * Validasi + persist ke DB via Settings service.
+     * site_url dan license tidak bisa diubah dari form — di-hardcode di .env.
+     */
+    public function updateShipping(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'origin' => ['required', 'string', 'max:100'],
+            'origin_zipcode' => ['required', 'string', 'max:10'],
+            'couriers' => ['nullable', 'array'],
+            'couriers.*' => ['string', 'in:'.implode(',', self::AVAILABLE_COURIERS)],
+            'service_markup' => ['nullable', 'string'],
+            'shipping_enabled' => ['nullable'],
+            'default_weight_kg' => ['required', 'numeric', 'min:0.1', 'max:100'],
+        ], [
+            'origin.required' => 'Kota asal wajib diisi.',
+            'origin_zipcode.required' => 'Kode pos asal wajib diisi.',
+            'default_weight_kg.required' => 'Berat default wajib diisi.',
+            'default_weight_kg.min' => 'Berat default minimal 0.1 kg.',
+            'default_weight_kg.max' => 'Berat default maksimal 100 kg.',
+            'couriers.*.in' => 'Kurir tidak valid.',
+        ]);
+
+        // Simpan origin
+        Settings::set('shipping.origin', $data['origin'], 'string');
+        Settings::set('shipping.origin_zipcode', $data['origin_zipcode'], 'string');
+
+        // Simpan daftar kurir aktif
+        Settings::set('shipping.couriers', $data['couriers'] ?? [], 'array');
+
+        // Parse service_markup dari textarea (satu baris = service:markup)
+        $markup = [];
+        if (! empty($data['service_markup'])) {
+            $lines = explode("\n", $data['service_markup']);
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if ($line === '') {
+                    continue;
+                }
+                $parts = explode(':', $line, 2);
+                if (count($parts) === 2) {
+                    $service = trim($parts[0]);
+                    $value = (int) trim($parts[1]);
+                    if ($service !== '' && $value >= 0) {
+                        $markup[$service] = $value;
+                    }
+                }
+            }
+        }
+        Settings::set('shipping.service_markup', $markup, 'json');
+
+        // Simpan shipping_enabled (toggle)
+        $enabled = ! empty($data['shipping_enabled']);
+        Settings::set('shipping.shipping_enabled', $enabled, 'bool');
+
+        // Simpan default_weight_kg
+        Settings::set('shipping.default_weight_kg', (float) $data['default_weight_kg'], 'string');
+
+        return redirect()
+            ->route('admin.settings.index', ['tab' => 'shipping'])
+            ->with('status', 'Pengaturan pengiriman berhasil diperbarui.');
     }
 }
