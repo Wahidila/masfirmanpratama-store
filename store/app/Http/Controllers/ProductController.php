@@ -100,7 +100,7 @@ class ProductController extends Controller
                 } elseif (! empty($relConfig)) {
                     $relConfig['image'] = isset($relConfig['image']) ? asset($relConfig['image']) : null;
                     $relConfig['type'] = ($relConfig['type'] ?? 'buku') === 'course' ? 'kelas' : ($relConfig['type'] ?? 'buku');
-                    $related[] = $relConfig;
+                    $related[] = array_merge(['slug' => $relatedSlug], $relConfig);
                 }
             }
         }
