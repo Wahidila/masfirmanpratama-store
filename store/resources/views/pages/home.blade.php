@@ -1,4 +1,6 @@
 @php
+    $featuredBookTitle = \App\Models\Product::where('slug', 'alpha-telepathy')->value('title') ?? 'Buku Alpha Telepati';
+
     /* -----------------------------------------------------------------
      | Static data — di-port dari prototype/index.html.
      | M2 akan di-wire ke DB (products, testimonials, media-coverage).
@@ -42,7 +44,7 @@
             'features' => [
                 '20 Materi Alpha Mind Control',
                 'Modul materi AMC',
-                'Buku Alpha Telepati',
+                $featuredBookTitle,
                 'Sertifikat & alat tulis (offline)',
                 'Grup Telegram alumni + pertemuan bulanan',
                 'Jadwal online sesuai antrian',
@@ -62,7 +64,7 @@
             'features' => [
                 '20 Materi AMC',
                 'Modul materi AMC',
-                'Buku Alpha Telepati',
+                $featuredBookTitle,
                 'Sertifikat & alat tulis (notes)',
                 'Grup Telegram alumni + pertemuan bulanan',
                 'Jadwal lebih fleksibel & lebih cepat',
