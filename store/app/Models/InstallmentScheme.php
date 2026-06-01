@@ -13,6 +13,7 @@ class InstallmentScheme extends Model
 
     protected $fillable = [
         'product_id',
+        'course_id',
         'name',
         'dp_pct',
         'n_installments',
@@ -35,6 +36,11 @@ class InstallmentScheme extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class);
+    }
+
     public function scopeActive(Builder $q): Builder
     {
         return $q->where('active', true);
@@ -52,6 +58,21 @@ class InstallmentScheme extends Model
 
         return $q->where(function ($inner) use ($productId) {
             $inner->whereNull('product_id')->orWhere('product_id', $productId);
+        });
+    }
+
+    /**
+     * Schemes for a given course: course-specific + global (course_id=null).
+     * Pass null to get global-only.
+     */
+    public function scopeForCourse(Builder $q, ?int $courseId): Builder
+    {
+        if ($courseId === null) {
+            return $q->whereNull('course_id');
+        }
+
+        return $q->where(function ($inner) use ($courseId) {
+            $inner->whereNull('course_id')->orWhere('course_id', $courseId);
         });
     }
 }
