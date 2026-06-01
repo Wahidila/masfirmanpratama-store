@@ -239,6 +239,115 @@ class CourseManagementTest extends TestCase
     }
 
     // -----------------------------------------------------------------
+    // Homepage card fields (sync-c2)
+    // -----------------------------------------------------------------
+
+    public function test_admin_can_store_course_with_card_fields(): void
+    {
+        $payload = $this->validPayload([
+            'title' => 'Kelas Platinum Card Test',
+            'slug' => 'kelas-platinum-card-test',
+            'sort_order' => 2,
+            'show_on_homepage' => '1',
+            'card_style' => 'highlight',
+            'card_icon' => 'gem',
+            'card_icon_color' => 'text-amber-500',
+            'cta_label' => 'Daftar Platinum',
+            'card_features_raw' => "Akses seumur hidup\nMentoring 1-on-1\nSertifikat premium",
+        ]);
+
+        $this->actingAs($this->admin, 'admin')
+            ->post(route('admin.courses.store'), $payload)
+            ->assertRedirect(route('admin.courses.index'));
+
+        $course = Course::where('slug', 'kelas-platinum-card-test')->first();
+        $this->assertNotNull($course);
+        $this->assertSame(2, $course->sort_order);
+        $this->assertTrue((bool) $course->show_on_homepage);
+        $this->assertSame('highlight', $course->card_style);
+        $this->assertSame('gem', $course->card_icon);
+        $this->assertSame('text-amber-500', $course->card_icon_color);
+        $this->assertSame('Daftar Platinum', $course->cta_label);
+        $this->assertIsArray($course->card_features);
+        $this->assertCount(3, $course->card_features);
+        $this->assertSame('Akses seumur hidup', $course->card_features[0]);
+        $this->assertSame('Mentoring 1-on-1', $course->card_features[1]);
+        $this->assertSame('Sertifikat premium', $course->card_features[2]);
+    }
+
+    public function test_admin_can_update_card_fields(): void
+    {
+        $course = Course::factory()->create([
+            'title' => 'Kelas Card Update',
+            'slug' => 'kelas-card-update',
+            'card_style' => 'default',
+            'sort_order' => 0,
+            'show_on_homepage' => false,
+        ]);
+
+        $payload = $this->validPayload([
+            'title' => 'Kelas Card Update',
+            'slug' => 'kelas-card-update',
+            'sort_order' => 5,
+            'show_on_homepage' => '1',
+            'card_style' => 'highlight',
+            'card_icon' => 'video',
+            'card_icon_color' => 'text-blue-600',
+            'cta_label' => 'Mulai Belajar',
+            'card_features_raw' => "Fitur A\nFitur B\nFitur C\nFitur D",
+        ]);
+
+        $this->actingAs($this->admin, 'admin')
+            ->put(route('admin.courses.update', $course), $payload)
+            ->assertRedirect(route('admin.courses.index'));
+
+        $course->refresh();
+        $this->assertSame(5, $course->sort_order);
+        $this->assertTrue((bool) $course->show_on_homepage);
+        $this->assertSame('highlight', $course->card_style);
+        $this->assertSame('video', $course->card_icon);
+        $this->assertSame('text-blue-600', $course->card_icon_color);
+        $this->assertSame('Mulai Belajar', $course->cta_label);
+        $this->assertIsArray($course->card_features);
+        $this->assertCount(4, $course->card_features);
+        $this->assertSame('Fitur A', $course->card_features[0]);
+        $this->assertSame('Fitur D', $course->card_features[3]);
+    }
+
+    public function test_validation_card_style_invalid(): void
+    {
+        $payload = $this->validPayload([
+            'card_style' => 'rainbow',
+        ]);
+
+        $this->actingAs($this->admin, 'admin')
+            ->post(route('admin.courses.store'), $payload)
+            ->assertSessionHasErrors('card_style');
+    }
+
+    public function test_show_on_homepage_unchecked_stores_false(): void
+    {
+        $course = Course::factory()->create([
+            'title' => 'Kelas Uncheck Test',
+            'slug' => 'kelas-uncheck-test',
+            'show_on_homepage' => true,
+        ]);
+
+        $payload = $this->validPayload([
+            'title' => 'Kelas Uncheck Test',
+            'slug' => 'kelas-uncheck-test',
+            // show_on_homepage NOT sent (checkbox unchecked)
+        ]);
+
+        $this->actingAs($this->admin, 'admin')
+            ->put(route('admin.courses.update', $course), $payload)
+            ->assertRedirect(route('admin.courses.index'));
+
+        $course->refresh();
+        $this->assertFalse((bool) $course->show_on_homepage);
+    }
+
+    // -----------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------
 
