@@ -21,6 +21,7 @@
 
     $descriptionRaw = old('description_raw', is_array($course->description ?? null) ? implode("\n\n", $course->description) : '');
     $syllabusRaw = old('syllabus_raw', is_array($course->syllabus ?? null) ? implode("\n", $course->syllabus) : '');
+    $cardFeaturesRaw = old('card_features_raw', is_array($course->card_features ?? null) ? implode("\n", $course->card_features) : '');
 @endphp
 
 <form
@@ -221,7 +222,97 @@
         </div>
     </x-admin.card>
 
-    {{-- 4. Gambar Kelas --}}
+    {{-- 4. Kartu Homepage — Pilih Format Kelas --}}
+    <x-admin.card title="Kartu Homepage — Pilih Format Kelas">
+        <div class="grid gap-5 sm:grid-cols-3">
+            <div class="sm:col-span-3">
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <input
+                        type="checkbox"
+                        name="show_on_homepage"
+                        value="1"
+                        {{ old('show_on_homepage', $course->show_on_homepage ?? false) ? 'checked' : '' }}
+                        class="rounded border-gray-300 text-brand-500 focus:ring-brand-500 dark:border-gray-700">
+                    Tampilkan kartu ini di homepage (section Pilih Format Kelas)
+                </label>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Kartu ini akan muncul di bagian "Pilih Format Kelas" pada halaman utama.</p>
+            </div>
+
+            <x-admin.form-group label="Urutan tampil" for="sort_order" name="sort_order"
+                hint="Angka lebih kecil tampil lebih kiri (1 = paling kiri).">
+                <input
+                    type="number"
+                    id="sort_order"
+                    name="sort_order"
+                    min="0"
+                    max="9999"
+                    value="{{ old('sort_order', $course->sort_order ?? 0) }}"
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                    placeholder="1">
+            </x-admin.form-group>
+
+            <x-admin.form-group label="Gaya kartu" for="card_style" name="card_style"
+                hint="Tampilan visual kartu di homepage.">
+                <select
+                    id="card_style"
+                    name="card_style"
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                    @foreach (['default' => 'Default', 'highlight' => 'Highlight (badge menonjol)', 'dark' => 'Dark (kartu gelap)'] as $value => $label)
+                        <option value="{{ $value }}" @selected(old('card_style', $course->card_style ?? 'default') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </x-admin.form-group>
+
+            <x-admin.form-group label="Label tombol CTA" for="cta_label" name="cta_label"
+                hint="Teks tombol ajakan di kartu.">
+                <input
+                    type="text"
+                    id="cta_label"
+                    name="cta_label"
+                    maxlength="60"
+                    value="{{ old('cta_label', $course->cta_label) }}"
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                    placeholder="Daftar Reguler">
+            </x-admin.form-group>
+
+            <x-admin.form-group label="Ikon kartu (lucide)" for="card_icon" name="card_icon"
+                hint="Nama ikon dari Lucide Icons.">
+                <input
+                    type="text"
+                    id="card_icon"
+                    name="card_icon"
+                    maxlength="40"
+                    value="{{ old('card_icon', $course->card_icon) }}"
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                    placeholder="video / mic / gem">
+            </x-admin.form-group>
+
+            <x-admin.form-group label="Warna ikon (class Tailwind)" for="card_icon_color" name="card_icon_color"
+                hint="Class Tailwind untuk warna ikon.">
+                <input
+                    type="text"
+                    id="card_icon_color"
+                    name="card_icon_color"
+                    maxlength="60"
+                    value="{{ old('card_icon_color', $course->card_icon_color) }}"
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                    placeholder="text-blue-600 / text-accent-600">
+            </x-admin.form-group>
+
+            <x-admin.form-group label="Fitur ringkas kartu (satu per baris)" for="card_features_raw" name="card_features_raw" class="sm:col-span-3"
+                hint="Satu fitur per baris. Ditampilkan sebagai bullet list di kartu homepage.">
+                <textarea
+                    id="card_features_raw"
+                    name="card_features_raw"
+                    rows="5"
+                    maxlength="4000"
+                    class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                    placeholder="Akses materi seumur hidup&#10;Sertifikat resmi&#10;Grup diskusi eksklusif">{{ $cardFeaturesRaw }}</textarea>
+            </x-admin.form-group>
+        </div>
+    </x-admin.card>
+
+    {{-- 5. Gambar Kelas --}}
     <x-admin.card title="Gambar kelas">
         <div class="grid gap-5 sm:grid-cols-2">
             <x-admin.form-group
@@ -262,7 +353,7 @@
         </div>
     </x-admin.card>
 
-    {{-- 5. Deskripsi (paragraf) --}}
+    {{-- 6. Deskripsi (paragraf) --}}
     <x-admin.card title="Deskripsi (paragraf)">
         <x-admin.form-group
             label="Paragraf deskripsi"
@@ -279,7 +370,7 @@
         </x-admin.form-group>
     </x-admin.card>
 
-    {{-- 6. Silabus --}}
+    {{-- 7. Silabus --}}
     <x-admin.card title="Silabus">
         <x-admin.form-group
             label="Poin silabus"
@@ -296,7 +387,7 @@
         </x-admin.form-group>
     </x-admin.card>
 
-    {{-- 7. Jadwal --}}
+    {{-- 8. Jadwal --}}
     <x-admin.card title="Jadwal">
         <template x-for="(item, idx) in schedule" :key="idx">
             <div class="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-white/[0.03]">
@@ -341,7 +432,7 @@
         </button>
     </x-admin.card>
 
-    {{-- 8. Benefit --}}
+    {{-- 9. Benefit --}}
     <x-admin.card title="Benefit">
         <template x-for="(item, idx) in benefits" :key="idx">
             <div class="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-white/[0.03]">
@@ -398,7 +489,7 @@
         </button>
     </x-admin.card>
 
-    {{-- 9. Testimoni --}}
+    {{-- 10. Testimoni --}}
     <x-admin.card title="Testimoni">
         <template x-for="(item, idx) in testimonials" :key="idx">
             <div class="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-white/[0.03]">
@@ -454,7 +545,7 @@
         </button>
     </x-admin.card>
 
-    {{-- 10. SEO --}}
+    {{-- 11. SEO --}}
     <x-admin.card title="SEO">
         <div class="grid gap-5 sm:grid-cols-2">
             <x-admin.form-group label="Meta title (SEO)" for="meta_title" name="meta_title"
