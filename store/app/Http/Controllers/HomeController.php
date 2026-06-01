@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
 use App\Models\Product;
 use Illuminate\View\View;
 
@@ -26,6 +27,29 @@ class HomeController extends Controller
         $slugs = ['10-keajaiban-pikiran', 'alpha-telepathy', 'instan-hypnosis', 'kitab-101-kalimat-sugesti-ajaib', 'kitab-kunci-penarik-rezeki'];
         $welcomeBooks = Product::whereIn('slug', $slugs)->get()->sortBy(fn ($p) => array_search($p->slug, $slugs))->values();
 
-        return view('pages.home', compact('products', 'welcomeBooks'));
+        $classFormats = Course::where('status', 'active')
+            ->where('show_on_homepage', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->map(function (Course $c) {
+                return [
+                    'name' => $c->title,
+                    'slug' => $c->slug,
+                    'tagline' => $c->tagline ?? $c->subtitle ?? '',
+                    'price' => 'Rp '.number_format((float) $c->price, 0, ',', '.'),
+                    'priceNote' => $c->installment_available ? '*Bisa dicicil sampai lunas.' : '',
+                    'iconAccent' => $c->card_icon ?: 'sparkles',
+                    'iconColor' => $c->card_icon_color ?: 'text-primary-500',
+                    'features' => is_array($c->card_features) ? $c->card_features : [],
+                    'badge' => $c->badge,
+                    'highlight' => $c->card_style === 'highlight',
+                    'dark' => $c->card_style === 'dark',
+                    'ctaLabel' => $c->cta_label ?: 'Lihat Detail',
+                    'ctaHref' => route('products.show', $c->slug),
+                ];
+            })->all();
+
+        return view('pages.home', compact('products', 'welcomeBooks', 'classFormats'));
     }
 }
