@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ShippingRateException;
 use App\Models\InstallmentScheme;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -121,18 +122,24 @@ class CheckoutController extends Controller
                 'zipcode' => $address['postal'],
             ];
 
-            $rates = $this->shippingRateService->getRates($destination, $cartItems);
+            try {
+                $rates = $this->shippingRateService->getRates($destination, $cartItems);
 
-            if (! empty($rates)) {
-                foreach ($rates as $rate) {
-                    if (($rate['service'] ?? '') === $shippingMethod) {
-                        $shippingCost = (int) ($rate['price'] ?? 0);
-                        $shippingService = $rate['service'] ?? null;
-                        $shippingEtd = $rate['etd'] ?? null;
-                        $shippingCourier = explode('_', $shippingMethod)[0];
-                        break;
+                if (! empty($rates)) {
+                    foreach ($rates as $rate) {
+                        if (($rate['service'] ?? '') === $shippingMethod) {
+                            $shippingCost = (int) ($rate['price'] ?? 0);
+                            $shippingService = $rate['service'] ?? null;
+                            $shippingEtd = $rate['etd'] ?? null;
+                            $shippingCourier = explode('_', $shippingMethod)[0];
+                            break;
+                        }
                     }
                 }
+            } catch (ShippingRateException $e) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['shipping_method' => 'Ongkir sementara tidak tersedia. Silakan hubungi admin via WhatsApp.']);
             }
         }
 

@@ -990,8 +990,13 @@
                         })
                             .then((r) => r.json())
                             .then((data) => {
-                                this.shippingRates = Array.isArray(data.rates) ? data.rates : [];
-                                this.rateError = '';
+                                if (data && data.error) {
+                                    this.shippingRates = [];
+                                    this.rateError = data.error;
+                                } else {
+                                    this.shippingRates = Array.isArray(data.rates) ? data.rates : [];
+                                    this.rateError = '';
+                                }
                             })
                             .catch(() => {
                                 this.shippingRates = [];

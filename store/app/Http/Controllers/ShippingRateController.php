@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ShippingRateException;
 use App\Services\Shipping\ShippingRateService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -46,6 +47,11 @@ class ShippingRateController extends Controller
             return response()->json(['rates' => $rates]);
         } catch (ValidationException $e) {
             throw $e;
+        } catch (ShippingRateException $e) {
+            return response()->json([
+                'rates' => [],
+                'error' => 'Ongkir sementara tidak tersedia. Silakan hubungi admin via WhatsApp untuk konfirmasi ongkir.',
+            ], 200);
         } catch (\Throwable $e) {
             return response()->json(['rates' => []]);
         }
