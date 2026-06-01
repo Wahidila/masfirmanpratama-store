@@ -181,4 +181,150 @@ class CheckoutCourseTest extends TestCase
         $this->assertSame($course->id, $item->course_id);
         $this->assertNull($item->product_id);
     }
+
+    // ------------------------------------------------------------------
+    // Privat & Platinum checkout — SYNC-C3-E (Opsi 2: full checkout items)
+    // ------------------------------------------------------------------
+
+    public function test_checkout_privat_course(): void
+    {
+        $course = Course::factory()->active()->create([
+            'slug' => 'kelas-amc-privat',
+            'title' => 'Kelas AMC Privat',
+            'price' => 7500000,
+        ]);
+
+        $this->post('/checkout', $this->validPayload([
+            'cart_json' => json_encode([
+                ['slug' => 'kelas-amc-privat', 'name' => 'Kelas AMC Privat', 'price' => 7500000, 'qty' => 1],
+            ]),
+            'cart_total' => 7500000,
+        ]));
+
+        $this->assertSame(1, Order::count());
+        $order = Order::first();
+        $this->assertSame('7500000.00', $order->total);
+
+        $item = OrderItem::where('order_id', $order->id)->first();
+        $this->assertSame($course->id, $item->course_id);
+        $this->assertNull($item->product_id);
+        $this->assertSame('7500000.00', $item->unit_price);
+
+        $this->assertDatabaseHas('order_items', [
+            'course_id' => $course->id,
+            'product_id' => null,
+            'unit_price' => '7500000.00',
+        ]);
+    }
+
+    public function test_checkout_platinum_course(): void
+    {
+        $course = Course::factory()->active()->create([
+            'slug' => 'kelas-amc-platinum',
+            'title' => 'Kelas AMC Platinum',
+            'price' => 22500000,
+        ]);
+
+        $this->post('/checkout', $this->validPayload([
+            'cart_json' => json_encode([
+                ['slug' => 'kelas-amc-platinum', 'name' => 'Kelas AMC Platinum', 'price' => 22500000, 'qty' => 1],
+            ]),
+            'cart_total' => 22500000,
+        ]));
+
+        $this->assertSame(1, Order::count());
+        $order = Order::first();
+        $this->assertSame('22500000.00', $order->total);
+
+        $item = OrderItem::where('order_id', $order->id)->first();
+        $this->assertSame($course->id, $item->course_id);
+        $this->assertNull($item->product_id);
+        $this->assertSame('22500000.00', $item->unit_price);
+
+        $this->assertDatabaseHas('order_items', [
+            'course_id' => $course->id,
+            'product_id' => null,
+            'unit_price' => '22500000.00',
+        ]);
+    }
+
+    public function test_installment_privat_course(): void
+    {
+        $course = Course::factory()->active()->create([
+            'slug' => 'kelas-amc-privat',
+            'title' => 'Kelas AMC Privat',
+            'price' => 7500000,
+        ]);
+
+        $scheme = InstallmentScheme::create([
+            'course_id' => $course->id,
+            'name' => 'Cicilan 12x Privat',
+            'dp_pct' => 20,
+            'n_installments' => 12,
+            'interval_days' => 30,
+            'active' => true,
+        ]);
+
+        // Assert scheme resolves for this course
+        $available = InstallmentScheme::active()->forCourse($course->id)->get();
+        $this->assertTrue($available->contains('id', $scheme->id));
+
+        // Checkout with installment
+        $this->post('/checkout', $this->validPayload([
+            'cart_json' => json_encode([
+                ['slug' => 'kelas-amc-privat', 'name' => 'Kelas AMC Privat', 'price' => 7500000, 'qty' => 1],
+            ]),
+            'cart_total' => 7500000,
+            'payment_type' => 'cicilan',
+            'installment_scheme_id' => $scheme->id,
+        ]));
+
+        $this->assertSame(1, Order::count());
+        $order = Order::first();
+        $payments = OrderPayment::where('order_id', $order->id)->orderBy('id')->get();
+        $this->assertCount(12, $payments);
+
+        $sum = (float) $payments->sum('amount');
+        $this->assertEquals(7500000.0, $sum);
+    }
+
+    public function test_installment_platinum_course(): void
+    {
+        $course = Course::factory()->active()->create([
+            'slug' => 'kelas-amc-platinum',
+            'title' => 'Kelas AMC Platinum',
+            'price' => 22500000,
+        ]);
+
+        $scheme = InstallmentScheme::create([
+            'course_id' => $course->id,
+            'name' => 'Cicilan 12x Platinum',
+            'dp_pct' => 20,
+            'n_installments' => 12,
+            'interval_days' => 30,
+            'active' => true,
+        ]);
+
+        // Assert scheme resolves for this course
+        $available = InstallmentScheme::active()->forCourse($course->id)->get();
+        $this->assertTrue($available->contains('id', $scheme->id));
+
+        // Checkout with installment
+        $this->post('/checkout', $this->validPayload([
+            'cart_json' => json_encode([
+                ['slug' => 'kelas-amc-platinum', 'name' => 'Kelas AMC Platinum', 'price' => 22500000, 'qty' => 1],
+            ]),
+            'cart_total' => 22500000,
+            'payment_type' => 'cicilan',
+            'installment_scheme_id' => $scheme->id,
+        ]));
+
+        $this->assertSame(1, Order::count());
+        $order = Order::first();
+        $payments = OrderPayment::where('order_id', $order->id)->orderBy('id')->get();
+        $this->assertCount(12, $payments);
+
+        $sum = (float) $payments->sum('amount');
+        $this->assertEquals(22500000.0, $sum);
+    }
 }
