@@ -23,6 +23,7 @@ class UpdateProductRequest extends FormRequest
 
         $this->merge([
             'slug' => $slug,
+            'type' => 'book',
             'meta_title' => $this->input('meta_title') ?: null,
             'meta_description' => $this->input('meta_description') ?: null,
         ]);
@@ -46,7 +47,7 @@ class UpdateProductRequest extends FormRequest
                     ->ignore($productId)
                     ->whereNull('deleted_at'),
             ],
-            'type' => ['required', Rule::in(['book', 'course'])],
+            'type' => ['required', Rule::in(['book'])],
             'price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'stock' => ['required', 'integer', 'min:0', 'max:1000000'],
             'status' => ['required', Rule::in(['draft', 'active', 'archived'])],

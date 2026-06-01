@@ -3,11 +3,6 @@
 @section('title', 'Produk')
 
 @php
-    $typeLabel = [
-        'book' => 'Buku',
-        'course' => 'Kelas',
-    ];
-
     $isTrashed = ($view ?? 'active') === 'trashed';
 @endphp
 
@@ -82,23 +77,12 @@
             </div>
         @endunless
 
-        <div class="sm:w-40">
-            <label for="type" class="block text-xs font-medium text-gray-700 mb-1 dark:text-gray-300">Tipe</label>
-            <select id="type" name="type"
-                class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
-                <option value="">Semua</option>
-                @foreach (['book' => 'Buku', 'course' => 'Kelas'] as $value => $label)
-                    <option value="{{ $value }}" @selected($filterType === $value)>{{ $label }}</option>
-                @endforeach
-            </select>
-        </div>
-
         <x-admin.button type="submit" size="sm">
             <x-admin.icon name="filter" class="h-3.5 w-3.5" />
             Filter
         </x-admin.button>
 
-        @if ($search || $filterStatus || $filterType)
+        @if ($search || $filterStatus)
             <x-admin.button href="{{ route('admin.products.index', ['view' => $view ?? 'active']) }}" variant="outline" size="sm">
                 Reset
             </x-admin.button>
@@ -111,7 +95,6 @@
         @csrf
         <input type="hidden" name="view" value="{{ $view ?? 'active' }}">
         @if ($filterStatus) <input type="hidden" name="status" value="{{ $filterStatus }}"> @endif
-        @if ($filterType) <input type="hidden" name="type" value="{{ $filterType }}"> @endif
         @if ($search) <input type="hidden" name="q" value="{{ $search }}"> @endif
 
         {{-- Bulk action toolbar (sticky bottom-style, conditional) --}}
@@ -162,7 +145,6 @@
             :columns="[
                 ['label' => '', 'align' => 'w-8'],
                 ['label' => 'Produk'],
-                ['label' => 'Tipe'],
                 ['label' => 'Harga'],
                 ['label' => 'Stok'],
                 ['label' => 'Status'],
@@ -196,11 +178,6 @@
                                 @endif
                             </div>
                         </div>
-                    </td>
-                    <td class="px-4 py-3">
-                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
-                            {{ $typeLabel[$product->type] ?? $product->type }}
-                        </span>
                     </td>
                     <td class="px-4 py-3 font-medium text-gray-800 dark:text-white/90">Rp {{ number_format((float) $product->price, 0, ',', '.') }}</td>
                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ $product->stock }}</td>

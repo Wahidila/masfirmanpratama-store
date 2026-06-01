@@ -67,17 +67,8 @@
                 </div>
             </x-admin.form-group>
 
-            <x-admin.form-group label="Tipe produk" for="type" name="type" required>
-                <select
-                    id="type"
-                    name="type"
-                    required
-                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
-                    @foreach (['book' => 'Buku', 'course' => 'Kelas / Kursus'] as $value => $label)
-                        <option value="{{ $value }}" @selected(old('type', $product->type) === $value)>{{ $label }}</option>
-                    @endforeach
-                </select>
-            </x-admin.form-group>
+            <input type="hidden" name="type" value="book">
+
         </div>
     </x-admin.card>
 

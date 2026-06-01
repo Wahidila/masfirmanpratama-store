@@ -21,7 +21,6 @@ class ProductController extends Controller
     public function index(Request $request): View
     {
         $filterStatus = $request->query('status');
-        $filterType = $request->query('type');
         $search = trim((string) $request->query('q', ''));
         $view = $request->query('view', 'active'); // 'active' (default) | 'trashed'
 
@@ -34,10 +33,6 @@ class ProductController extends Controller
 
         if (in_array($filterStatus, ['draft', 'active', 'archived'], true)) {
             $query->where('status', $filterStatus);
-        }
-
-        if (in_array($filterType, ['book', 'course'], true)) {
-            $query->where('type', $filterType);
         }
 
         if ($search !== '') {
@@ -61,7 +56,6 @@ class ProductController extends Controller
             'products' => $products,
             'stats' => $stats,
             'filterStatus' => $filterStatus,
-            'filterType' => $filterType,
             'search' => $search,
             'view' => $view,
         ]);
@@ -201,7 +195,7 @@ class ProductController extends Controller
         };
 
         return redirect()
-            ->route('admin.products.index', $request->only(['view', 'status', 'type', 'q']))
+            ->route('admin.products.index', $request->only(['view', 'status', 'q']))
             ->with('status', $message);
     }
 

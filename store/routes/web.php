@@ -166,6 +166,7 @@ if (! app()->environment('production')) {
 */
 
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InstallmentSchemeController;
 use App\Http\Controllers\Admin\OrderController;
@@ -194,6 +195,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('products', AdminProductController::class)
             ->except(['show'])
             ->parameters(['products' => 'product']);
+
+        Route::post('courses/bulk', [AdminCourseController::class, 'bulk'])->name('courses.bulk');
+        Route::post('courses/{course}/restore', [AdminCourseController::class, 'restore'])
+            ->withTrashed()
+            ->name('courses.restore');
+        Route::resource('courses', AdminCourseController::class)
+            ->except(['show'])
+            ->parameters(['courses' => 'course']);
 
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
