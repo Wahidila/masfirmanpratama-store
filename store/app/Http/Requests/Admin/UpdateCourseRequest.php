@@ -31,6 +31,8 @@ class UpdateCourseRequest extends FormRequest
             'meta_title' => $this->input('meta_title') ?: null,
             'meta_description' => $this->input('meta_description') ?: null,
             'installment_available' => $this->has('installment_available') && $this->input('installment_available') === '1',
+            'show_on_homepage' => $this->has('show_on_homepage') && $this->input('show_on_homepage') === '1',
+            'sort_order' => (int) ($this->input('sort_order') ?: 0),
         ];
 
         $rawDesc = $this->input('description_raw');
@@ -45,6 +47,14 @@ class UpdateCourseRequest extends FormRequest
         if (is_string($rawSyllabus) && $rawSyllabus !== '') {
             $data['syllabus'] = array_values(array_filter(
                 explode("\n", $rawSyllabus),
+                fn ($v) => trim($v) !== '',
+            ));
+        }
+
+        $rawCardFeatures = $this->input('card_features_raw');
+        if (is_string($rawCardFeatures) && $rawCardFeatures !== '') {
+            $data['card_features'] = array_values(array_filter(
+                explode("\n", $rawCardFeatures),
                 fn ($v) => trim($v) !== '',
             ));
         }
@@ -132,6 +142,17 @@ class UpdateCourseRequest extends FormRequest
             'related.*' => ['string', 'max:200'],
             'meta_title' => ['nullable', 'string', 'max:160'],
             'meta_description' => ['nullable', 'string', 'max:320'],
+
+            // Homepage card fields
+            'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
+            'show_on_homepage' => ['boolean'],
+            'card_features_raw' => ['nullable', 'string', 'max:4000'],
+            'card_features' => ['nullable', 'array'],
+            'card_features.*' => ['string', 'max:200'],
+            'card_icon' => ['nullable', 'string', 'max:40'],
+            'card_icon_color' => ['nullable', 'string', 'max:60'],
+            'card_style' => ['nullable', Rule::in(['default', 'highlight', 'dark'])],
+            'cta_label' => ['nullable', 'string', 'max:60'],
         ];
     }
 
