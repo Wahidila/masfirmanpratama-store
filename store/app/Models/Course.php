@@ -34,6 +34,13 @@ class Course extends Model
         'testimonials',
         'related',
         'meta_seo',
+        'sort_order',
+        'show_on_homepage',
+        'card_features',
+        'card_icon',
+        'card_icon_color',
+        'card_style',
+        'cta_label',
     ];
 
     protected function casts(): array
@@ -49,6 +56,9 @@ class Course extends Model
             'testimonials' => 'array',
             'related' => 'array',
             'meta_seo' => 'array',
+            'sort_order' => 'integer',
+            'show_on_homepage' => 'boolean',
+            'card_features' => 'array',
         ];
     }
 

@@ -43,6 +43,13 @@ class CourseFactory extends Factory
             'testimonials' => [],
             'related' => [],
             'meta_seo' => null,
+            'sort_order' => 0,
+            'show_on_homepage' => true,
+            'card_features' => [],
+            'card_icon' => null,
+            'card_icon_color' => null,
+            'card_style' => 'default',
+            'cta_label' => null,
         ];
     }
 
