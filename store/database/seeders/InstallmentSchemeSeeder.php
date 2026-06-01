@@ -35,5 +35,23 @@ class InstallmentSchemeSeeder extends Seeder
                 ['dp_pct' => 15, 'n_installments' => 12, 'interval_days' => 30, 'active' => true],
             );
         }
+
+        // Skema 12x untuk kelas privat (sync-c1)
+        $privat = Course::where('slug', 'kelas-amc-privat')->first();
+        if ($privat) {
+            InstallmentScheme::updateOrCreate(
+                ['course_id' => $privat->id, 'name' => '12x Cicilan (Kelas Privat)'],
+                ['dp_pct' => 15, 'n_installments' => 12, 'interval_days' => 30, 'active' => true],
+            );
+        }
+
+        // Skema 12x untuk kelas platinum (sync-c1)
+        $platinum = Course::where('slug', 'kelas-amc-platinum')->first();
+        if ($platinum) {
+            InstallmentScheme::updateOrCreate(
+                ['course_id' => $platinum->id, 'name' => '12x Cicilan (Kelas Platinum)'],
+                ['dp_pct' => 20, 'n_installments' => 12, 'interval_days' => 30, 'active' => true],
+            );
+        }
     }
 }
