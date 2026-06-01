@@ -2,9 +2,11 @@
 
 namespace App\Services\Shipping;
 
+use App\Exceptions\ShippingRateException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AgenwebsiteClient
 {
@@ -110,7 +112,17 @@ class AgenwebsiteClient
         return Cache::remember($cacheKey, $this->cfg['cache_rate_ttl'], function () use ($params) {
             $result = $this->post('shipping/price', $params);
 
-            if ($result['status'] !== 'success' || ! is_array($result['result'])) {
+            if ($result['status'] === 'error') {
+                Log::warning('Shipping rate API error', [
+                    'endpoint' => 'shipping/price',
+                    'api_message' => $result['message'] ?? null,
+                    'province' => $params['province'] ?? null,
+                    'city' => $params['city'] ?? null,
+                ]);
+                throw new ShippingRateException($result['message'] ?? 'Gagal memuat tarif pengiriman.');
+            }
+
+            if (! is_array($result['result'])) {
                 return [];
             }
 

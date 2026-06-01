@@ -2,8 +2,10 @@
 
 namespace App\Services\Shipping;
 
+use App\Exceptions\ShippingRateException;
 use App\Models\Product;
 use App\Services\Settings;
+use Illuminate\Support\Facades\Log;
 
 class ShippingRateService
 {
@@ -149,8 +151,13 @@ class ShippingRateService
                     'etd' => $row['etd'] ?? '',
                 ];
             }, array_values($filtered));
+        } catch (ShippingRateException $e) {
+            throw $e;
         } catch (\Throwable $e) {
-            return [];
+            Log::error('Shipping rate unexpected failure', [
+                'exception_message' => $e->getMessage(),
+            ]);
+            throw new ShippingRateException('Ongkir sementara tidak tersedia.');
         }
     }
 
