@@ -10,12 +10,8 @@ class ProductSeeder extends Seeder
     /**
      * Map config/products.php → tabel products.
      *
-     * Config pakai type 'kelas'/'buku', schema enum pakai 'course'/'book'.
+     * B1: hanya seed BUKU. Kelas sudah dipisah ke CourseSeeder.
      */
-    private const TYPE_MAP = [
-        'kelas' => 'course',
-        'buku' => 'book',
-    ];
 
     /**
      * Realistic weight (kg) mapping based on page count / thickness.
@@ -34,7 +30,10 @@ class ProductSeeder extends Seeder
         $items = config('products.items', []);
 
         foreach ($items as $slug => $p) {
-            $type = self::TYPE_MAP[$p['type'] ?? 'buku'] ?? 'book';
+            // B1: skip kelas — sudah di CourseSeeder
+            if (($p['type'] ?? '') === 'kelas') {
+                continue;
+            }
 
             $description = isset($p['description']) && is_array($p['description'])
                 ? implode("\n\n", $p['description'])
@@ -53,16 +52,16 @@ class ProductSeeder extends Seeder
             Product::updateOrCreate(
                 ['slug' => $slug],
                 [
-                    'type' => $type,
+                    'type' => 'book',
                     'title' => $p['title'] ?? $slug,
                     'price' => $p['price'] ?? 0,
-                    'stock' => $type === 'course' ? 99 : 50,
+                    'stock' => 50,
                     'status' => 'active',
                     'image_path' => $p['image'] ?? null,
                     'description' => $description,
                     'meta_seo' => $metaSeo ?: null,
-                    'weight_kg' => $type === 'book' ? (self::WEIGHT_MAP[$slug] ?? 0.3) : null,
-                    'is_shippable' => $type !== 'course',
+                    'weight_kg' => self::WEIGHT_MAP[$slug] ?? 0.3,
+                    'is_shippable' => true,
                 ],
             );
         }

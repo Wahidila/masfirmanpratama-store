@@ -2,36 +2,36 @@
 
 namespace Database\Seeders;
 
+use App\Models\Course;
 use App\Models\InstallmentScheme;
-use App\Models\Product;
 use Illuminate\Database\Seeder;
 
 class InstallmentSchemeSeeder extends Seeder
 {
     public function run(): void
     {
-        // Skema global (product_id = null) berlaku untuk semua produk
+        // Skema global (product_id = null, course_id = null) berlaku untuk semua produk
         // yang belum punya skema spesifik.
         InstallmentScheme::updateOrCreate(
-            ['product_id' => null, 'name' => 'Lunas (cash)'],
+            ['product_id' => null, 'course_id' => null, 'name' => 'Lunas (cash)'],
             ['dp_pct' => 100, 'n_installments' => 1, 'interval_days' => 0, 'active' => true],
         );
 
         InstallmentScheme::updateOrCreate(
-            ['product_id' => null, 'name' => '3x Cicilan'],
+            ['product_id' => null, 'course_id' => null, 'name' => '3x Cicilan'],
             ['dp_pct' => 30, 'n_installments' => 3, 'interval_days' => 30, 'active' => true],
         );
 
         InstallmentScheme::updateOrCreate(
-            ['product_id' => null, 'name' => '6x Cicilan'],
+            ['product_id' => null, 'course_id' => null, 'name' => '6x Cicilan'],
             ['dp_pct' => 20, 'n_installments' => 6, 'interval_days' => 30, 'active' => true],
         );
 
-        // Optional: skema 12x untuk kelas reguler (high-ticket).
-        $kelas = Product::where('slug', 'kelas-amc-reguler')->first();
+        // Skema 12x untuk kelas reguler (high-ticket) — B1: pakai Course model.
+        $kelas = Course::where('slug', 'kelas-amc-reguler')->first();
         if ($kelas) {
             InstallmentScheme::updateOrCreate(
-                ['product_id' => $kelas->id, 'name' => '12x Cicilan (Kelas Reguler)'],
+                ['course_id' => $kelas->id, 'name' => '12x Cicilan (Kelas Reguler)'],
                 ['dp_pct' => 15, 'n_installments' => 12, 'interval_days' => 30, 'active' => true],
             );
         }

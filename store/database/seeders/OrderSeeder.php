@@ -2,11 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\Course;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderPayment;
 use App\Models\Product;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -14,14 +16,15 @@ class OrderSeeder extends Seeder
 {
     public function run(): void
     {
-        $kelasReguler = Product::where('slug', 'kelas-amc-reguler')->first();
+        // B1: kelas sekarang dari Course model
+        $kelasReguler = Course::where('slug', 'kelas-amc-reguler')->first();
         $bukuKeajaiban = Product::where('slug', '10-keajaiban-pikiran')->first();
         $bukuKitabSugesti = Product::where('slug', 'kitab-101-kalimat-sugesti-ajaib')->first();
         $bukuFormula = Product::where('slug', 'formula-amc-firman-pratama')->first();
         $bukuTelepathy = Product::where('slug', 'alpha-telepathy')->first();
 
         if (! $kelasReguler || ! $bukuKeajaiban) {
-            // Produk belum ter-seed. Skip.
+            // Data belum ter-seed. Skip.
             return;
         }
 
@@ -38,7 +41,8 @@ class OrderSeeder extends Seeder
             'payments' => [],
         ]);
 
-        // Sample 2 — partial_paid (DP cicilan 3x sudah masuk, verified)
+        // Sample 2 — partial_paid (DP cicilan kelas, verified)
+        // B1: item kelas pakai Course model
         $this->createOrder([
             'order_number' => $this->generateOrderNumber('20260517-PRT'),
             'customer_name' => 'Sari Lestari',
@@ -108,6 +112,12 @@ class OrderSeeder extends Seeder
         ]);
     }
 
+    /**
+     * Create order with items and payments.
+     * B1: detects Course vs Product to set correct FK (course_id or product_id).
+     *
+     * @param  array{order_number: string, customer_name: string, phone: string, email?: string, address: string, status: string, ref_code?: string, created_at?: Carbon, items: array<int, array{0: Model, 1: int}>, payments: array}  $data
+     */
     private function createOrder(array $data): Order
     {
         $items = $data['items'];
@@ -115,8 +125,8 @@ class OrderSeeder extends Seeder
         unset($data['items'], $data['payments']);
 
         $total = 0;
-        foreach ($items as [$product, $qty]) {
-            $total += (float) $product->price * $qty;
+        foreach ($items as [$model, $qty]) {
+            $total += (float) $model->price * $qty;
         }
 
         $order = Order::create([
@@ -132,14 +142,21 @@ class OrderSeeder extends Seeder
             'updated_at' => $data['created_at'] ?? now(),
         ]);
 
-        foreach ($items as [$product, $qty]) {
-            OrderItem::create([
+        foreach ($items as [$model, $qty]) {
+            $itemData = [
                 'order_id' => $order->id,
-                'product_id' => $product->id,
                 'qty' => $qty,
-                'unit_price' => $product->price,
-                'subtotal' => (float) $product->price * $qty,
-            ]);
+                'unit_price' => $model->price,
+                'subtotal' => (float) $model->price * $qty,
+            ];
+
+            if ($model instanceof Course) {
+                $itemData['course_id'] = $model->id;
+            } else {
+                $itemData['product_id'] = $model->id;
+            }
+
+            OrderItem::create($itemData);
         }
 
         foreach ($payments as $payment) {
