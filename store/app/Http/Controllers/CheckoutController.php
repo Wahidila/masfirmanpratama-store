@@ -6,6 +6,7 @@ use App\Models\InstallmentScheme;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderPayment;
+use App\Models\Course;
 use App\Models\Product;
 use App\Services\Shipping\ShippingRateService;
 use Illuminate\Http\RedirectResponse;
@@ -184,6 +185,7 @@ class CheckoutController extends Controller
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
+                    'course_id' => $item['course_id'],
                     'qty' => $item['qty'],
                     'unit_price' => $item['unit_price'],
                     'subtotal' => $item['subtotal'],
@@ -245,12 +247,17 @@ class CheckoutController extends Controller
      * di DB / non-active di-skip silently (atau bisa raise — pilihan: raise untuk
      * fail-loud lebih baik UX).
      *
-     * @return array{0: array<int, array{product_id:int, qty:int, unit_price:int, subtotal:int}>, 1: int}
+     * @return array{0: array<int, array{product_id:int|null, course_id:int|null, qty:int, unit_price:int, subtotal:int}>, 1: int}
      */
     protected function resolveCartItems(array $cart): array
     {
         $slugs = array_unique(array_map(fn ($i) => (string) $i['slug'], $cart));
         $products = Product::whereIn('slug', $slugs)
+            ->where('status', 'active')
+            ->get()
+            ->keyBy('slug');
+
+        $courses = Course::whereIn('slug', $slugs)
             ->where('status', 'active')
             ->get()
             ->keyBy('slug');
@@ -262,24 +269,33 @@ class CheckoutController extends Controller
             $slug = (string) ($entry['slug'] ?? '');
             $qty = max(1, (int) ($entry['qty'] ?? 1));
             $product = $products->get($slug);
+            $course = $courses->get($slug);
 
-            if (! $product) {
+            if ($product) {
+                $unitPrice = (int) $product->price;
+                $items[] = [
+                    'product_id' => $product->id,
+                    'course_id' => null,
+                    'qty' => $qty,
+                    'unit_price' => $unitPrice,
+                    'subtotal' => $unitPrice * $qty,
+                ];
+            } elseif ($course) {
+                $unitPrice = (int) $course->price;
+                $items[] = [
+                    'product_id' => null,
+                    'course_id' => $course->id,
+                    'qty' => $qty,
+                    'unit_price' => $unitPrice,
+                    'subtotal' => $unitPrice * $qty,
+                ];
+            } else {
                 throw ValidationException::withMessages([
-                    'cart_json' => "Produk '{$slug}' tidak ditemukan atau tidak aktif.",
+                    'cart_json' => "Item '{$slug}' tidak ditemukan atau tidak aktif.",
                 ]);
             }
 
-            $unitPrice = (int) $product->price;
-            $rowSubtotal = $unitPrice * $qty;
-
-            $items[] = [
-                'product_id' => $product->id,
-                'qty' => $qty,
-                'unit_price' => $unitPrice,
-                'subtotal' => $rowSubtotal,
-            ];
-
-            $subtotal += $rowSubtotal;
+            $subtotal += $items[array_key_last($items)]['subtotal'];
         }
 
         return [$items, $subtotal];
