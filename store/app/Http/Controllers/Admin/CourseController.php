@@ -94,6 +94,13 @@ class CourseController extends Controller
             'testimonials' => $data['testimonials'] ?? null,
             'related' => $data['related'] ?? null,
             'meta_seo' => $this->buildMetaSeo($data),
+            'sort_order' => $data['sort_order'] ?? 0,
+            'show_on_homepage' => $data['show_on_homepage'] ?? false,
+            'card_features' => $data['card_features'] ?? null,
+            'card_icon' => $data['card_icon'] ?? null,
+            'card_icon_color' => $data['card_icon_color'] ?? null,
+            'card_style' => $data['card_style'] ?? 'default',
+            'cta_label' => $data['cta_label'] ?? null,
         ]);
 
         if ($request->hasFile('image')) {
@@ -139,6 +146,13 @@ class CourseController extends Controller
             'testimonials' => $data['testimonials'] ?? null,
             'related' => $data['related'] ?? null,
             'meta_seo' => $this->buildMetaSeo($data),
+            'sort_order' => $data['sort_order'] ?? 0,
+            'show_on_homepage' => $data['show_on_homepage'] ?? false,
+            'card_features' => $data['card_features'] ?? null,
+            'card_icon' => $data['card_icon'] ?? null,
+            'card_icon_color' => $data['card_icon_color'] ?? null,
+            'card_style' => $data['card_style'] ?? 'default',
+            'cta_label' => $data['cta_label'] ?? null,
         ]);
 
         // Replace image
