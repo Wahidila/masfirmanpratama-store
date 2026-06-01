@@ -181,6 +181,18 @@ class ProductController extends Controller
                         'category_label' => $relProduct->meta_seo['category_label'] ?? ($relConfig['category_label'] ?? 'Buku'),
                         'image_alt' => $relProduct->meta_seo['image_alt'] ?? ($relConfig['image_alt'] ?? $relProduct->title),
                     ]);
+                } elseif ($relCourse = Course::where('slug', $relatedSlug)->where('status', 'active')->first()) {
+                    $related[] = [
+                        'slug' => $relCourse->slug,
+                        'type' => 'kelas',
+                        'title' => $relCourse->title,
+                        'price' => (float) $relCourse->price,
+                        'image' => asset($relCourse->image_path ?? 'images/placeholder.webp'),
+                        'subtitle' => $relCourse->subtitle ?? '',
+                        'badge' => $relCourse->badge ?? null,
+                        'category_label' => $relCourse->category_label ?? 'Kelas',
+                        'image_alt' => $relCourse->meta_seo['image_alt'] ?? $relCourse->title,
+                    ];
                 } elseif (! empty($relConfig)) {
                     $relConfig['image'] = isset($relConfig['image']) ? asset($relConfig['image']) : null;
                     $relConfig['type'] = ($relConfig['type'] ?? 'buku') === 'course' ? 'kelas' : ($relConfig['type'] ?? 'buku');
