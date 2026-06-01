@@ -649,7 +649,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                @foreach ($pricing as $tier)
+                @foreach (($classFormats ?? $pricing) as $tier)
                     @php
                         $isHighlight = $tier['highlight'] ?? false;
                         $isDark = $tier['dark'] ?? false;
@@ -700,8 +700,6 @@
                             @if ($isHighlight)
                                 <a
                                     href="{{ $tier['ctaHref'] }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
                                     class="ripple block w-full text-center bg-primary-600 text-white hover:bg-primary-700 hover:shadow-lg rounded-xl py-3.5 font-bold transition-all"
                                 >
                                     {{ $tier['ctaLabel'] }}
@@ -709,8 +707,6 @@
                             @elseif ($isDark)
                                 <a
                                     href="{{ $tier['ctaHref'] }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
                                     class="block w-full text-center bg-white text-slate-900 hover:bg-secondary-50 hover:text-secondary-700 rounded-xl py-3.5 font-bold transition-all shadow-md"
                                 >
                                     {{ $tier['ctaLabel'] }}
@@ -718,8 +714,6 @@
                             @else
                                 <a
                                     href="{{ $tier['ctaHref'] }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
                                     class="block w-full text-center bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl py-3.5 font-bold transition-all shadow-sm"
                                 >
                                     {{ $tier['ctaLabel'] }}
