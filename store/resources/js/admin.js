@@ -20,7 +20,10 @@ document.addEventListener('alpine:init', () => {
             this.apply();
         },
         apply() {
-            document.documentElement.classList.toggle('dark', this.theme === 'dark');
+            const isDark = this.theme === 'dark';
+            document.documentElement.classList.toggle('dark', isDark);
+            document.body.classList.toggle('dark', isDark);
+            document.body.classList.toggle('bg-gray-900', isDark);
         }
     });
 
