@@ -13,3 +13,6 @@ build/
 
 # Third-party reference plugin (GPL WooCommerce, audit-only — jangan masuk repo)
 docs_dev/reference/agenwebsite-shipping/
+
+# TailAdmin Laravel template (UI reference only, verbatim port source — jangan masuk repo)
+_ui_reference/
