@@ -21,6 +21,8 @@ class CheckoutPageTest extends TestCase
             'price' => 4_500_000,
             'status' => 'active',
             'type' => 'course',
+            'is_shippable' => false,
+            'weight_kg' => null,
         ]);
     }
     // ─── GET /checkout ──────────────────────────────────────────────────────

@@ -83,10 +83,10 @@ class ShippingRateEndpointTest extends TestCase
         $response->assertJsonValidationErrors(['cart_json']);
     }
 
-    public function test_api_failure_returns_empty_rates(): void
+    public function test_api_failure_returns_error_message(): void
     {
         Http::fake([
-            '*/shipping/price' => Http::response(['message' => 'Error'], 500),
+            '*/shipping/price' => Http::response(['message' => 'License Anda sudah expired.'], 403),
         ]);
 
         $response = $this->postJson('/shipping/rates', [
@@ -99,7 +99,9 @@ class ShippingRateEndpointTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        $response->assertExactJson(['rates' => []]);
+        $response->assertJsonPath('rates', []);
+        $response->assertJsonStructure(['rates', 'error']);
+        $this->assertNotEmpty($response->json('error'));
     }
 
     public function test_route_has_csrf_protection(): void

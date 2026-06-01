@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Shipping;
 
+use App\Exceptions\ShippingRateException;
 use App\Models\Product;
 use App\Services\Shipping\ShippingRateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -161,7 +162,7 @@ class ShippingRatesTest extends TestCase
         $this->assertEmpty($result);
     }
 
-    public function test_get_rates_returns_empty_array_on_api_error(): void
+    public function test_get_rates_throws_on_api_error(): void
     {
         Product::factory()->create([
             'slug' => 'buku-a',
@@ -174,10 +175,12 @@ class ShippingRatesTest extends TestCase
         ]);
 
         Http::fake([
-            '*/shipping/price' => Http::response(['message' => 'Error'], 500),
+            '*/shipping/price' => Http::response(['message' => 'License Anda sudah expired.'], 403),
         ]);
 
-        $result = app(ShippingRateService::class)->getRates(
+        $this->expectException(ShippingRateException::class);
+
+        app(ShippingRateService::class)->getRates(
             [
                 'province' => 'DKI Jakarta',
                 'city' => 'Jakarta Selatan',
@@ -188,9 +191,6 @@ class ShippingRatesTest extends TestCase
                 ['slug' => 'buku-a', 'qty' => 1],
             ]
         );
-
-        $this->assertIsArray($result);
-        $this->assertEmpty($result);
     }
 
     public function test_get_rates_filters_only_active_couriers(): void

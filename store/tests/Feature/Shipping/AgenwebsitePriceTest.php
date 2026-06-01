@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Shipping;
 
+use App\Exceptions\ShippingRateException;
 use App\Services\Shipping\AgenwebsiteClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -91,21 +92,22 @@ class AgenwebsitePriceTest extends TestCase
         Http::assertSentCount(1);
     }
 
-    public function test_price_returns_empty_array_on_api_error(): void
+    public function test_price_throws_on_api_error(): void
     {
         Http::fake([
-            '*/shipping/price' => Http::response(['message' => 'Error'], 500),
+            '*/shipping/price' => Http::response(['message' => 'License Anda sudah expired.'], 403),
         ]);
 
         $client = app(AgenwebsiteClient::class);
-        $result = $client->price([
+
+        $this->expectException(ShippingRateException::class);
+        $this->expectExceptionMessage('License Anda sudah expired.');
+
+        $client->price([
             'origin' => 'surabaya',
             'weight' => 1,
             'courier' => 'jne',
         ]);
-
-        $this->assertIsArray($result);
-        $this->assertEmpty($result);
     }
 
     public function test_price_casts_multiple_rows(): void
