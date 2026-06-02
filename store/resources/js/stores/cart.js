@@ -47,6 +47,7 @@ function loadFromStorage() {
                 image: it.image ? String(it.image) : null,
                 category: it.category ? String(it.category) : null,
                 qty: Math.max(1, Math.floor(Number(it.qty) || 1)),
+                is_shippable: it.is_shippable !== false, // default true; false only for digital items
             }));
     } catch (e) {
         // localStorage unavailable / disabled / corrupted JSON — start clean.
@@ -122,6 +123,7 @@ const cart = {
                 image: item.image ? String(item.image) : null,
                 category: item.category ? String(item.category) : null,
                 qty: addQty,
+                is_shippable: item.is_shippable !== false, // default true; false for digital
             });
         }
         this._persist();

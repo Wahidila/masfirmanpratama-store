@@ -35,6 +35,7 @@
         'price' => $price,
         'image' => $image,
         'category_label' => $categoryLabel,
+        'is_shippable' => true, // buku fisik — butuh pengiriman
     ];
 @endphp
 

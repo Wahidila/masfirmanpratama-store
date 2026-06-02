@@ -348,7 +348,7 @@
                         </div>
 
                         {{-- Ongkir method --}}
-                        <div class="sm:col-span-2">
+                        <div class="sm:col-span-2" x-show="requiresShipping">
                             <label class="mb-1.5 block text-sm font-semibold text-slate-700">
                                 Metode Pengiriman <span class="text-rose-500">*</span>
                             </label>
@@ -773,6 +773,12 @@
                     rateError: '',
 
                     // ── Computed ────────────────────────────────────────
+                    get requiresShipping() {
+                        const items = this.$store.cart && this.$store.cart.items ? this.$store.cart.items : [];
+                        // Cart requires shipping if ANY item has is_shippable !== false (default true)
+                        return items.some((i) => i.is_shippable !== false);
+                    },
+
                     get cartSubtotal() {
                         return this.$store.cart && this.$store.cart.subtotal
                             ? Number(this.$store.cart.subtotal) || 0
@@ -886,7 +892,7 @@
                         }
                         if (! this.form.address_city) e.address_city = 'Kota wajib dipilih.';
                         if (! this.form.address_province) e.address_province = 'Provinsi wajib dipilih.';
-                        if (! this.form.shipping_method) e.shipping_method = 'Metode pengiriman wajib dipilih.';
+                        if (this.requiresShipping && ! this.form.shipping_method) e.shipping_method = 'Metode pengiriman wajib dipilih.';
 
                         if (this.form.payment_type === 'cicilan') {
                             const idx = this.form.installment_scheme;
