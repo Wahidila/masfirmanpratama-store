@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ShippingRateException;
+use App\Models\Course;
 use App\Models\InstallmentScheme;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderPayment;
-use App\Models\Course;
 use App\Models\Product;
 use App\Services\Shipping\ShippingRateService;
 use Illuminate\Http\RedirectResponse;
