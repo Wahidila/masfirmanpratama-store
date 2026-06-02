@@ -30,8 +30,8 @@
             <div class="hidden md:flex items-center space-x-8">
                 <a href="{{ url('/') }}" class="text-slate-600 hover:text-primary-600 font-medium transition-colors">Beranda</a>
                 <a href="{{ url('/produk') }}" class="text-slate-600 hover:text-primary-600 font-medium transition-colors">Produk</a>
-                <a href="{{ url('/tentang') }}" class="text-slate-600 hover:text-primary-600 font-medium transition-colors">Tentang</a>
-                <a href="{{ url('/kontak') }}" class="text-slate-600 hover:text-primary-600 font-medium transition-colors">Kontak</a>
+                <a href="{{ route('pages.tentang') }}" class="text-slate-600 hover:text-primary-600 font-medium transition-colors">Tentang</a>
+                <a href="{{ route('pages.kontak') }}" class="text-slate-600 hover:text-primary-600 font-medium transition-colors">Kontak</a>
 
                 <span class="h-6 w-px bg-slate-200" aria-hidden="true"></span>
 
@@ -104,8 +104,8 @@
         <div class="px-4 pt-3 pb-6 space-y-1">
             <a href="{{ url('/') }}" class="flex items-center min-h-[44px] px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Beranda</a>
             <a href="{{ url('/produk') }}" class="flex items-center min-h-[44px] px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Produk</a>
-            <a href="{{ url('/tentang') }}" class="flex items-center min-h-[44px] px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Tentang</a>
-            <a href="{{ url('/kontak') }}" class="flex items-center min-h-[44px] px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Kontak</a>
+            <a href="{{ route('pages.tentang') }}" class="flex items-center min-h-[44px] px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Tentang</a>
+            <a href="{{ route('pages.kontak') }}" class="flex items-center min-h-[44px] px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 transition-colors">Kontak</a>
 
             <div class="pt-2">
                 <x-button :href="$ctaHref" size="md" icon="message-circle" iconPosition="left" class="w-full">

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShippingRateController;
 use App\Http\Controllers\TrackController;
@@ -23,8 +24,16 @@ use Illuminate\Support\Facades\Route;
 // Homepage
 Route::get('/', HomeController::class)->name('home');
 
+// Static pages
+Route::get('/tentang', [PageController::class, 'tentang'])->name('pages.tentang');
+Route::get('/kontak', [PageController::class, 'kontak'])->name('pages.kontak');
+
 // Katalog produk
 Route::get('/produk', [ProductController::class, 'index'])->name('products.index');
+
+Route::get('/kelas/{slug}', [ProductController::class, 'show'])
+    ->where('slug', '[a-z0-9\-]+')
+    ->name('courses.show');
 
 Route::get('/produk/{slug}', [ProductController::class, 'show'])
     ->where('slug', '[A-Za-z0-9\-]+')

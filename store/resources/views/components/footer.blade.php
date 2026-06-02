@@ -24,7 +24,7 @@
             ['label' => 'Pembelian Karya', 'href' => url('/produk?kategori=buku')],
         ],
         'Komunitas' => [
-            ['label' => 'Profil Pribadi', 'href' => url('/tentang')],
+            ['label' => 'Profil Pribadi', 'href' => route('pages.tentang')],
             ['label' => 'Testimoni Alumni', 'href' => url('/#testimoni')],
             ['label' => 'Artikel Keajaiban', 'href' => url('/blog')],
             ['label' => 'Afiliasi Program', 'href' => 'https://affiliate.masfirmanpratama.com'],

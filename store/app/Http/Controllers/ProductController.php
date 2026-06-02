@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Product;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class ProductController extends Controller
@@ -51,10 +52,13 @@ class ProductController extends Controller
         return view('pages.products.index', compact('products', 'productCounts', 'productIndex', 'productTotal'));
     }
 
-    public function show(string $slug): View
+    public function show(string $slug): View|RedirectResponse
     {
         $courseModel = Course::where('slug', $slug)->where('status', 'active')->first();
         if ($courseModel) {
+            if (request()->route()->getName() === 'products.show') {
+                return redirect()->route('courses.show', $slug, 301);
+            }
             $data = [
                 'slug' => $courseModel->slug,
                 'type' => 'kelas',

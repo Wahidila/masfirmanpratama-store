@@ -55,7 +55,7 @@ class CourseStorefrontTest extends TestCase
             ],
         ]);
 
-        $response = $this->get('/produk/kelas-amc-reguler');
+        $response = $this->get('/kelas/kelas-amc-reguler');
         $response->assertStatus(200);
         $response->assertSee('Kelas Reguler Alpha Mind Control');
         $response->assertSee('Topik A');
@@ -72,7 +72,7 @@ class CourseStorefrontTest extends TestCase
             'price' => 4500000,
         ]);
 
-        $response = $this->get('/produk/kelas-amc-reguler');
+        $response = $this->get('/kelas/kelas-amc-reguler');
         $response->assertStatus(200);
         $response->assertSee('DB Course Title Unique');
     }

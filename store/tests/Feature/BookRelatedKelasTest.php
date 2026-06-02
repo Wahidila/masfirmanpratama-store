@@ -78,7 +78,7 @@ class BookRelatedKelasTest extends TestCase
             'Config entry kelas-amc-reguler must be removed (B4-B).'
         );
 
-        $response = $this->get('/produk/kelas-amc-reguler');
+        $response = $this->get('/kelas/kelas-amc-reguler');
 
         $response->assertStatus(200);
         $response->assertSee('Kelas Reguler Alpha Mind Control', false);

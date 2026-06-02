@@ -109,7 +109,7 @@
                         :category="$product['type'] === 'kelas' ? 'Kelas' : 'Buku'"
                         :categoryVariant="$product['type'] === 'kelas' ? 'info' : 'category'"
                         :badge="$product['badge']"
-                        :href="route('products.show', $product['slug'])"
+                        :href="$product['type'] === 'kelas' ? route('courses.show', $product['slug']) : route('products.show', $product['slug'])"
                         class="h-full"
                     />
                 </div>

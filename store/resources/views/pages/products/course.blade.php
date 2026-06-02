@@ -384,7 +384,7 @@
                                         :originalPrice="$r['original_price'] ?? null"
                                         :image="isset($r['image']) ? asset($r['image']) : null"
                                         :imageAlt="$r['image_alt'] ?? $r['title']"
-                                        :href="route('products.show', ['slug' => $r['slug']])"
+                                        :href="($r['type'] ?? 'buku') === 'kelas' ? route('courses.show', ['slug' => $r['slug']]) : route('products.show', ['slug' => $r['slug']])"
                                     />
                                 @endforeach
                             </div>
