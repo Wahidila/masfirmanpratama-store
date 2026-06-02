@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Course;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class BookDetailPageTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected bool $seed = true;
 
     /**
@@ -51,24 +55,24 @@ class BookDetailPageTest extends TestCase
         $response->assertDontSee('Apa yang Akan Anda Dapatkan', false);
     }
 
-    public function test_unknown_slug_renders_placeholder_not_book_template(): void
+    public function test_unknown_slug_returns_404(): void
     {
         $response = $this->get('/produk/slug-yang-tidak-terdaftar');
 
-        $response->assertStatus(200);
-        $response->assertSee('Produk Tidak Ditemukan', false);
-        $response->assertDontSee('Spesifikasi Buku', false);
-        $response->assertDontSee('bookDetailPage', false);
+        $response->assertStatus(404);
     }
 
-    public function test_course_slug_uses_course_template_not_book_template(): void
+    public function test_course_slug_redirects_to_kelas_route(): void
     {
+        Course::factory()->create([
+            'slug' => 'kelas-amc-reguler',
+            'status' => 'active',
+        ]);
+
         $response = $this->get('/produk/kelas-amc-reguler');
 
-        $response->assertStatus(200);
-        // Book-only marker must be absent.
-        $response->assertDontSee('Spesifikasi Buku', false);
-        $response->assertDontSee('bookDetailPage', false);
+        $response->assertStatus(301);
+        $response->assertRedirect('/kelas/kelas-amc-reguler');
     }
 
     public function test_book_cover_images_are_served(): void

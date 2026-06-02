@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Course;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
  * Regression guard untuk task t_5e6b03f1 — Lighthouse timeout di
- * /produk/kelas-amc-reguler. Investigation lengkap: docs/qc/M1/lighthouse/timeout-investigation.md.
+ * /kelas/kelas-amc-reguler. Investigation lengkap: docs/qc/M1/lighthouse/timeout-investigation.md.
  *
  * Bug bar (3 separable issues yang stack jadi PROTOCOL_TIMEOUT):
  *
@@ -23,11 +25,25 @@ use Tests\TestCase;
  */
 class CourseDetailLighthouseGuardTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected bool $seed = true;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Course::factory()->create([
+            'slug' => 'kelas-amc-reguler',
+            'status' => 'active',
+            'title' => 'AMC Reguler',
+            'price' => 2500000,
+        ]);
+    }
 
     public function test_layout_pins_lucide_cdn_to_specific_version(): void
     {
-        $response = $this->get('/produk/kelas-amc-reguler');
+        $response = $this->get('/kelas/kelas-amc-reguler');
 
         $response->assertStatus(200);
 
@@ -44,7 +60,7 @@ class CourseDetailLighthouseGuardTest extends TestCase
 
     public function test_layout_does_not_listen_for_alpine_morphed(): void
     {
-        $response = $this->get('/produk/kelas-amc-reguler');
+        $response = $this->get('/kelas/kelas-amc-reguler');
 
         // Bug #2 guard: alpine:morphed → createIcons → mutate → morphed loop.
         $response->assertDontSee(
@@ -58,7 +74,7 @@ class CourseDetailLighthouseGuardTest extends TestCase
 
     public function test_course_tab_buttons_dont_call_createicons_per_render(): void
     {
-        $response = $this->get('/produk/kelas-amc-reguler');
+        $response = $this->get('/kelas/kelas-amc-reguler');
 
         // Bug #3 guard: per-tab x-init createIcons di <template x-for>.
         // Pattern lama: <i :data-lucide="t.icon" x-init="$nextTick(() => ... createIcons())">
@@ -81,7 +97,7 @@ class CourseDetailLighthouseGuardTest extends TestCase
 
     public function test_course_detail_renders_required_lucide_brand_icons(): void
     {
-        $response = $this->get('/produk/kelas-amc-reguler');
+        $response = $this->get('/kelas/kelas-amc-reguler');
 
         // Footer footer punya 3 brand icon socmed yang missing di lucide v1.16.0.
         // Kalau test ini fail di body markup, fine — tapi kalau page rendered tanpa

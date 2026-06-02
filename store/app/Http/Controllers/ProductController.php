@@ -130,15 +130,9 @@ class ProductController extends Controller
         $productModel = Product::where('slug', $slug)->where('status', 'active')->first();
         $configProduct = config('products.items.'.$slug, []);
 
-        // If product not in DB and not in config, show placeholder
+        // If product not in DB and not in config, 404
         if (! $productModel && empty($configProduct)) {
-            return view('pages.products.show', [
-                'productModel' => null,
-                'data' => null,
-                'related' => [],
-                'template' => null,
-                'slug' => $slug,
-            ]);
+            abort(404);
         }
 
         // Build product array: DB takes precedence, config as fallback
