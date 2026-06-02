@@ -289,7 +289,8 @@ class ProductController extends Controller
 
         $path = $file->storeAs("products/{$slug}", $filename, 'public');
 
-        return $path; // relative path within the disk (e.g. products/slug-x/abcd.jpg)
+        // Prepend storage/ so asset($image_path) resolves to /storage/products/...
+        return 'storage/'.$path;
     }
 
     protected function deleteImage(?string $path): void
@@ -298,8 +299,11 @@ class ProductController extends Controller
             return;
         }
 
-        if (Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
+        // Strip storage/ prefix before addressing the disk (disk uses paths relative to storage/app/public)
+        $diskPath = str_starts_with($path, 'storage/') ? substr($path, 8) : $path;
+
+        if (Storage::disk('public')->exists($diskPath)) {
+            Storage::disk('public')->delete($diskPath);
         }
     }
 }

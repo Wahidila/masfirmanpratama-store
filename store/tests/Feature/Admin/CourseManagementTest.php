@@ -105,7 +105,9 @@ class CourseManagementTest extends TestCase
 
         $course = Course::first();
         $this->assertNotNull($course->image_path);
-        Storage::disk('public')->assertExists($course->image_path);
+        $this->assertStringStartsWith('storage/', $course->image_path);
+        $diskPath = str_starts_with($course->image_path, 'storage/') ? substr($course->image_path, 8) : $course->image_path;
+        Storage::disk('public')->assertExists($diskPath);
     }
 
     // -----------------------------------------------------------------

@@ -327,7 +327,8 @@ class CourseController extends Controller
 
         $path = $file->storeAs("courses/{$slug}", $filename, 'public');
 
-        return $path; // relative path within the disk (e.g. courses/slug-x/abcd.jpg)
+        // Prepend storage/ so asset($image_path) resolves to /storage/courses/...
+        return 'storage/'.$path;
     }
 
     protected function deleteImage(?string $path): void
@@ -336,8 +337,11 @@ class CourseController extends Controller
             return;
         }
 
-        if (Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
+        // Strip storage/ prefix before addressing the disk (disk uses paths relative to storage/app/public)
+        $diskPath = str_starts_with($path, 'storage/') ? substr($path, 8) : $path;
+
+        if (Storage::disk('public')->exists($diskPath)) {
+            Storage::disk('public')->delete($diskPath);
         }
     }
 }

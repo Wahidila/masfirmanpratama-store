@@ -117,7 +117,9 @@ class ProductCrudTest extends TestCase
 
         $product = Product::where('slug', 'buku-mind-power-101')->first();
         $this->assertNotNull($product->image_path);
-        Storage::disk('public')->assertExists($product->image_path);
+        $this->assertStringStartsWith('storage/', $product->image_path);
+        $diskPath = str_starts_with($product->image_path, 'storage/') ? substr($product->image_path, 8) : $product->image_path;
+        Storage::disk('public')->assertExists($diskPath);
     }
 
     public function test_store_auto_generates_slug_from_title(): void
@@ -294,8 +296,10 @@ class ProductCrudTest extends TestCase
 
         $product->refresh();
         $this->assertNotSame($oldPath, $product->image_path);
+        $this->assertStringStartsWith('storage/', $product->image_path);
         Storage::disk('public')->assertMissing($oldPath);
-        Storage::disk('public')->assertExists($product->image_path);
+        $diskPath = str_starts_with($product->image_path, 'storage/') ? substr($product->image_path, 8) : $product->image_path;
+        Storage::disk('public')->assertExists($diskPath);
     }
 
     public function test_update_can_remove_image(): void
