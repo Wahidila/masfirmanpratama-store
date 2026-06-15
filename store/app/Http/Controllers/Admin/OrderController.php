@@ -104,6 +104,7 @@ class OrderController extends Controller
         $order->load([
             'items' => fn ($q) => $q->orderBy('id'),
             'items.product',
+            'items.course',
             'payments' => fn ($q) => $q->orderBy('created_at'),
             'payments.verifier',
         ]);
