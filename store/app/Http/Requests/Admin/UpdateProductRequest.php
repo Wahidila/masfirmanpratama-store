@@ -61,6 +61,7 @@ class UpdateProductRequest extends FormRequest
             ],
             'remove_image' => ['nullable', 'boolean'],
             'description' => ['nullable', 'string', 'max:8000'],
+            'weight_kg' => ['required', 'numeric', 'min:0', 'max:100'],
             'meta_title' => ['nullable', 'string', 'max:160'],
             'meta_description' => ['nullable', 'string', 'max:320'],
         ];
