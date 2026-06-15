@@ -27,6 +27,10 @@
             class="px-4 py-2.5 -mb-px border-b-2 transition {{ $tab === 'shipping' ? 'border-brand-500 text-brand-600 dark:text-brand-400' : 'border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90' }}">
             Shipping
         </a>
+        <a href="{{ route('admin.settings.index', ['tab' => 'whatsapp']) }}"
+            class="px-4 py-2.5 -mb-px border-b-2 transition {{ $tab === 'whatsapp' ? 'border-brand-500 text-brand-600 dark:text-brand-400' : 'border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90' }}">
+            WhatsApp
+        </a>
     </div>
 
     @if ($tab === 'store-info')
@@ -36,6 +40,8 @@
             'shippingData' => $shippingData,
             'availableCouriers' => $availableCouriers,
         ])
+    @elseif ($tab === 'whatsapp')
+        @include('admin.settings._whatsapp', ['whatsappData' => $whatsappData])
     @else
         @include('admin.settings._bank_accounts', ['bankAccounts' => $bankAccounts])
     @endif

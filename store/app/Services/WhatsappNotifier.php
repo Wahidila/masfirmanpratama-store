@@ -4,39 +4,40 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\WaNotification;
+use Illuminate\Support\Facades\Log;
 
 /**
- * WhatsappNotifier — M2 stub (no actual gateway integration).
+ * WhatsappNotifier — sends WhatsApp notifications via XSender.
  *
- * INSERT row ke `wa_notifications` dengan status='queued'. Gateway sender
- * (Fonnte / Wablas) di-wire di M3+ via worker yang baca queued rows + flip
- * status ke 'sent' atau 'failed' setelah API call.
+ * Flow:
+ *   1. INSERT row ke `wa_notifications` (status='queued')
+ *   2. Attempt kirim via XSenderService
+ *   3. Update status ke 'sent' atau 'failed'
  *
  * Pattern usage:
  *
  *     app(WhatsappNotifier::class)->send(
  *         template: 'admin_payment_review_alert',
- *         recipient: '+628111222333',
+ *         recipient: '081234567890',
  *         payload: ['order_number' => 'MFP-...', 'amount' => 1500000],
- *         order: $order, // optional, untuk FK lookup di list view
+ *         order: $order,
  *     );
  *
- * Recipient format: E.164 (+62...) atau plain digit (sanitization gateway side).
- * Template: snake_case identifier yang nanti di-map ke WhatsApp Business
- * template approved Meta. Untuk M2 stub, template name cuma annotation.
- *
- * Listeners di app/Listeners/* call ini, listener registration di
- * AppServiceProvider::boot.
+ * Recipient format: 08xxx, +62xxx, atau 628xxx (akan di-normalize).
  */
 class WhatsappNotifier
 {
+    public function __construct(
+        protected XSenderService $xsender,
+    ) {}
+
     /**
-     * Queue WhatsApp notification — write row ke wa_notifications, return WaNotification.
+     * Send WhatsApp notification — write row + fire XSender API.
      *
      * @param  string  $template  template identifier (mis. 'admin_payment_review_alert')
-     * @param  string  $recipient  phone E.164 (mis. '+62811222333')
-     * @param  array<string, mixed>  $payload  variabel template (di-serialize JSON di kolom payload_json)
-     * @param  Order|null  $order  optional FK ke orders.id (nullOnDelete)
+     * @param  string  $recipient  phone (mis. '081234567890')
+     * @param  array<string, mixed>  $payload  variabel template (di-serialize JSON)
+     * @param  Order|null  $order  optional FK ke orders.id
      */
     public function send(
         string $template,
@@ -44,12 +45,75 @@ class WhatsappNotifier
         array $payload = [],
         ?Order $order = null,
     ): WaNotification {
-        return WaNotification::create([
+        $notification = WaNotification::create([
             'order_id' => $order?->id,
             'recipient' => $recipient,
             'template' => $template,
             'payload_json' => $payload,
             'status' => 'queued',
         ]);
+
+        // Build message from template + payload
+        $message = $this->buildMessage($template, $payload);
+
+        // Attempt send via XSender (skip if not configured)
+        $result = $this->xsender->send($recipient, $message);
+
+        if ($result['status'] === 0 && str_contains($result['body'] ?? '', 'not configured')) {
+            // XSender not configured — keep as queued (stub mode)
+            return $notification;
+        }
+
+        if ($result['ok']) {
+            $notification->update([
+                'status' => 'sent',
+                'sent_at' => now(),
+            ]);
+        } else {
+            $notification->update([
+                'status' => 'failed',
+                'error' => mb_substr($result['body'] ?? 'Unknown error', 0, 500),
+            ]);
+
+            Log::warning('[WhatsappNotifier] Failed to send', [
+                'template' => $template,
+                'recipient' => $recipient,
+                'response' => $result,
+            ]);
+        }
+
+        return $notification;
+    }
+
+    /**
+     * Build pesan dari template name + payload placeholders.
+     *
+     * Template message di-hardcode di sini (simple approach).
+     * Bisa di-migrate ke DB/config nanti kalau butuh editable dari admin.
+     */
+    protected function buildMessage(string $template, array $payload): string
+    {
+        $templates = [
+            'admin_payment_review_alert' => "🔔 *Pembayaran Baru*\n\nOrder: {order_number}\nNama: {customer_name}\nTotal: Rp {amount}\n\nSegera verifikasi pembayaran di dashboard admin.",
+
+            'customer_payment_verified' => "✅ *Pembayaran Dikonfirmasi*\n\nHalo {customer_name},\nPembayaran untuk order *{order_number}* sudah diverifikasi.\n\nPesanan kamu sedang diproses. Terima kasih! 🙏",
+
+            'customer_payment_rejected' => "❌ *Pembayaran Ditolak*\n\nHalo {customer_name},\nPembayaran untuk order *{order_number}* tidak dapat diverifikasi.\nAlasan: {reason}\n\nSilakan upload ulang bukti pembayaran yang valid.",
+
+            'customer_order_shipped' => "📦 *Pesanan Dikirim*\n\nHalo {customer_name},\nOrder *{order_number}* sudah dikirim!\n\nKurir: {courier}\nResi: {tracking_number}\n\nLacak pesananmu di halaman tracking. Terima kasih! 🙏",
+
+            'course_registration_success' => "🎓 *PENDAFTARAN KELAS BERHASIL*\n\nHalo {customer_name},\nTerima kasih sudah mendaftar!\n\nKelas: {course_title}\nOrder ID: {order_number}\nTotal: Rp {amount}\n\nDetail pembayaran dan rekening sudah dikirim. Lakukan transfer dalam 1x24 jam. 🙏",
+        ];
+
+        $text = $templates[$template] ?? "Notifikasi: {$template}\n\n".json_encode($payload, JSON_PRETTY_PRINT);
+
+        // Replace placeholders {key} dengan value dari payload
+        foreach ($payload as $key => $value) {
+            if (is_string($value) || is_numeric($value)) {
+                $text = str_replace('{'.$key.'}', (string) $value, $text);
+            }
+        }
+
+        return $text;
     }
 }
