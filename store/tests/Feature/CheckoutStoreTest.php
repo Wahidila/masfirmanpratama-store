@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\InstallmentScheme;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderPayment;
@@ -52,7 +51,6 @@ class CheckoutStoreTest extends TestCase
             'address_postal' => '65111',
             'shipping_method' => null,
             'payment_type' => 'lunas',
-            'installment_scheme_id' => null,
             'cart_json' => json_encode([
                 ['slug' => 'kelas-amc-reguler', 'name' => 'Kelas AMC Reguler', 'price' => 4_500_000, 'qty' => 1],
             ]),
@@ -97,72 +95,6 @@ class CheckoutStoreTest extends TestCase
         $this->assertStringContainsString('signature=', $response->headers->get('Location'));
     }
 
-    public function test_cicilan_happy_path_generates_payment_schedule(): void
-    {
-        // Cicilan: 30% DP, 3 installments total
-        $scheme = InstallmentScheme::create([
-            'product_id' => null,
-            'name' => 'Cicilan 3x',
-            'dp_pct' => 30,
-            'n_installments' => 3,
-            'interval_days' => 30,
-            'active' => true,
-        ]);
-
-        $this->post('/checkout', $this->validPayload([
-            'payment_type' => 'cicilan',
-            'installment_scheme_id' => $scheme->id,
-        ]));
-
-        $order = Order::first();
-        $payments = OrderPayment::where('order_id', $order->id)->orderBy('id')->get();
-
-        $this->assertCount(3, $payments, '3 installment rows expected');
-
-        // Row 1 = DP 30% × 4_500_000 = 1_350_000
-        $this->assertSame('1350000.00', $payments[0]->amount);
-        // Row 2 + 3 = sisa (3_150_000) / 2 = 1_575_000 each
-        $this->assertSame('1575000.00', $payments[1]->amount);
-        $this->assertSame('1575000.00', $payments[2]->amount);
-
-        // Sum must equal grand total
-        $sum = $payments->sum('amount');
-        $this->assertEquals(4_500_000.0, (float) $sum);
-
-        $this->assertSame('pending', $order->status);
-    }
-
-    public function test_cicilan_schedule_handles_rounding_via_last_row_adjust(): void
-    {
-        // Total 1_000_000, DP 33% = 330_000, sisa 670_000 / 2 = 335_000 each.
-        // Pas. Coba angka rounding-prone: total 1_000_001.
-        Product::where('slug', 'kelas-amc-reguler')->update(['price' => 1_000_001]);
-
-        $scheme = InstallmentScheme::create([
-            'name' => 'Cicilan 3x DP 33%',
-            'dp_pct' => 33,
-            'n_installments' => 3,
-            'interval_days' => 30,
-            'active' => true,
-        ]);
-
-        $this->post('/checkout', $this->validPayload([
-            'payment_type' => 'cicilan',
-            'installment_scheme_id' => $scheme->id,
-            'cart_json' => json_encode([
-                ['slug' => 'kelas-amc-reguler', 'name' => 'X', 'price' => 1_000_001, 'qty' => 1],
-            ]),
-            'cart_total' => 1_000_001,
-        ]));
-
-        $order = Order::first();
-        $payments = OrderPayment::where('order_id', $order->id)->orderBy('id')->get();
-
-        $this->assertCount(3, $payments);
-        $sum = (float) $payments->sum('amount');
-        $this->assertEquals(1_000_001.0, $sum, 'Sum of installments must equal grand total');
-    }
-
     public function test_validation_rejects_missing_required_fields(): void
     {
         $this->post('/checkout', [])
@@ -178,39 +110,15 @@ class CheckoutStoreTest extends TestCase
         $this->assertSame(0, Order::count());
     }
 
-    public function test_validation_rejects_cicilan_without_scheme_id(): void
-    {
-        $this->post('/checkout', $this->validPayload([
-            'payment_type' => 'cicilan',
-            'installment_scheme_id' => null,
-        ]))
-            ->assertSessionHasErrors('installment_scheme_id');
-
-        $this->assertSame(0, Order::count());
-    }
-
-    public function test_validation_rejects_inactive_scheme(): void
-    {
-        $scheme = InstallmentScheme::create([
-            'name' => 'Cicilan Disabled',
-            'dp_pct' => 30,
-            'n_installments' => 3,
-            'interval_days' => 30,
-            'active' => false,
-        ]);
-
-        $this->post('/checkout', $this->validPayload([
-            'payment_type' => 'cicilan',
-            'installment_scheme_id' => $scheme->id,
-        ]))
-            ->assertSessionHasErrors('installment_scheme_id');
-
-        $this->assertSame(0, Order::count());
-    }
-
     public function test_validation_rejects_invalid_payment_type(): void
     {
         $this->post('/checkout', $this->validPayload(['payment_type' => 'kredit']))
+            ->assertSessionHasErrors('payment_type');
+    }
+
+    public function test_validation_rejects_cicilan_payment_type(): void
+    {
+        $this->post('/checkout', $this->validPayload(['payment_type' => 'cicilan']))
             ->assertSessionHasErrors('payment_type');
     }
 
@@ -324,23 +232,4 @@ class CheckoutStoreTest extends TestCase
         $this->assertGreaterThan(0, OrderPayment::where('order_id', $order->id)->count());
     }
 
-    public function test_cicilan_with_n_equals_1_treated_as_lunas(): void
-    {
-        $scheme = InstallmentScheme::create([
-            'name' => 'Edge n=1',
-            'dp_pct' => 100,
-            'n_installments' => 1,
-            'interval_days' => 30,
-            'active' => true,
-        ]);
-
-        $this->post('/checkout', $this->validPayload([
-            'payment_type' => 'cicilan',
-            'installment_scheme_id' => $scheme->id,
-        ]));
-
-        $order = Order::first();
-        $this->assertSame(1, OrderPayment::where('order_id', $order->id)->count());
-        $this->assertSame('4500000.00', OrderPayment::where('order_id', $order->id)->value('amount'));
-    }
 }

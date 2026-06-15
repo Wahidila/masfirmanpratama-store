@@ -146,46 +146,92 @@
                     </div>
 
                     {{-- Preview pages gallery --}}
-                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
-                        <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <i data-lucide="images" class="w-4 h-4 text-primary-500"></i>
-                            Preview Halaman
-                        </h3>
+                    @if (! empty($previewPages))
+                        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                            <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                <i data-lucide="images" class="w-4 h-4 text-primary-500"></i>
+                                Preview Halaman
+                            </h3>
 
-                        @if (! empty($previewPages))
-                            <div class="grid grid-cols-3 gap-3">
-                                @foreach ($previewPages as $i => $page)
+                            <div
+                                x-data="{ lightbox: false, current: 0, pages: @js(collect($previewPages)->map(fn($p) => asset($p))->values()->all()) }"
+                                @keydown.escape.window="lightbox = false"
+                                @keydown.arrow-right.window="if(lightbox) current = (current + 1) % pages.length"
+                                @keydown.arrow-left.window="if(lightbox) current = (current - 1 + pages.length) % pages.length"
+                            >
+                                <div class="grid grid-cols-3 gap-3">
+                                    @foreach ($previewPages as $i => $page)
+                                        <button
+                                            type="button"
+                                            @click="current = {{ $i }}; lightbox = true"
+                                            class="aspect-[3/4] rounded-xl overflow-hidden border border-slate-100 hover:border-primary-300 transition-colors img-zoom-container group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                                            aria-label="Lihat preview halaman {{ $i + 1 }}"
+                                        >
+                                            <img
+                                                src="{{ asset($page) }}"
+                                                alt="Preview halaman {{ $i + 1 }}"
+                                                loading="lazy"
+                                                class="w-full h-full object-cover img-zoom"
+                                            >
+                                        </button>
+                                    @endforeach
+                                </div>
+
+                                {{-- Lightbox modal --}}
+                                <div
+                                    x-show="lightbox"
+                                    x-cloak
+                                    x-transition.opacity.duration.200ms
+                                    class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                                    @click.self="lightbox = false"
+                                    role="dialog"
+                                    aria-label="Gallery preview halaman buku"
+                                >
+                                    {{-- Close button --}}
                                     <button
                                         type="button"
-                                        class="aspect-[3/4] rounded-xl overflow-hidden border border-slate-100 hover:border-primary-300 transition-colors img-zoom-container group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-                                        aria-label="Lihat preview halaman {{ $i + 1 }}"
+                                        @click="lightbox = false"
+                                        class="absolute top-4 right-4 z-10 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+                                        aria-label="Tutup gallery"
                                     >
-                                        <img
-                                            src="{{ asset($page) }}"
-                                            alt="Preview halaman {{ $i + 1 }}"
-                                            loading="lazy"
-                                            class="w-full h-full object-cover img-zoom"
-                                        >
+                                        <i data-lucide="x" class="w-5 h-5"></i>
                                     </button>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="grid grid-cols-3 gap-3">
-                                @for ($i = 0; $i < 3; $i++)
-                                    <div
-                                        class="aspect-[3/4] rounded-xl bg-slate-50 border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300"
-                                        aria-label="Preview belum tersedia"
+
+                                    {{-- Prev button --}}
+                                    <button
+                                        type="button"
+                                        @click="current = (current - 1 + pages.length) % pages.length"
+                                        class="absolute left-4 z-10 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+                                        aria-label="Halaman sebelumnya"
                                     >
-                                        <i data-lucide="image-off" class="w-6 h-6 mb-1"></i>
-                                        <span class="text-[10px] font-semibold">Soon</span>
+                                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                                    </button>
+
+                                    {{-- Image --}}
+                                    <img
+                                        :src="pages[current]"
+                                        :alt="'Preview halaman ' + (current + 1)"
+                                        class="max-h-[85vh] max-w-[90vw] object-contain rounded-xl shadow-2xl"
+                                    >
+
+                                    {{-- Next button --}}
+                                    <button
+                                        type="button"
+                                        @click="current = (current + 1) % pages.length"
+                                        class="absolute right-4 z-10 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+                                        aria-label="Halaman berikutnya"
+                                    >
+                                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                    </button>
+
+                                    {{-- Counter --}}
+                                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm font-semibold bg-black/40 px-3 py-1 rounded-full">
+                                        <span x-text="current + 1"></span> / <span x-text="pages.length"></span>
                                     </div>
-                                @endfor
+                                </div>
                             </div>
-                            <p class="mt-4 text-xs text-slate-500">
-                                Preview halaman akan tersedia setelah proses scanning selesai.
-                            </p>
-                        @endif
-                    </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 

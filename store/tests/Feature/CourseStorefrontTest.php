@@ -11,7 +11,7 @@ class CourseStorefrontTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_catalog_shows_courses_and_books(): void
+    public function test_catalog_shows_only_books_not_courses(): void
     {
         $course = Course::factory()->active()->create([
             'slug' => 'kelas-amc-reguler',
@@ -34,7 +34,7 @@ class CourseStorefrontTest extends TestCase
 
         $response = $this->get('/produk');
         $response->assertStatus(200);
-        $response->assertSee('Kelas Reguler Alpha Mind Control');
+        $response->assertDontSee('Kelas Reguler Alpha Mind Control');
         $response->assertSee('Buku Alpha Mind Control');
         $response->assertSee('Buku Hypno Mind Control');
     }
