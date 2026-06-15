@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\ShippingRateException;
 use App\Models\Course;
-use App\Models\InstallmentScheme;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderPayment;
@@ -21,14 +20,11 @@ use Illuminate\Validation\ValidationException;
  * CheckoutController — wire FE checkout form ke DB persistence (task t_a3f2fe94).
  *
  * Flow:
- *   1. Validate FE payload (customer, address, cart_json, payment_type, scheme).
+ *   1. Validate FE payload (customer, address, cart_json, payment_type=lunas).
  *   2. Re-resolve produk dari slug + harga server-side (jangan trust client price).
  *   3. Generate order_number unik (MFP-YYYYMMDD-XXXXXX).
  *   4. Insert orders + order_items + order_payments dalam DB transaction.
- *   5. Generate payment schedule:
- *      - Lunas: 1 row pending sebesar grand_total
- *      - Cicilan: row 1 = DP (dp_pct% × total), row 2..N = sisa terbagi rata
- *        (interval_days dari scheme — paid_at di-set null, akan di-update saat verifikasi)
+ *   5. Generate payment: 1 row pending sebesar grand_total (lunas only).
  *   6. Status order awal: 'pending' (schema source-of-truth — task body sebut
  *      'awaiting_payment' yang ngga ada di enum, default ke schema).
  *   7. Redirect ke signed URL /upload/{order_number} (TTL 24 jam) supaya customer
@@ -58,33 +54,13 @@ class CheckoutController extends Controller
             'address_province' => ['nullable', 'string', 'max:120'],
             'address_postal' => ['nullable', 'string', 'max:20'],
             'shipping_method' => ['nullable', 'string', 'max:50'],
-            'payment_type' => ['required', 'string', 'in:lunas,cicilan'],
-            'installment_scheme_id' => ['nullable', 'integer', 'exists:installment_schemes,id'],
+            'payment_type' => ['required', 'string', 'in:lunas'],
             'cart_json' => ['required', 'string', 'min:2'],
             'cart_total' => ['required', 'integer', 'min:1'],
             'ref_code' => ['nullable', 'string', 'max:64'],
         ]);
 
         $cart = $this->parseCartJson($validated['cart_json']);
-
-        if ($validated['payment_type'] === 'cicilan' && empty($validated['installment_scheme_id'])) {
-            throw ValidationException::withMessages([
-                'installment_scheme_id' => 'Skema cicilan wajib dipilih untuk pembayaran cicilan.',
-            ]);
-        }
-
-        $scheme = null;
-        if ($validated['payment_type'] === 'cicilan') {
-            $scheme = InstallmentScheme::where('id', $validated['installment_scheme_id'])
-                ->where('active', true)
-                ->first();
-
-            if (! $scheme) {
-                throw ValidationException::withMessages([
-                    'installment_scheme_id' => 'Skema cicilan tidak aktif atau tidak ditemukan.',
-                ]);
-            }
-        }
 
         // Resolve produk dari slug + recalc subtotal server-side. Cart-level only:
         // ngga ada per-product scheme di task ini (forProduct(null) dari FE config).
@@ -162,7 +138,6 @@ class CheckoutController extends Controller
             $validated,
             $resolvedItems,
             $grandTotal,
-            $scheme,
             $shippingCourier,
             $shippingService,
             $shippingCost,
@@ -199,7 +174,7 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            $this->generatePaymentSchedule($order, $grandTotal, $scheme);
+            $this->generatePaymentSchedule($order, $grandTotal);
 
             return $order;
         });
@@ -348,66 +323,17 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Generate payment schedule rows di order_payments (status='pending'):
-     *   - Lunas: 1 row sebesar grand_total
-     *   - Cicilan: row 1 = DP (dp_pct% × total), row 2..N = (sisa) / (N-1)
-     *     Round amount ke integer. Last installment absorb rounding diff biar
-     *     sum-of-installments == grand_total tepat.
-     *
+     * Generate single payment row (lunas) di order_payments (status='pending').
      * paid_at di-set null. Akan di-update saat customer upload bukti +
      * admin verify (handled task t_812d1980 udah merged).
      */
-    protected function generatePaymentSchedule(Order $order, int $grandTotal, ?InstallmentScheme $scheme): void
+    protected function generatePaymentSchedule(Order $order, int $grandTotal): void
     {
-        if (! $scheme) {
-            // Lunas: single row.
-            OrderPayment::create([
-                'order_id' => $order->id,
-                'amount' => $grandTotal,
-                'method' => 'transfer',
-                'status' => 'pending',
-            ]);
-
-            return;
-        }
-
-        $n = max(1, (int) $scheme->n_installments);
-        $dpPct = (float) $scheme->dp_pct;
-        $dpAmount = (int) round($grandTotal * $dpPct / 100);
-
-        // Edge case: scheme dengan n=1 → treat seperti lunas, satu row sebesar grandTotal.
-        if ($n === 1) {
-            OrderPayment::create([
-                'order_id' => $order->id,
-                'amount' => $grandTotal,
-                'method' => 'transfer',
-                'status' => 'pending',
-            ]);
-
-            return;
-        }
-
-        // Row 1 = DP
         OrderPayment::create([
             'order_id' => $order->id,
-            'amount' => $dpAmount,
+            'amount' => $grandTotal,
             'method' => 'transfer',
             'status' => 'pending',
         ]);
-
-        // Row 2..N = sisa dibagi rata
-        $remaining = $grandTotal - $dpAmount;
-        $perInstallment = (int) floor($remaining / ($n - 1));
-        $lastAdjust = $remaining - ($perInstallment * ($n - 1));
-
-        for ($i = 2; $i <= $n; $i++) {
-            $amount = $perInstallment + ($i === $n ? $lastAdjust : 0);
-            OrderPayment::create([
-                'order_id' => $order->id,
-                'amount' => $amount,
-                'method' => 'transfer',
-                'status' => 'pending',
-            ]);
-        }
     }
 }
