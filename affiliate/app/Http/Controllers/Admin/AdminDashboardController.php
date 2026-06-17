@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Affiliator;
 use App\Models\Commission;
-use App\Models\Withdrawal;
 use App\Models\ReferralOrder;
+use App\Models\Withdrawal;
 use Illuminate\View\View;
 
 class AdminDashboardController extends Controller

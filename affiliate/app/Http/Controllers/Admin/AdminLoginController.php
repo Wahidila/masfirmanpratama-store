@@ -17,14 +17,19 @@ class AdminLoginController extends Controller
     public function login(Request $request): RedirectResponse
     {
         $request->validate([
-            'email' => 'required|email',
+            'email' => 'required|email:rfc,strict',
             'password' => 'required',
         ]);
 
         // Simple admin auth — config-based for M3
         // M4 will integrate with store admin
-        if ($request->email === config('admin.email') && $request->password === config('admin.password')) {
+        $emailMatch = hash_equals((string) config('admin.email'), (string) $request->email);
+        $passwordMatch = hash_equals((string) config('admin.password'), (string) $request->password);
+
+        if ($emailMatch && $passwordMatch) {
+            $request->session()->regenerate();
             session(['admin_authenticated' => true, 'admin_email' => $request->email]);
+
             return redirect()->route('admin.dashboard');
         }
 
@@ -34,6 +39,8 @@ class AdminLoginController extends Controller
     public function logout(Request $request): RedirectResponse
     {
         session()->forget(['admin_authenticated', 'admin_email']);
+        $request->session()->regenerateToken();
+
         return redirect()->route('admin.login');
     }
 }

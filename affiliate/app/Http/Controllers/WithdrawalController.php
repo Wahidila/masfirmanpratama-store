@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Commission;
+use App\Models\ActivityLog;
 use App\Models\Withdrawal;
 use App\Models\WithdrawalMethod;
-use App\Models\ActivityLog;
-use App\Models\Notification as AppNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,7 +57,7 @@ class WithdrawalController extends Controller
 
         if ($request->amount < $method->min_withdrawal) {
             return back()->withErrors([
-                'amount' => "Minimum penarikan untuk {$method->name} adalah Rp " . number_format($method->min_withdrawal, 0, ',', '.'),
+                'amount' => "Minimum penarikan untuk {$method->name} adalah Rp ".number_format($method->min_withdrawal, 0, ',', '.'),
             ])->withInput();
         }
 
@@ -93,7 +91,9 @@ class WithdrawalController extends Controller
                 ->get();
 
             foreach ($commissions as $commission) {
-                if ($remaining <= 0) break;
+                if ($remaining <= 0) {
+                    break;
+                }
 
                 $commission->update([
                     'status' => 'withdrawn',
@@ -106,7 +106,7 @@ class WithdrawalController extends Controller
             ActivityLog::create([
                 'affiliator_id' => $affiliator->id,
                 'action' => 'withdraw_request',
-                'description' => "Permintaan penarikan Rp " . number_format($request->amount, 0, ',', '.') . " via {$method->name}",
+                'description' => 'Permintaan penarikan Rp '.number_format($request->amount, 0, ',', '.')." via {$method->name}",
                 'ip_address' => request()->ip(),
             ]);
         });

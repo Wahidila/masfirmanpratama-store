@@ -14,6 +14,7 @@ class AdminMaterialController extends Controller
     public function index(): View
     {
         $materials = Material::latest()->paginate(15);
+
         return view('admin.materials.index', compact('materials'));
     }
 
@@ -60,7 +61,7 @@ class AdminMaterialController extends Controller
 
     public function toggle(Material $material): RedirectResponse
     {
-        $material->update(['is_active' => !$material->is_active]);
+        $material->update(['is_active' => ! $material->is_active]);
         $status = $material->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
         return back()->with('success', "Materi berhasil {$status}.");

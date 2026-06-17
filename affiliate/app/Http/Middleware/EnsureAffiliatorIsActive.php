@@ -13,7 +13,7 @@ class EnsureAffiliatorIsActive
     {
         $affiliator = Auth::guard('affiliator')->user();
 
-        if ($affiliator && !$affiliator->isActive()) {
+        if ($affiliator && ! $affiliator->isActive()) {
             if ($affiliator->isPending()) {
                 return redirect()->route('pending-approval');
             }

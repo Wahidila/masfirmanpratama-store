@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Material;
 use App\Models\MaterialDownload;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -27,17 +28,18 @@ class MaterialController extends Controller
         // Filter by access
         $materials->getCollection()->transform(function ($material) use ($affiliator) {
             $material->accessible = $material->isAccessibleBy($affiliator);
+
             return $material;
         });
 
         return view('materials.index', compact('materials'));
     }
 
-    public function download(Material $material): StreamedResponse|\Illuminate\Http\RedirectResponse
+    public function download(Material $material): StreamedResponse|RedirectResponse
     {
         $affiliator = Auth::guard('affiliator')->user();
 
-        if (!$material->isAccessibleBy($affiliator)) {
+        if (! $material->isAccessibleBy($affiliator)) {
             return redirect()->route('materials.index')
                 ->withErrors(['access' => 'Anda tidak memiliki akses ke materi ini.']);
         }

@@ -35,7 +35,7 @@ class AdminWithdrawalController extends Controller
             'affiliator_id' => $withdrawal->affiliator_id,
             'type' => 'withdrawal_completed',
             'title' => 'Penarikan Diproses',
-            'message' => 'Penarikan sebesar Rp ' . number_format($withdrawal->amount, 0, ',', '.') . ' telah ditransfer ke rekening Anda.',
+            'message' => 'Penarikan sebesar Rp '.number_format($withdrawal->amount, 0, ',', '.').' telah ditransfer ke rekening Anda.',
         ]);
 
         return back()->with('success', 'Penarikan berhasil disetujui dan ditandai selesai.');
@@ -61,7 +61,7 @@ class AdminWithdrawalController extends Controller
             'affiliator_id' => $withdrawal->affiliator_id,
             'type' => 'withdrawal_rejected',
             'title' => 'Penarikan Ditolak',
-            'message' => "Penarikan Rp " . number_format($withdrawal->amount, 0, ',', '.') . " ditolak. Alasan: {$request->admin_note}. Saldo dikembalikan.",
+            'message' => 'Penarikan Rp '.number_format($withdrawal->amount, 0, ',', '.')." ditolak. Alasan: {$request->admin_note}. Saldo dikembalikan.",
         ]);
 
         return back()->with('success', 'Penarikan ditolak. Saldo dikembalikan ke affiliator.');

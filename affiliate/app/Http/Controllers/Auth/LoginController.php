@@ -19,7 +19,7 @@ class LoginController extends Controller
     public function login(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email' => ['required', 'email:rfc,strict'],
             'password' => ['required'],
         ], [
             'email.required' => 'Email wajib diisi.',
@@ -31,8 +31,9 @@ class LoginController extends Controller
 
             $affiliator = Auth::guard('affiliator')->user();
 
-            if (!$affiliator->isActive()) {
+            if (! $affiliator->isActive()) {
                 Auth::guard('affiliator')->logout();
+
                 return back()->withErrors([
                     'email' => 'Akun Anda belum aktif. Silakan tunggu persetujuan admin.',
                 ]);

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Affiliator;
 use App\Models\ReferralCode;
+use Database\Seeders\AffiliatorTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,7 +15,7 @@ class ReferralTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\AffiliatorTypeSeeder::class);
+        $this->seed(AffiliatorTypeSeeder::class);
     }
 
     private function activeAffiliator(): Affiliator

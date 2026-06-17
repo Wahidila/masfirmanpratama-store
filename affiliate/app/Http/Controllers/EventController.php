@@ -6,7 +6,6 @@ use App\Models\AffiliateEvent;
 use App\Models\AffiliateEventParticipant;
 use App\Models\Affiliator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -42,7 +41,7 @@ class EventController extends Controller
     {
         $affiliator = Auth::guard('affiliator')->user();
 
-        if (!$event->isActive()) {
+        if (! $event->isActive()) {
             return back()->withErrors(['event' => 'Event sudah berakhir atau belum dimulai.']);
         }
 

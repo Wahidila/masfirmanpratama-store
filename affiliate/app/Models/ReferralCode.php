@@ -46,7 +46,10 @@ class ReferralCode extends Model
     public function conversionRate(): float
     {
         $clicks = $this->totalClicks();
-        if ($clicks === 0) return 0;
+        if ($clicks === 0) {
+            return 0;
+        }
+
         return ($this->orders()->count() / $clicks) * 100;
     }
 }

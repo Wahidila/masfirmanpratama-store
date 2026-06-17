@@ -18,7 +18,7 @@ class ReferralController extends Controller
             ->where('is_active', true)
             ->first();
 
-        if (!$referralCode) {
+        if (! $referralCode) {
             return redirect()->route('landing');
         }
 
@@ -118,7 +118,7 @@ class ReferralController extends Controller
     {
         $this->authorizeReferral($referral);
 
-        $referral->update(['is_active' => !$referral->is_active]);
+        $referral->update(['is_active' => ! $referral->is_active]);
 
         $status = $referral->is_active ? 'diaktifkan' : 'dinonaktifkan';
 

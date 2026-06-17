@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Affiliator;
 use App\Models\AffiliatorType;
+use App\Models\Commission;
 use Illuminate\View\View;
 
 class LandingController extends Controller
@@ -12,8 +14,8 @@ class LandingController extends Controller
         $types = AffiliatorType::where('is_active', true)->get();
 
         $stats = [
-            'total_affiliators' => \App\Models\Affiliator::where('status', 'active')->count(),
-            'total_commissions_paid' => \App\Models\Commission::where('status', 'withdrawn')->sum('amount'),
+            'total_affiliators' => Affiliator::where('status', 'active')->count(),
+            'total_commissions_paid' => Commission::where('status', 'withdrawn')->sum('amount'),
         ];
 
         return view('landing', compact('types', 'stats'));

@@ -1,23 +1,25 @@
 <?php
 
-use App\Http\Controllers\Auth\EmailVerificationController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\LandingController;
-use App\Http\Controllers\ReferralController;
-use App\Http\Controllers\CommissionController;
-use App\Http\Controllers\WithdrawalController;
-use App\Http\Controllers\MaterialController;
-use App\Http\Controllers\EventController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\AdminAffiliatorController;
 use App\Http\Controllers\Admin\AdminCommissionController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\Admin\AdminMaterialController;
 use App\Http\Controllers\Admin\AdminWithdrawalController;
+use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CommissionController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\WithdrawalController;
+use App\Http\Middleware\AdminAuthenticate;
+use App\Http\Middleware\EnsureAffiliatorIsActive;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -67,7 +69,7 @@ Route::middleware('auth:affiliator')->group(function () {
     })->name('pending-approval');
 
     // Active affiliator routes (verified + active)
-    Route::middleware(['verified', \App\Http\Middleware\EnsureAffiliatorIsActive::class])->group(function () {
+    Route::middleware(['verified', EnsureAffiliatorIsActive::class])->group(function () {
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -119,7 +121,7 @@ Route::prefix('admin')->group(function () {
     });
 
     // Admin authenticated
-    Route::middleware(\App\Http\Middleware\AdminAuthenticate::class)->group(function () {
+    Route::middleware(AdminAuthenticate::class)->group(function () {
         Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 

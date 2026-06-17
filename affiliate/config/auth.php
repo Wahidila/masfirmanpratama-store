@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Affiliator;
+
 return [
 
     'defaults' => [
@@ -17,7 +19,7 @@ return [
     'providers' => [
         'affiliators' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Affiliator::class,
+            'model' => Affiliator::class,
         ],
     ],
 

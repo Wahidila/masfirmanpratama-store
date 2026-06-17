@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Affiliator;
+use Database\Seeders\AffiliatorTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,7 +14,7 @@ class DashboardTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\AffiliatorTypeSeeder::class);
+        $this->seed(AffiliatorTypeSeeder::class);
     }
 
     private function activeAffiliator(): Affiliator
