@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderPayment;
 use App\Models\WaNotification;
+use App\Services\ReferralService;
 use App\Services\Settings;
 use App\Services\XSenderService;
 use Illuminate\Http\RedirectResponse;
@@ -30,6 +31,8 @@ use Illuminate\View\View;
  */
 class CourseCheckoutController extends Controller
 {
+    public function __construct(private ReferralService $referralService) {}
+
     /**
      * Tampilkan form pendaftaran kelas.
      */
@@ -120,6 +123,9 @@ class CourseCheckoutController extends Controller
 
             return $order;
         });
+
+        // Attach referral attribution (cookie-based)
+        $this->referralService->attachOrder($order, $request->cookie('ref_code'));
 
         // Kirim notifikasi WhatsApp ke customer
         $uploadUrl = $this->generateUploadUrl($order->order_number);

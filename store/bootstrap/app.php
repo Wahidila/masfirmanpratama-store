@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CaptureReferral;
 use App\Http\Middleware\EnsureAffiliatorIsVerified;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -22,6 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Exempt webhook callback from CSRF — Agenwebsite sends POST with HMAC
         // signature in header, no session cookie or CSRF token.
         $middleware->validateCsrfTokens(except: ['webhooks/agenwebsite/*']);
+
+        // Append CaptureReferral to web group (tracks ?ref=CODE cookie + click)
+        $middleware->web(append: [
+            CaptureReferral::class,
+        ]);
 
         // Register custom middleware aliases
         $middleware->alias([

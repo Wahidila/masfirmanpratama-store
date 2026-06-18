@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderPayment;
 use App\Models\Product;
+use App\Services\ReferralService;
 use App\Services\Shipping\ShippingRateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,6 +38,7 @@ class CheckoutController extends Controller
 {
     public function __construct(
         private ShippingRateService $shippingRateService,
+        private ReferralService $referralService,
     ) {}
 
     /**
@@ -178,6 +180,9 @@ class CheckoutController extends Controller
 
             return $order;
         });
+
+        // Attach referral attribution (cookie-based, outside transaction is fine — order exists)
+        $this->referralService->attachOrder($order, $request->cookie('ref_code'));
 
         // Signed URL token-protect (task t_8a063559). TTL config-driven via
         // config/checkout.php → CHECKOUT_UPLOAD_URL_TTL_DAYS env (default 7d).
