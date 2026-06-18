@@ -60,6 +60,7 @@ class StoreProductRequest extends FormRequest
                 'dimensions:min_width=800,min_height=800',
             ],
             'description' => ['nullable', 'string', 'max:8000'],
+            'weight_kg' => ['required', 'numeric', 'min:0', 'max:100'],
             'meta_title' => ['nullable', 'string', 'max:160'],
             'meta_description' => ['nullable', 'string', 'max:320'],
         ];
@@ -100,6 +101,12 @@ class StoreProductRequest extends FormRequest
             'image.dimensions' => 'Resolusi gambar minimal 800 × 800 piksel.',
 
             'description.max' => 'Deskripsi maksimal 8.000 karakter.',
+
+            'weight_kg.required' => 'Berat produk wajib diisi (untuk kalkulasi ongkir).',
+            'weight_kg.numeric' => 'Berat harus angka.',
+            'weight_kg.min' => 'Berat tidak boleh negatif.',
+            'weight_kg.max' => 'Berat maksimal 100 kg.',
+
             'meta_title.max' => 'Meta title SEO maksimal 160 karakter.',
             'meta_description.max' => 'Meta description SEO maksimal 320 karakter.',
         ];

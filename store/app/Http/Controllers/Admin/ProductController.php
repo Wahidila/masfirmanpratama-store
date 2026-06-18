@@ -80,8 +80,10 @@ class ProductController extends Controller
             'price' => $data['price'],
             'stock' => $data['stock'],
             'status' => $data['status'],
+            'weight_kg' => $data['weight_kg'],
             'description' => $data['description'] ?? null,
             'meta_seo' => $this->buildMetaSeo($data),
+            'specs' => $this->buildSpecs($request),
         ]);
 
         if ($request->hasFile('image')) {
@@ -113,8 +115,10 @@ class ProductController extends Controller
             'price' => $data['price'],
             'stock' => $data['stock'],
             'status' => $data['status'],
+            'weight_kg' => $data['weight_kg'],
             'description' => $data['description'] ?? null,
             'meta_seo' => $this->buildMetaSeo($data),
+            'specs' => $this->buildSpecs($request),
         ]);
 
         // Replace image
@@ -275,6 +279,38 @@ class ProductController extends Controller
             'title' => $title,
             'description' => $desc,
         ], fn ($v) => $v !== null && $v !== '');
+    }
+
+    /**
+     * Build specs array from parallel specs_keys[] + specs_values[] inputs.
+     * Skips rows where both key and value are empty.
+     *
+     * @return array<string, string>|null
+     */
+    protected function buildSpecs(Request $request): ?array
+    {
+        $keys = $request->input('specs_keys', []);
+        $values = $request->input('specs_values', []);
+
+        if (! is_array($keys) || ! is_array($values)) {
+            return null;
+        }
+
+        $specs = [];
+        foreach ($keys as $index => $key) {
+            $key = trim((string) $key);
+            $value = trim((string) ($values[$index] ?? ''));
+
+            if ($key === '' && $value === '') {
+                continue;
+            }
+
+            if ($key !== '') {
+                $specs[$key] = $value;
+            }
+        }
+
+        return $specs ?: null;
     }
 
     /**

@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'xsender' => [
+        'api_key' => env('XSENDER_API_KEY'),
+        'sender' => env('XSENDER_SENDER'),
+        'endpoint' => env('XSENDER_ENDPOINT', 'https://xsender.id/id/send-message'),
+    ],
+
 ];

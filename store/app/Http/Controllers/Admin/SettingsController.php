@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\Settings;
 use App\Services\Shipping\AgenwebsiteClient;
+use App\Services\XSenderService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 
 class SettingsController extends Controller
@@ -14,7 +17,7 @@ class SettingsController extends Controller
     /**
      * Tab yang diizinkan.
      */
-    protected const ALLOWED_TABS = ['store-info', 'bank-accounts', 'shipping'];
+    protected const ALLOWED_TABS = ['store-info', 'bank-accounts', 'shipping', 'whatsapp'];
 
     /**
      * Daftar kurir yang tersedia.
@@ -47,6 +50,10 @@ class SettingsController extends Controller
         if ($tab === 'shipping') {
             $viewData['shippingData'] = $this->getShippingData();
             $viewData['availableCouriers'] = self::AVAILABLE_COURIERS;
+        }
+
+        if ($tab === 'whatsapp') {
+            $viewData['whatsappData'] = $this->getWhatsappData();
         }
 
         return view('admin.settings.index', $viewData);
@@ -230,5 +237,91 @@ class SettingsController extends Controller
         return redirect()
             ->route('admin.settings.index', ['tab' => 'shipping'])
             ->with('status', 'Pengaturan pengiriman berhasil diperbarui.');
+    }
+
+    /**
+     * Data untuk tab WhatsApp (XSender gateway).
+     */
+    protected function getWhatsappData(): array
+    {
+        return [
+            'api_key' => Settings::get('xsender.api_key', config('services.xsender.api_key')),
+            'sender' => Settings::get('xsender.sender', config('services.xsender.sender')),
+            'endpoint' => Settings::get('xsender.endpoint', config('services.xsender.endpoint', 'https://xsender.id/id/send-message')),
+        ];
+    }
+
+    /**
+     * Update WhatsApp XSender settings (tab whatsapp).
+     */
+    public function updateWhatsapp(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'xsender_api_key' => ['required', 'string', 'max:255'],
+            'xsender_sender' => ['required', 'string', 'max:30'],
+            'xsender_endpoint' => ['nullable', 'url', 'max:255'],
+        ], [
+            'xsender_api_key.required' => 'API Key XSender wajib diisi.',
+            'xsender_sender.required' => 'Nomor WhatsApp XSender wajib diisi.',
+            'xsender_endpoint.url' => 'Format URL endpoint tidak valid.',
+        ]);
+
+        Settings::set('xsender.api_key', $data['xsender_api_key'], 'string');
+        Settings::set('xsender.sender', $data['xsender_sender'], 'string');
+
+        if (! empty($data['xsender_endpoint'])) {
+            Settings::set('xsender.endpoint', $data['xsender_endpoint'], 'string');
+        }
+
+        return redirect()
+            ->route('admin.settings.index', ['tab' => 'whatsapp'])
+            ->with('status', 'Pengaturan WhatsApp (XSender) berhasil diperbarui.');
+    }
+
+    /**
+     * Test koneksi XSender — kirim pesan test ke nomor sender sendiri.
+     */
+    public function testWhatsapp(Request $request): JsonResponse
+    {
+        $apiKey = $request->input('api_key');
+        $sender = $request->input('sender');
+        $endpoint = $request->input('endpoint') ?: 'https://xsender.id/id/send-message';
+
+        if (empty($apiKey) || empty($sender)) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'API Key dan Nomor Sender wajib diisi.',
+            ]);
+        }
+
+        $sender = XSenderService::normalizePhone($sender);
+
+        try {
+            $response = Http::asForm()
+                ->timeout(15)
+                ->post($endpoint, [
+                    'api_key' => $apiKey,
+                    'sender' => $sender,
+                    'number' => $sender, // kirim ke diri sendiri
+                    'message' => '✅ Test koneksi XSender berhasil! ('.now()->format('d/m/Y H:i:s').')',
+                ]);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'ok' => true,
+                    'message' => 'Pesan test berhasil dikirim ke '.$sender.'.',
+                ]);
+            }
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'API response: HTTP '.$response->status().' — '.mb_substr($response->body(), 0, 200),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Exception: '.$e->getMessage(),
+            ]);
+        }
     }
 }

@@ -111,6 +111,10 @@ const cart = {
         if (!item || typeof item.slug !== 'string' || item.slug.length === 0) {
             return;
         }
+        // Kelas tidak boleh masuk cart — harus lewat checkout kelas
+        if (item.type === 'kelas' || item.type === 'course') {
+            return;
+        }
         const addQty = Math.max(1, Math.floor(Number(qty) || 1));
         const existing = this.items.find((it) => it.slug === item.slug);
         if (existing) {

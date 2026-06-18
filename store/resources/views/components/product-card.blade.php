@@ -21,13 +21,13 @@
         'class' => 'group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
     ]) }}
 >
-    <div class="img-zoom-container relative aspect-square bg-slate-100 overflow-hidden p-4">
+    <div class="img-zoom-container relative aspect-square bg-slate-100 overflow-hidden">
         @if ($image)
             <img
                 src="{{ $image }}"
                 alt="{{ $imageAlt ?: $title }}"
                 loading="lazy"
-                class="img-zoom w-full h-full object-contain"
+                class="img-zoom w-full h-full object-cover"
             >
         @else
             <div class="flex items-center justify-center w-full h-full text-slate-300">

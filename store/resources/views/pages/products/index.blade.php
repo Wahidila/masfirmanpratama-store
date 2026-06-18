@@ -1,15 +1,15 @@
 <x-layouts.store
-    title="Katalog Produk — Firman Pratama"
-    description="Kelas Alpha Mind Control (AMC) dan buku-buku karya Mas Firman Pratama. Mind Power & Life Mastery untuk transformasi hidup yang nyata."
+    title="Katalog Buku — Firman Pratama"
+    description="Buku-buku karya Mas Firman Pratama. Mind Power & Life Mastery untuk transformasi hidup yang nyata."
 >
     <section class="bg-gradient-to-b from-white to-slate-50 border-b border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-center">
             <p class="text-xs tracking-[0.2em] font-extrabold text-accent-600 uppercase mb-3">Katalog</p>
             <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 leading-tight">
-                Kelas &amp; Buku <span class="text-gradient">Alpha Mind Control</span>
+                Buku <span class="text-gradient">Alpha Mind Control</span>
             </h1>
             <p class="mt-5 text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
-                Pilih jalur transformasi Anda — ikut kelas langsung bersama Mas Firman atau pelajari secara otodidak lewat karya buku bestseller.
+                Pelajari Mind Power & Life Mastery secara otodidak lewat karya buku bestseller Mas Firman Pratama.
             </p>
         </div>
     </section>
@@ -19,47 +19,17 @@
         x-init="init()"
         class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16"
     >
-        {{-- Filter + search bar --}}
+        {{-- Search bar --}}
         <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            {{-- Filter pills --}}
-            <div
-                role="tablist"
-                aria-label="Filter kategori produk"
-                class="inline-flex items-center gap-2 p-1.5 bg-white border border-slate-200 rounded-full shadow-sm self-start"
-            >
-                <template x-for="opt in filters" :key="opt.value">
-                    <button
-                        type="button"
-                        role="tab"
-                        :aria-selected="filter === opt.value"
-                        :tabindex="filter === opt.value ? 0 : -1"
-                        @click="setFilter(opt.value)"
-                        :class="filter === opt.value
-                            ? 'bg-primary-600 text-white shadow-sm'
-                            : 'text-slate-600 hover:text-primary-700 hover:bg-primary-50'"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-                    >
-                        <i :data-lucide="opt.icon" class="w-4 h-4"></i>
-                        <span x-text="opt.label"></span>
-                        <span
-                            x-show="opt.value !== 'all'"
-                            class="text-xs font-bold opacity-70"
-                            x-text="`(${counts[opt.value] ?? 0})`"
-                        ></span>
-                    </button>
-                </template>
-            </div>
-
-            {{-- Search --}}
             <div class="relative md:w-80">
-                <label for="product-search" class="sr-only">Cari produk</label>
+                <label for="product-search" class="sr-only">Cari buku</label>
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"></i>
                 <input
                     id="product-search"
                     type="search"
                     x-model="searchInput"
                     @input.debounce.300ms="search = searchInput.trim().toLowerCase()"
-                    placeholder="Cari kelas atau buku…"
+                    placeholder="Cari buku…"
                     autocomplete="off"
                     class="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-full text-sm text-slate-700 placeholder:text-slate-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
                 >
@@ -83,12 +53,12 @@
         >
             <span x-show="visibleCount > 0">
                 Menampilkan <span class="font-semibold text-slate-700" x-text="visibleCount"></span>
-                dari {{ count($products) }} produk
+                dari {{ count($products) }} buku
                 <template x-if="search">
                     <span> untuk "<span class="font-semibold text-slate-700" x-text="search"></span>"</span>
                 </template>
             </span>
-            <span x-show="visibleCount === 0">Tidak ada produk yang cocok dengan filter.</span>
+            <span x-show="visibleCount === 0">Tidak ada buku yang cocok dengan pencarian.</span>
         </div>
 
         {{-- Product grid --}}
@@ -106,10 +76,10 @@
                         :price="$product['price']"
                         :image="$product['image']"
                         :imageAlt="$product['name']"
-                        :category="$product['type'] === 'kelas' ? 'Kelas' : 'Buku'"
-                        :categoryVariant="$product['type'] === 'kelas' ? 'info' : 'category'"
+                        category="Buku"
+                        categoryVariant="category"
                         :badge="$product['badge']"
-                        :href="$product['type'] === 'kelas' ? route('courses.show', $product['slug']) : route('products.show', $product['slug'])"
+                        :href="route('products.show', $product['slug'])"
                         class="h-full"
                     />
                 </div>
@@ -126,9 +96,9 @@
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-100 text-slate-500 mb-5">
                 <i data-lucide="search-x" class="w-8 h-8"></i>
             </div>
-            <h2 class="text-xl font-bold text-slate-900">Tidak ada produk yang cocok</h2>
+            <h2 class="text-xl font-bold text-slate-900">Tidak ada buku yang cocok</h2>
             <p class="mt-2 text-slate-500 max-w-md mx-auto">
-                Coba ubah kata kunci pencarian atau pilih kategori lain. Anda juga bisa menghubungi tim kami untuk konsultasi langsung.
+                Coba ubah kata kunci pencarian. Anda juga bisa menghubungi tim kami untuk konsultasi langsung.
             </p>
             <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
                 <button
@@ -154,37 +124,22 @@
         <script>
             function productCatalog() {
                 return {
-                    filter: 'all',
                     search: '',
                     searchInput: '',
                     visibleCount: 0,
-                    filters: [
-                        { value: 'all',    label: 'Semua', icon: 'layout-grid' },
-                        { value: 'kelas',  label: 'Kelas', icon: 'graduation-cap' },
-                        { value: 'buku',   label: 'Buku',  icon: 'book-open' },
-                    ],
-                    counts: @json($productCounts),
                     init() {
                         this.recalc();
-                        this.$watch('filter', () => this.recalc());
                         this.$watch('search', () => this.recalc());
-                        // Re-render Lucide icons after Alpine mounts pills/inputs
                         this.$nextTick(() => window.lucide && window.lucide.createIcons());
                     },
-                    setFilter(v) {
-                        this.filter = v;
-                    },
                     matches(p) {
-                        const typeOk = this.filter === 'all' || p.type === this.filter;
-                        const searchOk = !this.search || p.name.includes(this.search);
-                        return typeOk && searchOk;
+                        return !this.search || p.name.includes(this.search);
                     },
                     recalc() {
                         const items = @json($productIndex);
                         this.visibleCount = items.filter(p => this.matches(p)).length;
                     },
                     reset() {
-                        this.filter = 'all';
                         this.search = '';
                         this.searchInput = '';
                     },

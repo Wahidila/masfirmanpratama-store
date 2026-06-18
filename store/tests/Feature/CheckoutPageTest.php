@@ -85,31 +85,10 @@ class CheckoutPageTest extends TestCase
         $response = $this->get('/checkout');
 
         $response->assertStatus(200);
-        // Lunas vs Cicilan radios
+        // Payment type is always lunas (hidden input)
         $response->assertSee('name="payment_type"', false);
         $response->assertSee('value="lunas"', false);
-        $response->assertSee('value="cicilan"', false);
-        $response->assertSee('Down Payment', false); // schedule label
-    }
-
-    public function test_checkout_page_injects_dynamic_installment_schemes_from_config(): void
-    {
-        // Drop in a custom scheme set so we can prove the page is config-driven,
-        // not hardcoded. KRITIS per task: skema bebas diatur admin.
-        config()->set('store.installment_schemes', [
-            ['name' => '4x Custom', 'n' => 4, 'dp_pct' => 25],
-            ['name' => '12x Custom', 'n' => 12, 'dp_pct' => 10],
-        ]);
-
-        $response = $this->get('/checkout');
-
-        $response->assertStatus(200);
-        // Both custom schemes serialize into Alpine config.
-        $response->assertSee('"4x Custom"', false);
-        $response->assertSee('"12x Custom"', false);
-        $response->assertSee('"dp_pct":25', false);
-        $response->assertSee('"dp_pct":10', false);
-        $response->assertSee('"n":12', false);
+        $response->assertDontSee('value="cicilan"', false);
     }
 
     public function test_checkout_page_exposes_alpine_store_cart_bindings(): void
@@ -145,17 +124,6 @@ class CheckoutPageTest extends TestCase
         $response->assertSee('action="'.route('checkout.store').'"', false);
         $response->assertSee('method="POST"', false);
         $response->assertDontSee('action="checkout-success.html"', false);
-    }
-
-    public function test_checkout_page_exposes_schedule_table_for_installment(): void
-    {
-        $response = $this->get('/checkout');
-
-        $response->assertStatus(200);
-        // Schedule table rendered via Alpine x-for over `schedule` computed.
-        $response->assertSee('data-testid="installment-schedule"', false);
-        $response->assertSee('Jadwal Pembayaran', false);
-        $response->assertSee('Jatuh Tempo', false);
     }
 
     // ─── POST /checkout (M1 stub) ───────────────────────────────────────────

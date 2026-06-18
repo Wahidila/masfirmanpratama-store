@@ -22,21 +22,7 @@ class CourseAddToCartTest extends TestCase
         ], $overrides));
     }
 
-    public function test_course_cta_is_button_not_checkout_link(): void
-    {
-        $this->createCourse();
-
-        $response = $this->get('/kelas/kelas-amc-reguler');
-        $response->assertStatus(200);
-
-        // CTA must NOT be a direct <a href> to checkout
-        $content = $response->getContent();
-        // The old pattern was <a href=\"/checkout\"> — must no longer exist as a CTA link
-        $this->assertStringNotContainsString('href=\"/checkout\"', $content,
-            'CTA should not be a direct link to /checkout — must use addToCartAndCheckout');
-    }
-
-    public function test_course_page_contains_is_shippable_false(): void
+    public function test_course_cta_links_to_course_checkout(): void
     {
         $this->createCourse();
 
@@ -44,16 +30,23 @@ class CourseAddToCartTest extends TestCase
         $response->assertStatus(200);
 
         $content = $response->getContent();
-        // Alpine data should contain is_shippable: false for digital course
-        // Js::from renders as JSON.parse('...') with unicode escapes for quotes
-        $this->assertMatchesRegularExpression(
-            '/is_shippable.{0,10}false/',
+
+        // CTA harus link ke /kelas/{slug}/checkout, bukan /checkout (book checkout)
+        $this->assertStringContainsString(
+            route('courses.checkout', 'kelas-amc-reguler'),
             $content,
-            'Course Alpine data must contain is_shippable: false'
+            'CTA must link to course checkout, not book checkout'
+        );
+
+        // Tidak boleh ada addToCartAndCheckout (kelas tidak masuk cart)
+        $this->assertStringNotContainsString(
+            'addToCartAndCheckout',
+            $content,
+            'Course page must not have addToCartAndCheckout function'
         );
     }
 
-    public function test_course_page_contains_add_to_cart_and_checkout_function(): void
+    public function test_course_page_does_not_add_to_cart(): void
     {
         $this->createCourse();
 
@@ -61,7 +54,26 @@ class CourseAddToCartTest extends TestCase
         $response->assertStatus(200);
 
         $content = $response->getContent();
-        $this->assertStringContainsString('addToCartAndCheckout', $content,
-            'Course page must contain addToCartAndCheckout function');
+
+        // Tidak boleh ada $store.cart.add di halaman kelas
+        $this->assertStringNotContainsString(
+            'store.cart.add',
+            $content,
+            'Course page must not add items to cart'
+        );
+    }
+
+    public function test_course_checkout_page_renders(): void
+    {
+        $this->createCourse();
+
+        $response = $this->get('/kelas/kelas-amc-reguler/checkout');
+        $response->assertStatus(200);
+
+        // Form pendaftaran harus ada
+        $response->assertSee('Formulir Pendaftaran');
+        $response->assertSee('customer_name', false);
+        $response->assertSee('customer_email', false);
+        $response->assertSee('customer_phone', false);
     }
 }

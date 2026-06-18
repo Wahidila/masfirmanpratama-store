@@ -102,13 +102,23 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
                             @foreach ($order->items as $item)
+                                @php
+                                    $itemTitle = $item->product?->title ?? $item->course?->title ?? ($item->course_id ? '(kelas dihapus)' : '(produk dihapus)');
+                                    $itemSlug = $item->product?->slug ?? $item->course?->slug ?? null;
+                                    $itemType = $item->course_id ? 'Kelas' : 'Produk';
+                                @endphp
                                 <tr>
                                     <td class="px-5 py-3">
                                         <div class="font-medium text-gray-800 dark:text-white/90">
-                                            {{ $item->product?->title ?? '(produk dihapus)' }}
+                                            {{ $itemTitle }}
                                         </div>
-                                        @if ($item->product?->slug)
-                                            <div class="text-xs text-gray-500 font-mono dark:text-gray-400">{{ $item->product->slug }}</div>
+                                        @if ($itemSlug)
+                                            <div class="text-xs text-gray-500 font-mono dark:text-gray-400">{{ $itemSlug }}</div>
+                                        @endif
+                                        @if ($item->course_id)
+                                            <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400 mt-1">
+                                                Kelas
+                                            </span>
                                         @endif
                                     </td>
                                     <td class="px-5 py-3 text-right text-gray-700 dark:text-gray-300">{{ $item->qty }}</td>
@@ -305,20 +315,53 @@
             </x-admin.card>
 
             <x-admin.card>
-                <h2 class="text-sm font-semibold text-gray-700 mb-3 dark:text-gray-300">Pengiriman</h2>
-                @if ($order->address)
-                    <p class="text-sm text-gray-700 whitespace-pre-line dark:text-gray-300">{{ $order->address }}</p>
+                @php
+                    $isCourseOrder = str_starts_with($order->order_number, 'COURSE-');
+                    $registrationMeta = null;
+                    if ($isCourseOrder && $order->ref_code) {
+                        $decoded = json_decode($order->ref_code, true);
+                        if (is_array($decoded)) {
+                            $registrationMeta = $decoded;
+                        }
+                    }
+                @endphp
+
+                @if ($isCourseOrder)
+                    <h2 class="text-sm font-semibold text-gray-700 mb-3 dark:text-gray-300">Data Pendaftaran</h2>
+                    <dl class="space-y-3 text-sm">
+                        @if ($registrationMeta && !empty($registrationMeta['occupation']))
+                            <div>
+                                <dt class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Pekerjaan</dt>
+                                <dd class="mt-0.5 text-gray-700 dark:text-gray-300">{{ $registrationMeta['occupation'] }}</dd>
+                            </div>
+                        @endif
+                        @if ($registrationMeta && !empty($registrationMeta['motivation']))
+                            <div>
+                                <dt class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Motivasi</dt>
+                                <dd class="mt-0.5 text-gray-700 dark:text-gray-300">{{ $registrationMeta['motivation'] }}</dd>
+                            </div>
+                        @endif
+                        @if (!$registrationMeta || (empty($registrationMeta['occupation']) && empty($registrationMeta['motivation'])))
+                            <p class="text-sm italic text-gray-500 dark:text-gray-400">Tidak ada data tambahan.</p>
+                        @endif
+                    </dl>
                 @else
-                    <p class="text-sm italic text-gray-500 dark:text-gray-400">Alamat belum diisi.</p>
-                @endif
-                @if ($order->ref_code)
-                    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                        <dt class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Kode Referral</dt>
-                        <dd class="mt-0.5 font-mono text-gray-700 dark:text-gray-300">{{ $order->ref_code }}</dd>
-                    </div>
+                    <h2 class="text-sm font-semibold text-gray-700 mb-3 dark:text-gray-300">Pengiriman</h2>
+                    @if ($order->address)
+                        <p class="text-sm text-gray-700 whitespace-pre-line dark:text-gray-300">{{ $order->address }}</p>
+                    @else
+                        <p class="text-sm italic text-gray-500 dark:text-gray-400">Alamat belum diisi.</p>
+                    @endif
+                    @if ($order->ref_code)
+                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                            <dt class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Kode Referral</dt>
+                            <dd class="mt-0.5 font-mono text-gray-700 dark:text-gray-300">{{ $order->ref_code }}</dd>
+                        </div>
+                    @endif
                 @endif
             </x-admin.card>
 
+            @if (!$isCourseOrder)
             <x-admin.card>
                 <h2 class="text-sm font-semibold text-gray-700 mb-3 dark:text-gray-300">Aksi Pengiriman</h2>
 
@@ -491,6 +534,7 @@
                     </div>
                 @endif
             </x-admin.card>
+            @endif
         </div>
     </div>
 @endsection

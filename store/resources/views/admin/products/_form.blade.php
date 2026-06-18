@@ -72,9 +72,9 @@
         </div>
     </x-admin.card>
 
-    {{-- Pricing & stock --}}
-    <x-admin.card title="Harga & stok">
-        <div class="grid gap-5 sm:grid-cols-3">
+    {{-- Pricing, stock & shipping --}}
+    <x-admin.card title="Harga, stok & pengiriman">
+        <div class="grid gap-5 sm:grid-cols-4">
             <x-admin.form-group label="Harga (Rp)" for="price" name="price" required>
                 <input
                     type="number"
@@ -97,7 +97,20 @@
                     step="1"
                     value="{{ old('stock', $product->stock ?? 0) }}"
                     required
-                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
+            </x-admin.form-group>
+
+            <x-admin.form-group label="Berat (kg)" for="weight_kg" name="weight_kg" required hint="Digunakan untuk kalkulasi ongkir.">
+                <input
+                    type="number"
+                    id="weight_kg"
+                    name="weight_kg"
+                    min="0"
+                    step="0.01"
+                    value="{{ old('weight_kg', $product->weight_kg ?? 0) }}"
+                    required
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                    placeholder="0.35">
             </x-admin.form-group>
 
             <x-admin.form-group label="Status" for="status" name="status" required>
@@ -152,6 +165,64 @@
                     </template>
                 </div>
             </div>
+        </div>
+    </x-admin.card>
+
+    {{-- Spesifikasi Buku --}}
+    <x-admin.card title="Spesifikasi Buku">
+        @php
+            $specs = old('specs', is_array($product->specs ?? null) ? $product->specs : []);
+            $defaultKeys = ['penulis', 'penerbit', 'jumlah_halaman', 'tahun_terbit', 'isbn', 'bahasa', 'ukuran', 'berat'];
+        @endphp
+        <div
+            x-data="specsForm(@js($specs), @js($defaultKeys))"
+            class="space-y-4"
+        >
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+                Isi spesifikasi buku seperti penulis, penerbit, jumlah halaman, dll. Baris kosong akan diabaikan.
+            </p>
+
+            <template x-for="(row, index) in rows" :key="index">
+                <div class="grid grid-cols-12 gap-3 items-start">
+                    <div class="col-span-4">
+                        <input
+                            type="text"
+                            :name="`specs_keys[${index}]`"
+                            x-model="row.key"
+                            placeholder="Label (mis. penulis)"
+                            class="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                        >
+                    </div>
+                    <div class="col-span-7">
+                        <input
+                            type="text"
+                            :name="`specs_values[${index}]`"
+                            x-model="row.value"
+                            placeholder="Nilai (mis. Firman Pratama)"
+                            class="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                        >
+                    </div>
+                    <div class="col-span-1 flex justify-center pt-1.5">
+                        <button
+                            type="button"
+                            @click="removeRow(index)"
+                            class="inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-error-600 hover:bg-error-50 transition dark:hover:bg-error-500/10"
+                            title="Hapus baris"
+                        >
+                            <x-admin.icon name="x" class="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <button
+                type="button"
+                @click="addRow()"
+                class="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-700 transition"
+            >
+                <x-admin.icon name="plus" class="w-4 h-4" />
+                Tambah spesifikasi
+            </button>
         </div>
     </x-admin.card>
 
@@ -215,6 +286,27 @@
 
 @push('scripts')
 <script>
+    function specsForm(existingSpecs, defaultKeys) {
+        const rows = [];
+        if (existingSpecs && typeof existingSpecs === 'object' && Object.keys(existingSpecs).length > 0) {
+            for (const [key, value] of Object.entries(existingSpecs)) {
+                rows.push({ key, value: String(value) });
+            }
+        } else {
+            // Pre-fill with common book spec keys
+            defaultKeys.forEach(k => rows.push({ key: k, value: '' }));
+        }
+        return {
+            rows,
+            addRow() {
+                this.rows.push({ key: '', value: '' });
+            },
+            removeRow(index) {
+                this.rows.splice(index, 1);
+            },
+        };
+    }
+
     function productForm({ autoSlug, existingImage, initialTitle, initialSlug }) {
         return {
             title: initialTitle || '',

@@ -89,13 +89,14 @@
         @endif
     </form>
 
-    {{-- Bulk action form wrapping the table --}}
-    <form id="bulk-form" method="POST" action="{{ route('admin.courses.bulk') }}"
-        x-data="{ selected: [], get hasSelection() { return this.selected.length > 0; } }">
-        @csrf
-        <input type="hidden" name="view" value="{{ $view ?? 'active' }}">
-        @if ($filterStatus) <input type="hidden" name="status" value="{{ $filterStatus }}"> @endif
-        @if ($search) <input type="hidden" name="q" value="{{ $search }}"> @endif
+    {{-- Bulk action form; keep it separate so row delete/restore forms are not nested. --}}
+    <div x-data="{ selected: [], get hasSelection() { return this.selected.length > 0; } }">
+        <form id="bulk-form" method="POST" action="{{ route('admin.courses.bulk') }}" class="hidden">
+            @csrf
+            <input type="hidden" name="view" value="{{ $view ?? 'active' }}">
+            @if ($filterStatus) <input type="hidden" name="status" value="{{ $filterStatus }}"> @endif
+            @if ($search) <input type="hidden" name="q" value="{{ $search }}"> @endif
+        </form>
 
         {{-- Bulk action toolbar (sticky bottom-style, conditional) --}}
         <div x-show="hasSelection" x-cloak
@@ -106,27 +107,27 @@
             <span class="text-gray-400 dark:text-gray-500">·</span>
 
             @if ($isTrashed)
-                <button type="submit" name="action" value="restore"
+                <button type="submit" form="bulk-form" name="action" value="restore"
                     class="inline-flex items-center gap-1 rounded-lg bg-success-500 px-3 py-1.5 font-medium text-white hover:bg-success-600 transition">
                     <x-admin.icon name="check" class="h-3 w-3" />
                     Restore
                 </button>
-                <button type="submit" name="action" value="force_delete"
+                <button type="submit" form="bulk-form" name="action" value="force_delete"
                     onclick="return confirm('Hapus permanen kelas yang dipilih? Tindakan ini tidak bisa dibatalkan.');"
                     class="inline-flex items-center gap-1 rounded-lg bg-error-500 px-3 py-1.5 font-medium text-white hover:bg-error-600 transition">
                     <x-admin.icon name="trash" class="h-3 w-3" />
                     Hapus permanen
                 </button>
             @else
-                <button type="submit" name="action" value="activate"
+                <button type="submit" form="bulk-form" name="action" value="activate"
                     class="inline-flex items-center gap-1 rounded-lg bg-success-500 px-3 py-1.5 font-medium text-white hover:bg-success-600 transition">
                     Activate
                 </button>
-                <button type="submit" name="action" value="archive"
+                <button type="submit" form="bulk-form" name="action" value="archive"
                     class="inline-flex items-center gap-1 rounded-lg bg-warning-500 px-3 py-1.5 font-medium text-white hover:bg-warning-600 transition">
                     Archive (status)
                 </button>
-                <button type="submit" name="action" value="soft_delete"
+                <button type="submit" form="bulk-form" name="action" value="soft_delete"
                     onclick="return confirm('Pindahkan ke arsip (soft delete)? Bisa di-restore.');"
                     class="inline-flex items-center gap-1 rounded-lg bg-error-500 px-3 py-1.5 font-medium text-white hover:bg-error-600 transition">
                     <x-admin.icon name="trash" class="h-3 w-3" />
@@ -154,7 +155,7 @@
             @foreach ($courses as $course)
                 <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition {{ $isTrashed ? 'opacity-75' : '' }}">
                     <td class="px-4 py-3">
-                        <input type="checkbox" name="ids[]" value="{{ $course->id }}"
+                        <input type="checkbox" form="bulk-form" name="ids[]" value="{{ $course->id }}"
                             x-on:change="$event.target.checked ? selected.push({{ $course->id }}) : (selected = selected.filter(id => id !== {{ $course->id }}))"
                             class="rounded border-gray-300 text-brand-500 focus:ring-brand-500 dark:border-gray-700">
                     </td>
@@ -217,7 +218,7 @@
                 </tr>
             @endforeach
         </x-admin.table>
-    </form>
+    </div>
 
     @if ($courses->hasPages())
         <div class="mt-6">

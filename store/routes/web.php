@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CourseCheckoutController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
@@ -31,9 +33,19 @@ Route::get('/kontak', [PageController::class, 'kontak'])->name('pages.kontak');
 // Katalog produk
 Route::get('/produk', [ProductController::class, 'index'])->name('products.index');
 
-Route::get('/kelas/{slug}', [ProductController::class, 'show'])
+Route::get('/kelas/{slug}', [CourseController::class, 'show'])
     ->where('slug', '[a-z0-9\-]+')
     ->name('courses.show');
+
+Route::get('/kelas/{slug}/checkout', [CourseCheckoutController::class, 'create'])
+    ->where('slug', '[a-z0-9\-]+')
+    ->name('courses.checkout');
+Route::post('/kelas/{slug}/checkout', [CourseCheckoutController::class, 'store'])
+    ->where('slug', '[a-z0-9\-]+')
+    ->name('courses.checkout.store');
+Route::get('/kelas/{slug}/checkout/success/{order}', [CourseCheckoutController::class, 'success'])
+    ->where('slug', '[a-z0-9\-]+')
+    ->name('courses.checkout.success');
 
 Route::get('/produk/{slug}', [ProductController::class, 'show'])
     ->where('slug', '[A-Za-z0-9\-]+')
@@ -233,6 +245,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('settings.bank-accounts.update');
         Route::put('settings/shipping', [SettingsController::class, 'updateShipping'])
             ->name('settings.shipping.update');
+        Route::put('settings/whatsapp', [SettingsController::class, 'updateWhatsapp'])
+            ->name('settings.whatsapp.update');
+        Route::post('settings/whatsapp/test', [SettingsController::class, 'testWhatsapp'])
+            ->name('settings.whatsapp.test');
 
         Route::post('installment-schemes/{installment_scheme}/toggle',
             [InstallmentSchemeController::class, 'toggle'])

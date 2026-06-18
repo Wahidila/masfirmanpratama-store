@@ -27,16 +27,6 @@
     $benefits = $product['benefits'] ?? [];
     $testimonials = $product['testimonials'] ?? [];
     $ctaLabel = $product['cta_label'] ?? 'Daftar Sekarang';
-    $ctaHref = $product['cta_href'] ?? route('checkout.index');
-    $alpineProduct = [
-        'slug' => $product['slug'] ?? '',
-        'name' => $title,
-        'title' => $title,
-        'price' => $price,
-        'image' => $image,
-        'category' => $categoryLabel ?? 'Kelas',
-        'is_shippable' => false,
-    ];
     $installmentAvailable = $product['installment_available'] ?? false;
 @endphp
 
@@ -102,9 +92,18 @@
 
                     {{-- Hero --}}
                     <header>
-                        @if ($badge)
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-bold uppercase tracking-wider mb-4 border border-primary-100 shadow-sm">
-                                <i data-lucide="{{ $badgeIcon }}" class="w-4 h-4"></i> {{ $badge }}
+                        @if ($badge || $installmentAvailable)
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                @if ($badge)
+                                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-bold uppercase tracking-wider border border-primary-100 shadow-sm">
+                                        <i data-lucide="{{ $badgeIcon }}" class="w-4 h-4"></i> {{ $badge }}
+                                    </div>
+                                @endif
+                                @if ($installmentAvailable)
+                                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-50 text-secondary-700 text-xs font-bold uppercase tracking-wider border border-secondary-100 shadow-sm">
+                                        <i data-lucide="credit-card" class="w-4 h-4"></i> Cicilan Tersedia
+                                    </div>
+                                @endif
                             </div>
                         @endif
 
@@ -402,19 +401,10 @@
                 </div>
 
                 {{-- ─── RIGHT: Sticky checkout panel (desktop) ───────────── --}}
-                <aside class="lg:col-span-4 mt-2 lg:mt-0" x-data="{
-                    product: {{ \Illuminate\Support\Js::from($alpineProduct) }},
-                    addToCartAndCheckout() {
-                        const store = this.$store && this.$store.cart;
-                        if (store && typeof store.add === 'function') {
-                            store.add(this.product, 1);
-                        }
-                        window.location.href = '{{ route("checkout.index") }}';
-                    }
-                }">
-                    <div class="lg:sticky lg:top-28 bg-white p-7 sm:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 hover-lift">
+                <aside class="lg:col-span-4 mt-2 lg:mt-0">
+                    <div class="lg:sticky lg:top-28 bg-white p-7 sm:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 hover-lift relative overflow-visible">
 
-                        <div class="mb-6 flex justify-between items-start gap-3">
+                        <div class="mb-6">
                             <div>
                                 <p class="text-slate-500 font-medium mb-1 text-sm">Investasi Kelas</p>
                                 <div class="flex items-baseline gap-2 flex-wrap">
@@ -430,11 +420,6 @@
                                     </span>
                                 @endif
                             </div>
-                            @if ($installmentAvailable)
-                                <div class="bg-secondary-50 text-secondary-700 px-3 py-1 rounded-full text-xs font-bold border border-secondary-100 shrink-0">
-                                    Cicilan Tersedia
-                                </div>
-                            @endif
                         </div>
 
                         <hr class="border-slate-100 mb-6">
@@ -451,13 +436,12 @@
                             @endforeach
                         </ul>
 
-                        <button
-                            @click="addToCartAndCheckout()"
-                            type="button"
+                        <a
+                            href="{{ route('courses.checkout', $data['slug']) }}"
                             class="ripple block w-full text-center bg-primary-600 hover:bg-primary-700 text-white rounded-2xl py-4 font-extrabold text-lg transition-all shadow-[0_10px_30px_-5px_rgba(79,70,229,0.4)] hover:shadow-[0_15px_30px_-5px_rgba(79,70,229,0.5)] transform hover:-translate-y-1"
                         >
                             {{ $ctaLabel }}
-                        </button>
+                        </a>
 
                         <p class="text-xs text-slate-500 mt-4 text-center leading-relaxed font-medium">
                             100% metode logis dan ilmiah. Tidak membawa-bawa hal gaib/mistis.
@@ -486,17 +470,7 @@
 
     {{-- ─── Sticky CTA bar (mobile only) ──────────────────────────────── --}}
     <div
-        x-data="{
-            visible: false,
-            product: {{ \Illuminate\Support\Js::from($alpineProduct) }},
-            addToCartAndCheckout() {
-                const store = this.$store && this.$store.cart;
-                if (store && typeof store.add === 'function') {
-                    store.add(this.product, 1);
-                }
-                window.location.href = '{{ route("checkout.index") }}';
-            }
-        }"
+        x-data="{ visible: false }"
         x-init="window.addEventListener('scroll', () => visible = window.scrollY > 400)"
         x-show="visible"
         x-transition:enter="transition ease-out duration-200"
@@ -517,14 +491,13 @@
                     @endif
                 </div>
             </div>
-            <button
-                @click="addToCartAndCheckout()"
-                type="button"
+            <a
+                href="{{ route('courses.checkout', $data['slug']) }}"
                 class="ripple shrink-0 inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white rounded-full px-5 py-3 font-bold text-sm shadow-lg shadow-primary-500/30 transition-colors"
             >
                 {{ $ctaLabel }}
                 <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </button>
+            </a>
         </div>
     </div>
 </x-layouts.store>

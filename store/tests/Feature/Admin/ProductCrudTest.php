@@ -354,6 +354,7 @@ class ProductCrudTest extends TestCase
             'price' => 150000,
             'stock' => 10,
             'status' => 'draft',
+            'weight_kg' => 0.35,
             'description' => 'Deskripsi singkat produk.',
         ], $overrides);
     }

@@ -1,41 +1,4 @@
 @php
-    use App\Models\InstallmentScheme;
-
-    /**
-     * Installment schemes (M2 — task t_8446fbd4): DB-backed.
-     * Active global schemes only on cart-level checkout (no specific product).
-     * Format ke FE: {name, n, dp_pct} — kompat dengan Alpine component existing.
-     *
-     * Fallback: kalau tabel installment_schemes belum ada (mis. test legacy
-     * tanpa RefreshDatabase) atau empty (fresh install tanpa seeder), pakai
-     * config sebagai safety net biar checkout tidak blank.
-     */
-    try {
-        $dbSchemes = InstallmentScheme::query()
-            ->active()
-            ->forProduct(null)
-            ->orderBy('n_installments')
-            ->get(['id', 'name', 'n_installments', 'dp_pct'])
-            ->map(fn ($s) => [
-                'id' => $s->id,
-                'name' => $s->name,
-                'n' => $s->n_installments,
-                'dp_pct' => (int) $s->dp_pct,
-            ])
-            ->all();
-    } catch (\Throwable) {
-        $dbSchemes = [];
-    }
-
-    /** @var array<int, array{id: int|null, name: string, n: int, dp_pct: int}> $installmentSchemes */
-    $installmentSchemes = ! empty($dbSchemes)
-        ? $dbSchemes
-        : array_map(
-            // Config fallback ngga punya id — set null. FE submit akan kirim
-            // installment_scheme_id=null, validator akan reject kalau cicilan.
-            fn ($s) => array_merge(['id' => null], $s),
-            (array) config('store.installment_schemes', []),
-        );
     /** @var array<int, array{code: string, label: string, price: int}> $shippingMethods */
     $shippingMethods = config('store.shipping_methods', []);
     /** @var array<int, string> $provinces */
@@ -46,7 +9,7 @@
 
 <x-layouts.store
     title="Checkout — Firman Pratama"
-    description="Selesaikan pesanan kamu. Pilih metode pembayaran lunas atau cicilan, isi data kirim, lalu lanjut ke upload bukti bayar."
+    description="Selesaikan pesanan kamu. Isi data pengiriman, lalu lanjut ke upload bukti bayar."
     bodyClass="relative pb-32 lg:pb-0"
 >
     {{-- Decorative blobs (consistent dengan cart + product detail) --}}
@@ -61,7 +24,6 @@
         membaca lewat window.__checkoutConfig.
     --}}
     <script type="application/json" id="checkout-config">@json([
-        'schemes' => $installmentSchemes,
         'shippingMethods' => $shippingMethods,
     ])</script>
 
@@ -73,11 +35,6 @@
             // Hydrate server-side validation errors into Alpine
             const serverErrors = @json($errors->messages());
             if (Object.keys(serverErrors).length > 0) {
-                // Map server field names to Alpine field names
-                if (serverErrors.installment_scheme_id) {
-                    serverErrors.installment_scheme = serverErrors.installment_scheme_id;
-                    delete serverErrors.installment_scheme_id;
-                }
                 errors = serverErrors;
                 touched = { __all: true };
                 // Hydrate form from old input
@@ -89,9 +46,6 @@
                 form.address_province = '{{ old('address_province', '') }}';
                 form.address_postal = '{{ old('address_postal', '') }}';
                 form.shipping_method = '{{ old('shipping_method', '') }}';
-                form.payment_type = '{{ old('payment_type', 'lunas') }}';
-                const oldScheme = '{{ old('installment_scheme_id', '') }}';
-                form.installment_scheme = oldScheme ? Number(oldScheme) : null;
             }
             $nextTick(() => window.lucide && window.lucide.createIcons());
         "
@@ -101,7 +55,7 @@
             Checkout Pembelian
         </h1>
         <p class="mt-4 max-w-3xl text-lg leading-relaxed text-slate-600">
-            Isi data pelanggan dan alamat pengiriman dengan benar, pilih metode pembayaran, lalu lanjut ke upload bukti bayar.
+            Isi data pelanggan dan alamat pengiriman dengan benar, lalu lanjut ke upload bukti bayar.
         </p>
 
         {{-- ========================================================== --}}
@@ -426,160 +380,8 @@
                     </div>
                 </section>
 
-                {{-- ┌── 3. Metode pembayaran ───────────────────────────┐ --}}
-                <section
-                    id="paymentMethod"
-                    class="panel-card glass hover-lift rounded-3xl border border-white/60 p-6 sm:p-8"
-                >
-                    <header class="flex items-start gap-3">
-                        <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
-                            <i data-lucide="credit-card" class="h-5 w-5"></i>
-                        </span>
-                        <div>
-                            <h2 class="text-2xl font-bold leading-tight text-slate-900">Metode Pembayaran</h2>
-                            <p class="mt-1 text-sm text-slate-500">Pilih bayar lunas atau cicilan. Pembayaran via transfer manual + upload bukti.</p>
-                        </div>
-                    </header>
-
-                    {{-- Lunas vs Cicilan radio --}}
-                    <div class="mt-6 grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Metode pembayaran">
-                        <label
-                            class="relative cursor-pointer rounded-2xl border-2 bg-white p-4 transition"
-                            :class="form.payment_type === 'lunas' ? 'border-primary-500 ring-2 ring-primary-200' : 'border-slate-200 hover:border-primary-300'"
-                        >
-                            <input
-                                type="radio"
-                                name="payment_type"
-                                value="lunas"
-                                x-model="form.payment_type"
-                                class="sr-only"
-                            >
-                            <div class="flex items-start gap-3">
-                                <span
-                                    class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition"
-                                    :class="form.payment_type === 'lunas' ? 'border-primary-600 bg-primary-600' : 'border-slate-300 bg-white'"
-                                >
-                                    <span
-                                        x-show="form.payment_type === 'lunas'"
-                                        x-cloak
-                                        class="block h-2 w-2 rounded-full bg-white"
-                                    ></span>
-                                </span>
-                                <div>
-                                    <p class="text-base font-bold text-slate-900">Lunas</p>
-                                    <p class="mt-0.5 text-xs text-slate-500">Bayar sekali penuh. Pesanan langsung diproses setelah bukti diverifikasi.</p>
-                                </div>
-                            </div>
-                        </label>
-
-                        <label
-                            class="relative cursor-pointer rounded-2xl border-2 bg-white p-4 transition"
-                            :class="form.payment_type === 'cicilan' ? 'border-primary-500 ring-2 ring-primary-200' : 'border-slate-200 hover:border-primary-300'"
-                            x-show="schemes.length > 0"
-                        >
-                            <input
-                                type="radio"
-                                name="payment_type"
-                                value="cicilan"
-                                x-model="form.payment_type"
-                                class="sr-only"
-                            >
-                            <div class="flex items-start gap-3">
-                                <span
-                                    class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition"
-                                    :class="form.payment_type === 'cicilan' ? 'border-primary-600 bg-primary-600' : 'border-slate-300 bg-white'"
-                                >
-                                    <span
-                                        x-show="form.payment_type === 'cicilan'"
-                                        x-cloak
-                                        class="block h-2 w-2 rounded-full bg-white"
-                                    ></span>
-                                </span>
-                                <div>
-                                    <p class="text-base font-bold text-slate-900">Cicilan</p>
-                                    <p class="mt-0.5 text-xs text-slate-500">Bayar bertahap dengan DP. Skema fleksibel sesuai pilihan kamu.</p>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-
-                    {{-- Cicilan scheme picker + jadwal preview --}}
-                    <div
-                        x-show="form.payment_type === 'cicilan' && schemes.length > 0"
-                        x-cloak
-                        x-transition.opacity
-                        class="mt-6 space-y-5 border-t border-slate-100 pt-6"
-                    >
-                        <div>
-                            <label for="installment_scheme" class="mb-1.5 block text-sm font-semibold text-slate-700">
-                                Skema Cicilan <span class="text-rose-500">*</span>
-                            </label>
-                            <select
-                                id="installment_scheme"
-                                name="installment_scheme_id"
-                                x-model.number="form.installment_scheme"
-                                @change="touch('installment_scheme')"
-                                :class="errorClasses('installment_scheme')"
-                                class="w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 transition focus:outline-none focus:ring-2"
-                            >
-                                <option :value="null">Pilih skema cicilan</option>
-                                <template x-for="(scheme, idx) in schemes" :key="idx">
-                                    <option
-                                        :value="scheme.id ?? idx"
-                                        x-text="scheme.name + ' — DP ' + scheme.dp_pct + '%'"
-                                    ></option>
-                                </template>
-                            </select>
-                            <p x-text="errors.installment_scheme || '\u00A0'" class="mt-1.5 min-h-[1.25rem] text-xs font-medium text-rose-600" :class="errors.installment_scheme ? 'opacity-100' : 'opacity-0'" aria-live="polite"></p>
-                        </div>
-
-                        {{-- Jadwal preview --}}
-                        <div
-                            x-show="schedule.length > 0"
-                            x-cloak
-                            data-testid="installment-schedule"
-                            class="overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/60"
-                        >
-                            <div class="flex items-center justify-between border-b border-slate-100 bg-white/60 px-4 py-3">
-                                <p class="text-sm font-bold text-slate-900">Jadwal Pembayaran</p>
-                                <span
-                                    class="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2.5 py-1 text-xs font-bold text-primary-700"
-                                    x-text="schedule.length + 'x pembayaran'"
-                                ></span>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full text-sm">
-                                    <thead>
-                                        <tr class="text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                                            <th class="px-4 py-2.5">Pembayaran</th>
-                                            <th class="px-4 py-2.5">Jatuh Tempo</th>
-                                            <th class="px-4 py-2.5 text-right">Nominal</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-slate-100 bg-white">
-                                        <template x-for="(row, i) in schedule" :key="i">
-                                            <tr>
-                                                <td class="px-4 py-3">
-                                                    <p class="font-semibold text-slate-900" x-text="row.label"></p>
-                                                    <p class="text-xs text-slate-500" x-text="row.note"></p>
-                                                </td>
-                                                <td class="px-4 py-3 text-slate-600" x-text="row.due_label"></td>
-                                                <td class="px-4 py-3 text-right font-bold text-slate-900" x-text="format(row.amount)"></td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <p class="border-t border-slate-100 bg-white/60 px-4 py-3 text-xs text-slate-500">
-                                <i data-lucide="info" class="mr-1 inline-block h-3.5 w-3.5 align-text-bottom"></i>
-                                Reminder otomatis via WhatsApp akan dikirim H-3 setiap jatuh tempo.
-                            </p>
-                        </div>
-                    </div>
-
-                    {{-- Hidden field: serialized schedule for backend (M2 will use this) --}}
-                    <input type="hidden" name="schedule_json" :value="JSON.stringify(schedule)">
-                </section>
+                {{-- Pembayaran selalu lunas (hidden) --}}
+                <input type="hidden" name="payment_type" value="lunas">
             </div>
 
             {{-- ─── RIGHT COLUMN: summary ──────────────────────────── --}}
@@ -635,14 +437,6 @@
                                 <dt class="font-bold text-slate-900">Total</dt>
                                 <dd class="font-extrabold text-primary-600" x-text="format(grandTotal)"></dd>
                             </div>
-                            <div
-                                x-show="form.payment_type === 'cicilan' && schedule.length > 0"
-                                x-cloak
-                                class="flex items-center justify-between rounded-xl bg-primary-50 px-3 py-2.5 text-sm"
-                            >
-                                <dt class="font-bold text-primary-700">Bayar sekarang (DP)</dt>
-                                <dd class="font-extrabold text-primary-700" x-text="format(dpAmount)"></dd>
-                            </div>
                         </dl>
 
                         <button
@@ -678,9 +472,9 @@
                             >
                                 <div>
                                     <p class="text-xs font-bold uppercase tracking-wide text-slate-500">
-                                        Total <span x-text="form.payment_type === 'cicilan' ? '(DP)' : ''"></span>
+                                        Total
                                     </p>
-                                    <p class="text-xl font-extrabold text-primary-600" x-text="format(form.payment_type === 'cicilan' ? dpAmount : grandTotal)"></p>
+                                    <p class="text-xl font-extrabold text-primary-600" x-text="format(grandTotal)"></p>
                                 </div>
                                 <i data-lucide="chevron-up" class="h-5 w-5 text-slate-500 transition" :class="expanded ? 'rotate-180' : ''"></i>
                             </button>
@@ -734,7 +528,7 @@
         <script>
             window.checkoutPage = function () {
                 // Read server-injected config from JSON island (set in Blade).
-                let cfg = { schemes: [], shippingMethods: [] };
+                let cfg = { shippingMethods: [] };
                 try {
                     const el = document.getElementById('checkout-config');
                     if (el && el.textContent.trim()) {
@@ -747,7 +541,6 @@
 
                 return {
                     // Static config (server-injected)
-                    schemes: Array.isArray(cfg.schemes) ? cfg.schemes : [],
                     shippingMethods: Array.isArray(cfg.shippingMethods) ? cfg.shippingMethods : [],
 
                     // Form state
@@ -760,8 +553,6 @@
                         address_province: '',
                         address_postal: '',
                         shipping_method: '',
-                        payment_type: 'lunas',
-                        installment_scheme: null,
                     },
                     errors: {},
                     touched: {},
@@ -798,73 +589,6 @@
                         return this.cartSubtotal + this.shippingPrice;
                     },
 
-                    get selectedScheme() {
-                        const val = this.form.installment_scheme;
-                        if (val === null || val === undefined || val === '') return null;
-                        // Cari by DB id dulu (DB-backed schemes punya id), fallback
-                        // ke index (config fallback ngga punya id).
-                        const byId = this.schemes.find((s) => s.id != null && Number(s.id) === Number(val));
-                        if (byId) return byId;
-                        return this.schemes[Number(val)] || null;
-                    },
-
-                    get dpAmount() {
-                        const s = this.selectedScheme;
-                        if (!s) return 0;
-                        return Math.round((this.grandTotal * Number(s.dp_pct || 0)) / 100);
-                    },
-
-                    /**
-                     * Auto-generated installment schedule.
-                     * Returns array of { label, note, due_label, due_at, amount }.
-                     *
-                     * - Row 0 = DP (jatuh tempo: hari ini).
-                     * - Row 1..n-1 = sisa cicilan, dibagi rata, jatuh tempo +1, +2, ...
-                     *   Rounding genap: cicilan terakhir menyerap selisih supaya
-                     *   total persis sama dengan grandTotal.
-                     */
-                    get schedule() {
-                        if (this.form.payment_type !== 'cicilan') return [];
-                        const s = this.selectedScheme;
-                        if (!s) return [];
-                        const total = this.grandTotal;
-                        if (total <= 0) return [];
-
-                        const n = Math.max(2, Number(s.n) || 2);
-                        const dp = this.dpAmount;
-                        const remaining = Math.max(0, total - dp);
-                        const installmentCount = n - 1;
-                        const baseInstallment = Math.floor(remaining / installmentCount);
-                        const lastInstallment = remaining - baseInstallment * (installmentCount - 1);
-
-                        const today = new Date();
-                        const out = [];
-
-                        // DP
-                        out.push({
-                            label: 'Down Payment',
-                            note: 'Bayar sekarang (' + Number(s.dp_pct) + '% dari total)',
-                            due_at: this._isoDate(today),
-                            due_label: 'Hari ini',
-                            amount: dp,
-                        });
-
-                        // Cicilan ke-i
-                        for (let i = 1; i <= installmentCount; i++) {
-                            const due = this._addMonths(today, i);
-                            const isLast = i === installmentCount;
-                            out.push({
-                                label: 'Cicilan ke-' + i + ' dari ' + installmentCount,
-                                note: isLast ? 'Cicilan terakhir' : '',
-                                due_at: this._isoDate(due),
-                                due_label: this._formatDate(due),
-                                amount: isLast ? lastInstallment : baseInstallment,
-                            });
-                        }
-
-                        return out;
-                    },
-
                     // ── Validation ──────────────────────────────────────
                     touch(field) {
                         this.touched[field] = true;
@@ -894,13 +618,6 @@
                         if (! this.form.address_province) e.address_province = 'Provinsi wajib dipilih.';
                         if (this.requiresShipping && ! this.form.shipping_method) e.shipping_method = 'Metode pengiriman wajib dipilih.';
 
-                        if (this.form.payment_type === 'cicilan') {
-                            const idx = this.form.installment_scheme;
-                            if (idx === null || idx === undefined || idx === '' || ! this.schemes[Number(idx)]) {
-                                e.installment_scheme = 'Pilih skema cicilan.';
-                            }
-                        }
-
                         // Only surface errors for fields user has touched, OR all on submit.
                         const filtered = {};
                         for (const k of Object.keys(e)) {
@@ -922,7 +639,7 @@
                         this.touched = {
                             customer_name: true, customer_email: true, customer_phone: true,
                             address_line: true, address_city: true, address_province: true,
-                            shipping_method: true, installment_scheme: true,
+                            shipping_method: true,
                             __all: true,
                         };
                         if (! this.validate()) {
