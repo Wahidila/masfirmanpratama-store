@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Store Webhook
+    |--------------------------------------------------------------------------
+    |
+    | Secret key untuk verifikasi HMAC-SHA256 webhook dari Store.
+    | Harus sama dengan AFFILIATE_WEBHOOK_SECRET di sisi Store.
+    |
+    */
+
+    'store_webhook' => [
+        'secret' => env('STORE_WEBHOOK_SECRET'),
+    ],
+
 ];

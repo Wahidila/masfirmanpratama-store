@@ -17,6 +17,7 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\Webhooks\StoreWebhookController;
 use App\Http\Controllers\WithdrawalController;
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\EnsureAffiliatorIsActive;
@@ -151,3 +152,11 @@ Route::prefix('admin')->group(function () {
         Route::post('/materials/{material}/toggle', [AdminMaterialController::class, 'toggle'])->name('admin.materials.toggle');
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Webhook Routes (no auth, CSRF excluded via bootstrap/app.php)
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/webhooks/store', [StoreWebhookController::class, 'handle'])->name('webhooks.store');
