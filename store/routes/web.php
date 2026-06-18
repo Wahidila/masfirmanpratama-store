@@ -248,14 +248,20 @@ Route::prefix('affiliate')->name('affiliate.')->group(function () {
 |--------------------------------------------------------------------------
 */
 
+use App\Http\Controllers\Admin\AffiliateEventController as AdminAffiliateEventController;
+use App\Http\Controllers\Admin\AffiliatorController;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\CommissionController;
+use App\Http\Controllers\Admin\CommissionSettingController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InstallmentSchemeController;
+use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\WaNotificationController;
+use App\Http\Controllers\Admin\WithdrawalController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
@@ -324,5 +330,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // route name pakai dash juga biar konsisten.
         Route::get('wa-notifications', [WaNotificationController::class, 'index'])
             ->name('wa-notifications.index');
+
+        // Affiliate Management (M3 — Batch 5)
+        Route::resource('affiliators', AffiliatorController::class)
+            ->only(['index', 'show', 'edit', 'update', 'destroy']);
+
+        Route::post('commissions/{commission}/approve', [CommissionController::class, 'approve'])
+            ->name('commissions.approve');
+        Route::post('commissions/{commission}/reject', [CommissionController::class, 'reject'])
+            ->name('commissions.reject');
+        Route::get('commissions', [CommissionController::class, 'index'])->name('commissions.index');
+
+        Route::post('withdrawals/{withdrawal}/approve', [WithdrawalController::class, 'approve'])
+            ->name('withdrawals.approve');
+        Route::post('withdrawals/{withdrawal}/mark-paid', [WithdrawalController::class, 'markPaid'])
+            ->name('withdrawals.mark-paid');
+        Route::post('withdrawals/{withdrawal}/reject', [WithdrawalController::class, 'reject'])
+            ->name('withdrawals.reject');
+        Route::get('withdrawals', [WithdrawalController::class, 'index'])->name('withdrawals.index');
+
+        Route::resource('materials', MaterialController::class)->except(['show']);
+
+        Route::resource('affiliate-events', AdminAffiliateEventController::class)
+            ->except(['show'])
+            ->parameters(['affiliate-events' => 'affiliateEvent']);
+
+        Route::get('commission-settings', [CommissionSettingController::class, 'index'])
+            ->name('commission-settings.index');
+        Route::put('commission-settings/{commissionSetting}', [CommissionSettingController::class, 'update'])
+            ->name('commission-settings.update');
     });
 });

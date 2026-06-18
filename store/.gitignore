@@ -25,3 +25,6 @@ yarn-error.log
 tools/tailwindcss-v4
 _ui_reference/
 _ui_reference/
+
+# oh-my-openagent run artifacts
+.omo/
