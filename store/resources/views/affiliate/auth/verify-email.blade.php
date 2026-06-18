@@ -3,7 +3,8 @@
 @section('title', 'Verifikasi Email')
 
 @section('content')
-<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
+<div class="flex items-center justify-center min-h-[calc(100vh-5rem)] px-4 py-12">
+<div class="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
     <div class="mb-4">
         <svg class="mx-auto h-12 w-12 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -37,5 +38,6 @@
             Logout
         </button>
     </form>
+</div>
 </div>
 @endsection

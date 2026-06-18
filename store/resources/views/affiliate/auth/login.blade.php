@@ -3,7 +3,8 @@
 @section('title', 'Login Affiliator')
 
 @section('content')
-<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+<div class="flex items-center justify-center min-h-[calc(100vh-5rem)] px-4 py-12">
+<div class="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
     <h1 class="text-2xl font-bold text-slate-900 mb-2">Login Affiliator</h1>
     <p class="text-slate-500 mb-6">Masuk ke dashboard affiliate Anda.</p>
 
@@ -44,5 +45,6 @@
         Belum punya akun?
         <a href="{{ route('affiliate.register') }}" class="text-indigo-600 hover:text-indigo-700 font-medium">Daftar sekarang</a>
     </p>
+</div>
 </div>
 @endsection

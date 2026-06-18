@@ -187,9 +187,13 @@ if (! app()->environment('production')) {
 */
 
 use App\Http\Controllers\Affiliate\AuthController as AffiliateAuthController;
+use App\Http\Controllers\Affiliate\LandingController as AffiliateLandingController;
 use App\Http\Controllers\Affiliate\VerificationController as AffiliateVerificationController;
 
 Route::prefix('affiliate')->name('affiliate.')->group(function () {
+    // Landing page — publik, tanpa auth
+    Route::get('/', [AffiliateLandingController::class, 'index'])->name('landing');
+
     Route::middleware('guest:affiliator')->group(function () {
         Route::get('/register', [AffiliateAuthController::class, 'showRegister'])->name('register');
         Route::post('/register', [AffiliateAuthController::class, 'register'])->name('register.store');
