@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAffiliatorIsVerified;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,20 +23,26 @@ return Application::configure(basePath: dirname(__DIR__))
         // signature in header, no session cookie or CSRF token.
         $middleware->validateCsrfTokens(except: ['webhooks/agenwebsite/*']);
 
-        // Untuk guard 'admin', redirect unauthenticated ke /admin/login
-        // (default Laravel pakai route('login') yang tidak terdefinisi di app ini).
+        // Register custom middleware aliases
+        $middleware->alias([
+            'affiliator.verified' => EnsureAffiliatorIsVerified::class,
+        ]);
+
+        // Untuk guard 'admin' dan 'affiliator', redirect unauthenticated ke login masing-masing.
         $middleware->redirectGuestsTo(function ($request) {
-            // Hanya admin routes yang dilindungi auth:admin saat ini.
-            // Web guard tidak dipakai — kalau dipakai later, tambahin guard-aware logic di sini.
-            if ($request->is('admin/*') || $request->is('admin')) {
-                return route('admin.login');
+            if ($request->is('affiliate/*') || $request->is('affiliate')) {
+                return route('affiliate.login');
             }
 
             return route('admin.login');
         });
 
-        // Authenticated admin yang nyentuh guest-only routes (login page) → dashboard
+        // Authenticated user yang nyentuh guest-only routes (login page) → dashboard
         $middleware->redirectUsersTo(function ($request) {
+            if ($request->is('affiliate/*') || $request->is('affiliate')) {
+                return route('affiliate.verification.notice');
+            }
+
             return route('admin.dashboard');
         });
     })

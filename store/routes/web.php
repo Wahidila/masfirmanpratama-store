@@ -182,6 +182,37 @@ if (! app()->environment('production')) {
 
 /*
 |--------------------------------------------------------------------------
+| Affiliate (M3 — auth + verification)
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\Affiliate\AuthController as AffiliateAuthController;
+use App\Http\Controllers\Affiliate\VerificationController as AffiliateVerificationController;
+
+Route::prefix('affiliate')->name('affiliate.')->group(function () {
+    Route::middleware('guest:affiliator')->group(function () {
+        Route::get('/register', [AffiliateAuthController::class, 'showRegister'])->name('register');
+        Route::post('/register', [AffiliateAuthController::class, 'register'])->name('register.store');
+        Route::get('/login', [AffiliateAuthController::class, 'showLogin'])->name('login');
+        Route::post('/login', [AffiliateAuthController::class, 'login'])
+            ->middleware('throttle:6,1')
+            ->name('login.attempt');
+    });
+
+    Route::middleware('auth:affiliator')->group(function () {
+        Route::post('/logout', [AffiliateAuthController::class, 'logout'])->name('logout');
+        Route::get('/email/verify', [AffiliateVerificationController::class, 'notice'])->name('verification.notice');
+        Route::get('/email/verify/{id}/{hash}', [AffiliateVerificationController::class, 'verify'])
+            ->middleware('signed')
+            ->name('verification.verify');
+        Route::post('/email/resend', [AffiliateVerificationController::class, 'resend'])
+            ->middleware('throttle:6,1')
+            ->name('verification.resend');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
 | Admin (M2 — auth + dashboard)
 |--------------------------------------------------------------------------
 */

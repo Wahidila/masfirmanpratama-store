@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Admin;
+use App\Models\Affiliator;
 use App\Models\User;
 
 return [
@@ -48,6 +49,11 @@ return [
             'driver' => 'session',
             'provider' => 'admins',
         ],
+
+        'affiliator' => [
+            'driver' => 'session',
+            'provider' => 'affiliators',
+        ],
     ],
 
     /*
@@ -76,6 +82,11 @@ return [
         'admins' => [
             'driver' => 'eloquent',
             'model' => Admin::class,
+        ],
+
+        'affiliators' => [
+            'driver' => 'eloquent',
+            'model' => Affiliator::class,
         ],
 
         // 'users' => [
