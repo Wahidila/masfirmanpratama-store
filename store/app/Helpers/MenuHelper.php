@@ -13,7 +13,10 @@ class MenuHelper
      */
     public static function getMenuGroups(): array
     {
-        $primary = collect(config('admin-nav.primary', []))
+        /** @var array<int, array{label: string, icon: string, route: string, enabled?: bool}> $navPrimary */
+        $navPrimary = config('admin-nav.primary', []);
+
+        $primary = collect($navPrimary)
             ->filter(fn ($item) => $item['enabled'] ?? true)
             ->map(fn ($item) => [
                 'name' => $item['label'],
