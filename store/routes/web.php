@@ -187,8 +187,15 @@ if (! app()->environment('production')) {
 */
 
 use App\Http\Controllers\Affiliate\AuthController as AffiliateAuthController;
+use App\Http\Controllers\Affiliate\CommissionController as AffiliateCommissionController;
+use App\Http\Controllers\Affiliate\DashboardController as AffiliateDashboardController;
+use App\Http\Controllers\Affiliate\EventController as AffiliateEventController;
 use App\Http\Controllers\Affiliate\LandingController as AffiliateLandingController;
+use App\Http\Controllers\Affiliate\MaterialController as AffiliateMaterialController;
+use App\Http\Controllers\Affiliate\ProfileController as AffiliateProfileController;
+use App\Http\Controllers\Affiliate\ReferralLinkController as AffiliateReferralLinkController;
 use App\Http\Controllers\Affiliate\VerificationController as AffiliateVerificationController;
+use App\Http\Controllers\Affiliate\WithdrawalController as AffiliateWithdrawalController;
 
 Route::prefix('affiliate')->name('affiliate.')->group(function () {
     // Landing page — publik, tanpa auth
@@ -212,6 +219,26 @@ Route::prefix('affiliate')->name('affiliate.')->group(function () {
         Route::post('/email/resend', [AffiliateVerificationController::class, 'resend'])
             ->middleware('throttle:6,1')
             ->name('verification.resend');
+
+        // Dashboard (requires verified email)
+        Route::middleware('affiliator.verified')->group(function () {
+            Route::get('/dashboard', [AffiliateDashboardController::class, 'index'])->name('dashboard');
+
+            Route::get('/referral-links', [AffiliateReferralLinkController::class, 'index'])->name('referral-links.index');
+            Route::post('/referral-links', [AffiliateReferralLinkController::class, 'store'])->name('referral-links.store');
+
+            Route::get('/commissions', [AffiliateCommissionController::class, 'index'])->name('commissions.index');
+
+            Route::get('/withdrawals', [AffiliateWithdrawalController::class, 'index'])->name('withdrawals.index');
+            Route::post('/withdrawals', [AffiliateWithdrawalController::class, 'store'])->name('withdrawals.store');
+
+            Route::get('/materials', [AffiliateMaterialController::class, 'index'])->name('materials.index');
+
+            Route::get('/events', [AffiliateEventController::class, 'index'])->name('events.index');
+
+            Route::get('/profile', [AffiliateProfileController::class, 'edit'])->name('profile.edit');
+            Route::put('/profile', [AffiliateProfileController::class, 'update'])->name('profile.update');
+        });
     });
 });
 
